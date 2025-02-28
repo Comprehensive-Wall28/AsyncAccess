@@ -1,2 +1,3 @@
-# Software-Engineering-Sem3
-The Software Engineering project for Semester 3 using Javascript 
+# Online Event Ticketing System
+
+This is a full-stack ticketing system that allows users to browse, search, and purchase tickets for various events such as concerts, sports games, theater shows, and more
