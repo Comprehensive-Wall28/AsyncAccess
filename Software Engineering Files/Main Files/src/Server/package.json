@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/Comprehensive-Wall28/Software-Engineering-Sem3/issues"
   },
-  "homepage": "https://github.com/Comprehensive-Wall28/Software-Engineering-Sem3#readme"
+  "homepage": "https://github.com/Comprehensive-Wall28/Software-Engineering-Sem3#readme",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
 }
