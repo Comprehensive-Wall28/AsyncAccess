@@ -1,5 +1,24 @@
+
 {
-  "dependencies": {
-    "mongodb": "^6.14.2"
-  }
+  "name": "seproject",
+  "version": "1.0.0",
+  "description": "Software Engineering Project",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Comprehensive-Wall28/Software-Engineering-Sem3.git"
+  },
+  "author": "Fady Osama, Youssef Amr, Mohammed Galal, Adam Ashraf, Mostafa Soliman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Comprehensive-Wall28/Software-Engineering-Sem3/issues"
+  },
+  "homepage": "https://github.com/Comprehensive-Wall28/Software-Engineering-Sem3#readme",
+  
+    "dependencies": {
+      "mongoose": "^8.12.1"
+    }
 }
