@@ -1,4 +1,3 @@
-// Use import for ESM syntax
 import { Router } from "express";
 const router = Router();
 
