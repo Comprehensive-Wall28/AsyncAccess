@@ -1,4 +1,3 @@
-
 {
   "name": "seproject",
   "version": "1.0.0",
@@ -17,8 +16,8 @@
     "url": "https://github.com/Comprehensive-Wall28/Software-Engineering-Sem3/issues"
   },
   "homepage": "https://github.com/Comprehensive-Wall28/Software-Engineering-Sem3#readme",
-  
-    "dependencies": {
-      "mongoose": "^8.12.1"
-    }
+  "dependencies": {
+    "cors": "^2.8.5",
+    "mongoose": "^8.12.1"
+  }
 }
