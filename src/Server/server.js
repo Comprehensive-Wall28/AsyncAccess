@@ -34,7 +34,7 @@ app.use(
   })
 );
 
-//app.use("/api/v1/user", userRouter);
+app.use("/api/v1/user", userRouter);
 //app.use("/api/v1/event", eventRouter);
 //app.use("/api/v1/booking", bookingRouter);
 app.use("/api/v1/auth", authRouter);

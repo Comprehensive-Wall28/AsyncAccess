@@ -120,7 +120,6 @@ const userController = {
   getCurrentUser: (req, res) => {
     res.send(req.user);
   },
-  
 };
 
 
