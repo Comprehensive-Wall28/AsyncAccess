@@ -8,7 +8,13 @@ const port = process.env.PORT || 4001;
 
 const app = express();
 
-app.use(cors())
+// CORS Configuration
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://localhost:4001'
+];
+
+app.use(cors({ origin: allowedOrigins }))
 app.use(express.json());
 
 const startServer = async () => {
