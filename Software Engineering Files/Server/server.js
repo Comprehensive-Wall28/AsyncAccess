@@ -18,7 +18,7 @@ const allowedOrigins = [
   'https://localhost:4001'
 ];
 
-app.use(cors())
+app.use(cors({ origin: allowedOrigins }))
 app.use(express.json());
 
 //MongoDB Atlas connection
