@@ -4,9 +4,11 @@ require('dotenv').config();
 
 const port = process.env.PORT || 4001;
 
+//temp Models
 const User = require('../Models/user.js');
 const Event = require('../Models/event.js');
-// add one for booking
+const Booking = require('../Models/booking.js');
+
 
 const app = express();
 app.use(express.json()); 
@@ -24,4 +26,8 @@ mongoose
   .catch((err) => {
     console.error('Error connecting to MongoDB Atlas:', err);
   });
-  
+
+// Routes
+app.get('/', (req, res) => {
+  res.send('Backend started successfully!')
+})
