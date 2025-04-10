@@ -20,13 +20,14 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['Standard User', 'Organizer', 'System Admin'],
-        default: 'Standard User',
+        required: true,
+        enum: ['User', 'Organizer', 'Admin'],
+        default: 'User',
     },
-    createdDate: {
+    creationDate: {
         type: Date,
         default: Date.now,
-    },
+    }
 });
 
 const User = mongoose.model('User', userSchema);
