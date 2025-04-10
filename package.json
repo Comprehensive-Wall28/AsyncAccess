@@ -1,9 +1,8 @@
-
 {
   "name": "seproject",
   "version": "1.0.0",
   "description": "Software Engineering Project",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "start": "nodemon server.js"
   },
@@ -17,8 +16,10 @@
     "url": "https://github.com/Comprehensive-Wall28/Software-Engineering-Sem3/issues"
   },
   "homepage": "https://github.com/Comprehensive-Wall28/Software-Engineering-Sem3#readme",
-  
-    "dependencies": {
-      "mongoose": "^8.12.1"
-    }
+  "dependencies": {
+    "mongoose": "^8.12.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
 }
