@@ -2,16 +2,13 @@
 import { Router } from "express";
 const router = Router();
 
-// Import the *default* export from userControllers.js
-// Give it a name (e.g., userController)
-import userController from "../controllers/userControllers.js"; // <-- Changed import
+import userController from "../controllers/userControllers.js"; 
 
 // * login
-router.post("/login", userController.login ); // You'll likely want to add login back later
+router.post("/login", userController.login ); 
 
 // * register
-// Access the 'register' method from the imported object
-router.post("/register", userController.register); // <-- Use the imported object here
+router.post("/register", userController.register); 
 
-// Export the router as the default export
+
 export default router;
