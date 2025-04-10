@@ -1,27 +1,33 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-require('dotenv').config();
+const cors = require('cors');
+const connectDB = require('./config/database');
 
 const port = process.env.PORT || 4001;
 
-const User = require('../Models/user.js');
-const Event = require('../Models/event.js');
-// add one for booking
-
 const app = express();
-app.use(express.json()); 
 
-//MongoDB Atlas connection
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.log('Connected to MongoDB Atlas');
+// CORS Configuration
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://localhost:4001'
+];
 
-    app.listen(port, () => {
-      console.log(`Server is running on port ${port}`);
-    });
-  })
-  .catch((err) => {
-    console.error('Error connecting to MongoDB Atlas:', err);
+app.use(cors({ origin: allowedOrigins }))
+app.use(express.json());
+
+const startServer = async () => {
+  await connectDB();
+
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
   });
-  
+};
+
+// Routes
+app.get('/', (req, res) => {
+  res.send('Backend started successfully!')
+})
+
+startServer();
