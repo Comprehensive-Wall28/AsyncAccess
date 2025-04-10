@@ -1,17 +1,25 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-require('dotenv').config();
+const cors = require('cors');
 
 const port = process.env.PORT || 4001;
 
 //temp Models
-const User = require('../Models/user.js');
-const Event = require('../Models/event.js');
-const Booking = require('../Models/booking.js');
-
+const User = require('./Models/user.js');
+const Event = require('./Models/event.js');
+const Booking = require('./Models/booking.js');
 
 const app = express();
-app.use(express.json()); 
+
+// CORS Configuration
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://localhost:4001'
+];
+
+app.use(cors())
+app.use(express.json());
 
 //MongoDB Atlas connection
 mongoose
