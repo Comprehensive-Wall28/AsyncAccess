@@ -109,6 +109,28 @@ const userController = {
       return res.status(500).json({ message: error.message });
     }
   },
+  updateUserPassword: async (req, res) => {
+    try {
+      const { email, oldPassword, newPassword } = req.body; 
+
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "email not found" });
+    }
+      
+      const isMatch = await bcrypt.compare(oldPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: "Incorrect password" });
+      }
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+      user.password = hashedNewPassword;
+      await user.save();
+      return res.status(200).json({ message: "Password updated successfully" });
+    } catch (error) {
+      console.error("Error changing password:", error);
+      return res.status(500).json({ message: "Server error" });
+    }
+  },
   deleteUser: async (req, res) => {
     try {
       const user = await userModel.findByIdAndDelete(req.params.id);
