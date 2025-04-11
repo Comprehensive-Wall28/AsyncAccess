@@ -1,10 +1,8 @@
-const mongoose = require("mongoose");
 const userModel = require("../models/user");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const secretKey = process.env.SECRET_KEY;
 const bcrypt = require("bcrypt");
-
 const userController = {
   register: async (req, res) => {
     try {
@@ -56,25 +54,25 @@ const userController = {
       }
 
       const currentDateTime = new Date();
-      const expiresAt = new Date(+currentDateTime + 1800000); // expire in 3 minutes
+      const expiresAt = new Date(+currentDateTime + 18000000);
       // Generate a JWT token
       const token = jwt.sign(
-        { user: { userId: user._id, role: user.role } },
-        secretKey,
-        {
-          expiresIn: 3 * 60 * 60,
-        }
+          { user: { userId: user._id, role: user.role } },
+          secretKey,
+          {
+            expiresIn: 3 * 60 * 60,
+          }
       );
 
       return res
-        .cookie("token", token, {
-          expires: expiresAt,
-          httpOnly: true,
-          secure: true, // if not working on thunder client , remove it
-          SameSite: "none",
-        })
-        .status(200)
-        .json({ message: "login successfully", user });
+          .cookie("token", token, {
+            expires: expiresAt,
+            httpOnly: true,
+            //secure: true, // if not working on thunder client , remove it
+            //SameSite: "none",
+          })
+          .status(200)
+          .json({ message: "login successfully", user });
     } catch (error) {
       console.error("Error logging in:", error);
       res.status(500).json({ message: "Server error" });
@@ -90,18 +88,7 @@ const userController = {
   },
   getUser: async (req, res) => {
     try {
-      const userId = req.params.id;
-
-      // Validate the userId
-      if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return res.status(400).json({ message: "Invalid user ID" });
-      }
-
-      const user = await userModel.findById(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
+      const user = await userModel.findById(req.params.id);
       return res.status(200).json(user);
     } catch (error) {
       return res.status(500).json({ message: error.message });
@@ -109,13 +96,13 @@ const userController = {
   },
   updateUser: async (req, res) => {
     try {
-  
+
       const user = await userModel.findByIdAndUpdate(
-        req.params.id,
-        { name: req.body.name },
-        {
-          new: true,
-        }
+          req.params.id,
+          { name: req.body.name },
+          {
+            new: true,
+          }
       );
       return res.status(200).json({ user, msg: "User updated successfully" });
     } catch (error) {
@@ -133,45 +120,6 @@ const userController = {
   getCurrentUser: (req, res) => {
     res.send(req.user);
   },
-
-  getUserBookings: async (req, res) => {
-    console.log("Fetching user bookings...");
-    try {
-      const userId = req.user.userId;
-
-      // Validate the userId
-      if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return res.status(400).json({ message: "Invalid user ID" });
-      }
-
-      const bookings = await bookingModel.find({ user: userId });
-      return res.status(200).json(bookings);
-    } catch (error) {
-      return res.status(500).json({ message: error.message });
-    }
-  },
-
-    getUserEventsAnalytics: async (req, res) => {
-        try {
-          const userId = req.user.userId;
-          const events = await eventModel.find({ user: userId });
-          const totalEvents = events.length;
-          const totalBookings = await bookingModel.countDocuments({ user: userId });
-          return res.status(200).json({ totalEvents, totalBookings });
-        } catch (error) {
-          return res.status(500).json({ message: error.message });
-        }
-    },
-
-    getUserEvents: async (req, res) => {
-        try {
-          const userId = req.user.userId;
-          const events = await eventModel.find({ user: userId });
-          return res.status(200).json(events);
-        } catch (error) {
-          return res.status(500).json({ message: error.message });
-        }
-    }
 };
 
 
