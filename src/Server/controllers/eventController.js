@@ -12,6 +12,7 @@ const getAllEvents = async (req, res, next) => {
 
 const getEventAnalytics = async (req, res) => {
     const { id } = req.params;
+    console.log("getting EVent analytics");
 
     if(!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(404).json(notFoundResponse);
