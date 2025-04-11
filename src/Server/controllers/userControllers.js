@@ -135,6 +135,7 @@ const userController = {
   },
 
   getUserBookings: async (req, res) => {
+    console.log("Fetching user bookings...");
     try {
       const userId = req.user.userId;
 
