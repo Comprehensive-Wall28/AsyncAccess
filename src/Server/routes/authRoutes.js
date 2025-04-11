@@ -9,5 +9,4 @@ router.post("/login", userController.login );
 // * register
 router.post("/register", userController.register);
 
-
 export default router;
