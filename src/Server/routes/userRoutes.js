@@ -3,7 +3,10 @@ const router = express.Router();
 const authenticationMiddleware = require('../middleware/authenticationMiddleware');
 const authorizationMiddleware = require('../middleware/authorizationMiddleware');
 const userController = require("../controllers/userControllers.js");
-const {getMyBookings} = require("../controllers/bookingController");
+const eventController = require("../controllers/eventController.js");
+const bookingController = require("../controllers/bookingController.js");
+
+
 
 const ROLES = {
     ADMIN: 'Admin',
@@ -13,11 +16,14 @@ const ROLES = {
 
 //Public routes:
 
+
 router.use(authenticationMiddleware);
 router.put("/:id", userController.updateUser);
 router.get("/profile", userController.getCurrentUser)
 
-router.get('/bookings', getMyBookings);
+router.get('/bookings', bookingController.getMyBookings);
+router.get('/events', eventController.getEvent);
+router.get('/events/analytics', eventController.getEventAnalytics);
 
 // --- Admin Only Routes ---
 // Apply authorization middleware for Admin role

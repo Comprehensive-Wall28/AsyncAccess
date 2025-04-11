@@ -1,23 +1,39 @@
-const Event = require('../models/event');
 const Booking = require('../models/booking');
-const mongoose = require("mongoose");
+const Event = require('../models/event');
+const User = require('../models/user');
+const mongoose = require('mongoose');
 
+const notFoundResponse = { error: 'No such event' };
 
 const getAllEvents = async (req, res, next) => {
     const events = await Event.find({}).sort({createdAt: -1});
     res.status(200).json(events);
 };
 
-const getEvent = async (req, res) => {
+const getEventAnalytics = async (req, res) => {
     const { id } = req.params;
 
     if(!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(404).json({error: 'No such event'});
+        return res.status(404).json(notFoundResponse);
     }
 
     const event = await Event.findById(id);
     if(!event) {
-        return res.status(404).json({error: 'No such event'});
+        return res.status(404).json({ error: 'No such event analytics' });
+    }
+    res.status(200).json(event);
+}
+
+const getEvent = async (req, res) => {
+    const { id } = req.params;
+
+    if(!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json(notFoundResponse);
+    }
+
+    const event = await Event.findById(id);
+    if(!event) {
+        return res.status(404).json(notFoundResponse);
     }
     res.status(200).json(event);
 }
@@ -62,12 +78,12 @@ const updateEvent = async (req, res, next) => {
         const { id } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(404).json({ error: 'No such event' });
+            return res.status(404).json(notFoundResponse);
         }
 
         const event = await Event.findById(id);
         if (!event) {
-            return res.status(404).json({ error: 'No such event' });
+            return res.status(404).json(notFoundResponse);
         }
 
         const allowedUpdates = {};
@@ -102,12 +118,12 @@ const deleteEvent = async (req, res) => {
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(404).json({ error: 'No such event' });
+        return res.status(404).json(notFoundResponse);
     }
 
     const event = await Event.findById(id);
     if (!event) {
-        return res.status(404).json({ error: 'No such event' });
+        return res.status(404).json(notFoundResponse);
     }
 
     const deletedEvent = await Event.findOneAndDelete({ _id: id });
@@ -120,7 +136,7 @@ const approveEvent = async (req, res, next) => {     //not tested
         const event = await Event.findById(req.params.id);
 
         if (!event) {
-            return res.status(404).json({error: 'No such event'});
+            return res.status(404).json(notFoundResponse);
         }
 
         if(event.status === 'approved') {
@@ -152,4 +168,5 @@ module.exports = {
     createEvent,
     updateEvent,
     deleteEvent,
+    getEventAnalytics,
 }
