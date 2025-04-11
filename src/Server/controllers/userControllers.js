@@ -65,14 +65,14 @@ const userController = {
       );
 
       return res
-          .cookie("token", token, {
-            expires: expiresAt,
-            httpOnly: true,
-            //secure: true, // if not working on thunder client , remove it
-            //SameSite: "none",
-          })
-          .status(200)
-          .json({ message: "login successfully", user });
+        .cookie("token", token, {
+          expires: expiresAt,
+          httpOnly: true,
+          //secure: true, // if not working on thunder client , remove it
+          //SameSite: "none",
+        })
+        .status(200)
+        .json({ message: "login successfully", user });
     } catch (error) {
       console.error("Error logging in:", error);
       res.status(500).json({ message: "Server error" });
@@ -80,33 +80,108 @@ const userController = {
   },
   getAllUsers: async (req, res) => {
     try {
-      const users = await userModel.find();
+      const users = await userModel.find().select('-password');
+      if (!users) {
+        return res.status(404).json({ message: "No users exist!" });
+      }
       return res.status(200).json(users);
+
     } catch (e) {
       return res.status(500).json({ message: e.message });
     }
   },
   getUser: async (req, res) => {
     try {
-      const user = await userModel.findById(req.params.id);
+      const user = await userModel.findById(req.params.id).select('-password');
+      if (!user) {
+          return res.status(404).json({ message: "User not found" });
+      }
       return res.status(200).json(user);
+
     } catch (error) {
-      return res.status(500).json({ message: error.message });
+      console.error("Error fetching user by ID:", error);
+      return res.status(500).json({ message: "Server error while fetching user" });
     }
   },
-  updateUser: async (req, res) => {
+  updateCurrentUserProfile: async (req, res) => {
     try {
+      const userId = req.user.userId; 
+      const updateData = {};
+      const allowedFields = ['name', 'age']; 
 
-      const user = await userModel.findByIdAndUpdate(
-          req.params.id,
-          { name: req.body.name },
-          {
-            new: true,
-          }
-      );
-      return res.status(200).json({ user, msg: "User updated successfully" });
+      // Build the updateData object only with allowed fields present in the body
+      allowedFields.forEach(field => {
+        if (req.body[field] !== undefined) {
+          updateData[field] = req.body[field];
+        }
+      });
+
+      // Check if there's anything valid to update
+      if (Object.keys(updateData).length === 0) {
+        return res.status(400).json({ message: "No valid fields provided for update." });
+      }
+
+      const updatedUser = await userModel.findByIdAndUpdate(
+        userId,
+        updateData,
+        {
+          new: true, // Return the updated document
+          runValidators: true // Ensure schema validation runs on update
+        }
+      ).select('-password'); // Exclude password from the returned user object
+
+      if (!updatedUser) {
+        // This case should be rare if the token is valid, but good practice
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      return res.status(200).json({ user: updatedUser, msg: "Profile updated successfully" });
+
     } catch (error) {
-      return res.status(500).json({ message: error.message });
+      console.error("Error updating current user profile:", error);
+       // Handle potential validation errors from Mongoose
+       if (error.name === 'ValidationError') {
+           return res.status(400).json({ message: "Validation failed", errors: error.errors });
+       }
+      return res.status(500).json({ message: "Server error while updating profile" });
+    }
+  },
+  updateUserById: async (req, res) => {
+    try {
+      const userIdToUpdate = req.params.id; 
+      const { role } = req.body; 
+
+      if (role === undefined) { // Use 'undefined' check as an empty string might be invalid but present
+        return res.status(400).json({ message: "Role is required in the request body to update." });
+      }
+      
+      const validRoles = ['Admin', 'Organizer', 'User']; // Make sure these match your schema/system roles
+      if (!validRoles.includes(role)) {
+          return res.status(400).json({ message: `Invalid role provided. Must be one of: ${validRoles.join(', ')}` });
+      }
+      const updateData = { role: role };
+
+      const updatedUser = await userModel.findByIdAndUpdate(
+        userIdToUpdate,
+        updateData, 
+        {
+          new: true, 
+          runValidators: true 
+        }
+      ).select('-password');
+
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      return res.status(200).json({ user: updatedUser, msg: "User role updated successfully by admin" });
+
+    } catch (error) {
+      console.error("Error updating user role by ID:", error);
+       if (error.name === 'ValidationError') {
+           return res.status(400).json({ message: "Validation failed", errors: error.errors });
+       }
+      return res.status(500).json({ message: "Server error while updating user role" });
     }
   },
   deleteUser: async (req, res) => {
@@ -117,11 +192,22 @@ const userController = {
       return res.status(500).json({ message: error.message });
     }
   },
-  getCurrentUser: (req, res) => {
-    res.send(req.user);
+  getCurrentUser: async (req, res) => { 
+    try {
+      const userId = req.user.userId;
+
+      const user = await userModel.findById(userId).select('_id name email role age'); 
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.status(200).json(user);
+
+    } catch (error) {
+      console.error("Error fetching current user:", error);
+      res.status(500).json({ message: "Server error while fetching user profile" });
+    }
   },
 };
-
-
 
 module.exports = userController;

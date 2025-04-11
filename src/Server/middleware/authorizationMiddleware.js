@@ -1,12 +1,12 @@
 module.exports= function authorizationMiddleware(roles) {
 
     return (req, res, next) => {
+  
+      const userRole = req.user.role;
 
-        const userRole = req.user.role;
-
-        if (!roles.includes(userRole)){
-            return res.status(403).json("unauthorized access");
-        }
-        next();
+      if (!roles.includes(userRole)){
+        return res.status(403).json("Sorry! You are not authorized to access this functionality");
+      }
+      next();
     };
 }

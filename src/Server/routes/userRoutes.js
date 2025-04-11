@@ -2,13 +2,7 @@ const express = require("express");
 const router = express.Router();
 const authenticationMiddleware = require('../middleware/authenticationMiddleware');
 const authorizationMiddleware = require('../middleware/authorizationMiddleware');
-const authenticationMiddleware = require('../middleware/authenticationMiddleware');
-const authorizationMiddleware = require('../middleware/authorizationMiddleware');
 const userController = require("../controllers/userControllers.js");
-const eventController = require("../controllers/eventController.js");
-const bookingController = require("../controllers/bookingController.js");
-
-
 
 const ROLES = {
     ADMIN: 'Admin',
@@ -18,21 +12,21 @@ const ROLES = {
 
 //Public routes:
 
+//Authed Routes
+router.use(authenticationMiddleware)
 
-router.use(authenticationMiddleware);
-router.put("/:id", userController.updateUser);
-router.get("/profile", userController.getCurrentUser)
+router.get("/profile",authorizationMiddleware([ROLES.ADMIN , ROLES.ORGANIZER , ROLES.USER]),
+ userController.getCurrentUser)
 
-router.get('/bookings', bookingController.getMyBookings);
-router.get('/events', eventController.getEvent);
-router.get('/events/analytics', eventController.getEventAnalytics);
+router.put("/profile",authorizationMiddleware([ROLES.ADMIN , ROLES.ORGANIZER , ROLES.USER]), 
+ userController.updateCurrentUserProfile)
 
-// --- Admin Only Routes ---
-// Apply authorization middleware for Admin role
-router.get('/', authorizationMiddleware([ROLES.ADMIN]), userController.getAllUsers);
-router.get('/:id', authorizationMiddleware([ROLES.ADMIN]), userController.getUser);
-router.put('/:id', authorizationMiddleware([ROLES.ADMIN]), userController.updateUser);
-router.delete('/:id', authorizationMiddleware([ROLES.ADMIN]), userController.deleteUser);
+router.delete("/:id",authorizationMiddleware([ROLES.ADMIN , ROLES.ORGANIZER , ROLES.USER]), 
+ userController.deleteUser)
 
+router.get('/', authorizationMiddleware([ROLES.ADMIN]), userController.getAllUsers)
+router.get('/:id', authorizationMiddleware([ROLES.ADMIN]), userController.getUser)
+router.put("/:id", authorizationMiddleware([ROLES.ADMIN]), userController.updateUserById)
+router.delete('/:id', authorizationMiddleware([ROLES.ADMIN]), userController.deleteUser)
 
 module.exports = router;

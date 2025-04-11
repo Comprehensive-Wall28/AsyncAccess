@@ -56,7 +56,7 @@ node_modules/
 .yarn-integrity
 
 # dotenv environment variables file
-.env
+#.env
 #.env.test
 
 # IDEs and editors
