@@ -25,10 +25,10 @@ router.put("/profile",authorizationMiddleware([ROLES.ADMIN , ROLES.ORGANIZER , R
 router.delete("/:id",authorizationMiddleware([ROLES.ADMIN , ROLES.ORGANIZER , ROLES.USER]),
  userController.deleteUser)
 
-router.get('/', authorizationMiddleware([ROLES.ADMIN]), userController.getAllUsers)
-router.get('/:id', authorizationMiddleware([ROLES.ADMIN]), userController.getUser)
-router.put("/:id", authorizationMiddleware([ROLES.ADMIN]), userController.updateUserById)
-router.delete('/:id', authorizationMiddleware([ROLES.ADMIN]), userController.deleteUser)
+router.get('/', authorizationMiddleware([ROLES.ADMIN , ROLES.ORGANIZER , ROLES.USER]), userController.getAllUsers)
+router.get('/:id', authorizationMiddleware([ROLES.ADMIN , ROLES.ORGANIZER , ROLES.USER]), userController.getUser)
+router.put("/:id", authorizationMiddleware([ROLES.ADMIN , ROLES.ORGANIZER , ROLES.USER]), userController.updateUserById)
+router.delete('/:id', authorizationMiddleware([ROLES.ADMIN , ROLES.ORGANIZER , ROLES.USER]), userController.deleteUser)
 
 router.get("/bookings",authorizationMiddleware([ROLES.ADMIN , ROLES.ORGANIZER , ROLES.USER]),
     bookingController.getMyBookings)

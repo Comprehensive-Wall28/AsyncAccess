@@ -45,20 +45,17 @@ const createBooking = async (req, res, next) => {
     }
 };
 
-const getMyBookings = async (req, res, next) => {
+const getMyBookings = async (req, res) => {
     try {
-        const bookings = await Booking.find({ user: req.user._id })
-            .populate('event');
-
-        res.status(200).json({
-            status: 'success',
-            results: bookings.length,
-            data: {
-                bookings
-            }
-        });
-    } catch (err) {
-        next(err);
+        console.log("Getting my bookings");
+        const userId = req.user.id; // Ensure `req.user` is set by authentication middleware
+        const bookings = await Booking.find({ userId }); // Replace with your database query
+        if (!bookings || bookings.length === 0) {
+            return res.status(404).json({ error: "No bookings found" });
+        }
+        res.status(200).json(bookings);
+    } catch (error) {
+        res.status(500).json({ error: "Server error" });
     }
 };
 

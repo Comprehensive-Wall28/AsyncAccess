@@ -1,3 +1,4 @@
+/*
 module.exports= function authorizationMiddleware(roles) {
 
     return (req, res, next) => {
@@ -11,4 +12,14 @@ module.exports= function authorizationMiddleware(roles) {
       }
       next();
     };
+}*/
+
+
+module.exports = (roles) => (req, res, next) => {
+    console.log("Authorization Middleware");
+    const userRole = req.user?.role; // Ensure `req.user` is set by authentication middleware
+    if (!roles.includes(userRole)) {
+        return res.status(403).json({ error: "Forbidden" });
+    }
+    next(); // Pass control to the next middleware or route handler
 }
