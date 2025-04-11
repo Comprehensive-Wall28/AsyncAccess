@@ -54,7 +54,7 @@ const userController = {
       }
 
       const currentDateTime = new Date();
-      const expiresAt = new Date(+currentDateTime + 1800000); // expire in 3 minutes
+      const expiresAt = new Date(+currentDateTime + 18000000); 
       // Generate a JWT token
       const token = jwt.sign(
         { user: { userId: user._id, role: user.role } },
@@ -68,8 +68,8 @@ const userController = {
         .cookie("token", token, {
           expires: expiresAt,
           httpOnly: true,
-          secure: true, // if not working on thunder client , remove it
-          SameSite: "none",
+          //secure: true, // if not working on thunder client , remove it
+          //SameSite: "none",
         })
         .status(200)
         .json({ message: "login successfully", user });

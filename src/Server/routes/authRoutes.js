@@ -7,7 +7,7 @@ import userController from "../controllers/userControllers.js";
 router.post("/login", userController.login ); 
 
 // * register
-router.post("/register", userController.register); 
+router.post("/register", userController.register);
 
 
 export default router;
