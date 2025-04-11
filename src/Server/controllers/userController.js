@@ -41,7 +41,7 @@ const userController = {
 
     loginUser: async (req, res) => {
         try {
-            console.log("Login attempt for:", req.body.email); // Log incoming request
+            console.log("Login attempt for:", req.body.email);
 
             const { email, password } = req.body;
             if (!email || !password) {
@@ -66,17 +66,11 @@ const userController = {
             console.log("Creating token...");
             const token = jwt.sign(
                 { userId: user._id, role: user.role },
-                process.env.JWT_SECRET, // Changed from secretKey to process.env.JWT_SECRET
+                process.env.JWT_SECRET,
                 { expiresIn: '3h' }
             );
 
-            console.log("Setting cookie...");
-            res.cookie('token', token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
-                maxAge: 3 * 60 * 60 * 1000
-            });
+            console.log("Generated Token:", token); // Print the token to the console
 
             console.log("Login successful");
             res.status(200).json({
@@ -89,10 +83,10 @@ const userController = {
                 }
             });
         } catch (error) {
-            console.error("FULL LOGIN ERROR:", error); // Detailed error log
+            console.error("FULL LOGIN ERROR:", error);
             res.status(500).json({
                 message: "Server error during login",
-                error: error.message // Include the actual error message
+                error: error.message
             });
         }
     }

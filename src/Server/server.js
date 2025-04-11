@@ -4,7 +4,6 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser=require('cookie-parser')
 const connectDB = require('./config/database');
-const cookieParser=require('cookie-parser')
 
 const port = process.env.PORT || 4001;
 

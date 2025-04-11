@@ -1,28 +1,33 @@
 const jwt = require("jsonwebtoken");
-const secretKey = process.env.SECRET_KEY
+const secretKey = process.env.SECRET_KEY;
 
 module.exports = function authenticationMiddleware(req, res, next) {
-  const cookie = req.cookies;// if not working then last option req.headers.cookie then extract token
-  console.log('inside auth middleware')
-  // console.log(cookie);
+  console.log("Inside auth middleware");
 
-  if (!cookie) {
-    return res.status(401).json({ message: "No Cookie provided" });
+  // Ensure cookies are parsed
+  const cookie = req.cookies;
+  if (!cookie || !cookie.token) {
+    console.log("No token found in cookies");
+    return res.status(401).json({ message: "No token provided" });
   }
-  const token = cookie.token;
+
+  const token = cookie.token; // Extract token from cookies
+  console.log("Extracted Token:", token);
+
   if (!token) {
-    return res.status(405).json({ message: "No token provided" });
+    console.log("Token is undefined");
+    return res.status(401).json({ message: "Token is missing" });
   }
 
   jwt.verify(token, secretKey, (error, decoded) => {
     if (error) {
+      console.log("Token verification failed:", error.message);
       return res.status(403).json({ message: "Invalid token" });
     }
 
-    // Attach the decoded user ID to the request object for further use
-    //console.log(decoded.user)
-    
+    // Attach the decoded user to the request object
     req.user = decoded.user;
+    console.log("Token verified successfully:", decoded);
     next();
   });
 };

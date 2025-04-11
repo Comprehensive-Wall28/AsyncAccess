@@ -1,8 +1,10 @@
+const mongoose = require("mongoose");
 const userModel = require("../models/user");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const secretKey = process.env.SECRET_KEY;
 const bcrypt = require("bcrypt");
+
 const userController = {
   register: async (req, res) => {
     try {
@@ -88,7 +90,18 @@ const userController = {
   },
   getUser: async (req, res) => {
     try {
-      const user = await userModel.findById(req.params.id);
+      const userId = req.params.id;
+
+      // Validate the userId
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+
+      const user = await userModel.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
       return res.status(200).json(user);
     } catch (error) {
       return res.status(500).json({ message: error.message });
@@ -120,6 +133,44 @@ const userController = {
   getCurrentUser: (req, res) => {
     res.send(req.user);
   },
+
+  getUserBookings: async (req, res) => {
+    try {
+      const userId = req.user.userId;
+
+      // Validate the userId
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+
+      const bookings = await bookingModel.find({ user: userId });
+      return res.status(200).json(bookings);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  },
+
+    getUserEventsAnalytics: async (req, res) => {
+        try {
+          const userId = req.user.userId;
+          const events = await eventModel.find({ user: userId });
+          const totalEvents = events.length;
+          const totalBookings = await bookingModel.countDocuments({ user: userId });
+          return res.status(200).json({ totalEvents, totalBookings });
+        } catch (error) {
+          return res.status(500).json({ message: error.message });
+        }
+    },
+
+    getUserEvents: async (req, res) => {
+        try {
+          const userId = req.user.userId;
+          const events = await eventModel.find({ user: userId });
+          return res.status(200).json(events);
+        } catch (error) {
+          return res.status(500).json({ message: error.message });
+        }
+    }
 };
 
 
