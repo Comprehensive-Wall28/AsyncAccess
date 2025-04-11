@@ -13,32 +13,22 @@ const bookingRouter = require("./routes/bookingRoutes.js")
 const userRouter = require("./routes/userRoutes.js")
 const eventRouter = require("./routes/eventRoutes.js")
 const authRouter = require("./routes/authRoutes.js").default
-const authenticationMiddleware=require('./middleware/authenticationMiddleware')
 
-// CORS Configuration
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:4001'
-];
+app.use(cors({
+  origin: process.env.ORIGIN || 'http://localhost:3000',
+  credentials: true,
+}));
 
-app.use(cors())
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser())
 
-app.use(
-  cors({
-    origin: process.env.ORIGIN,
-    methods: ["GET", "POST", "DELETE", "PUT"],
-    credentials: true,
-  })
-);
+app.use("/api/v1", authRouter); //MAKE IT NOT /auth
 
-app.use("/api/v1/user", userRouter);
-//app.use("/api/v1/event", eventRouter);
-//app.use("/api/v1/booking", bookingRouter);
-app.use("/api/v1/auth", authRouter);
-app.use(authenticationMiddleware);
+app.use("/api/v1/users", userRouter); 
+//app.use("/api/v1/events", eventRouter); 
+//app.use("/api/v1/bookings", bookingRouter); 
+
 
 
 const startServer = async () => {
@@ -53,5 +43,10 @@ const startServer = async () => {
 app.get('/', (req, res) => {
   res.send('Backend started successfully!')
 })
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
 
 startServer();
