@@ -10,9 +10,6 @@ const ROLES = {
     USER: 'User'
 };
 
-//Public routes:
-
-//Authed Routes
 router.use(authenticationMiddleware)
 
 router.get("/profile",authorizationMiddleware([ROLES.ADMIN , ROLES.ORGANIZER , ROLES.USER]),
@@ -20,9 +17,6 @@ router.get("/profile",authorizationMiddleware([ROLES.ADMIN , ROLES.ORGANIZER , R
 
 router.put("/profile",authorizationMiddleware([ROLES.ADMIN , ROLES.ORGANIZER , ROLES.USER]), 
  userController.updateCurrentUserProfile)
-
-router.delete("/:id",authorizationMiddleware([ROLES.ADMIN , ROLES.ORGANIZER , ROLES.USER]), 
- userController.deleteUser)
 
 router.get('/', authorizationMiddleware([ROLES.ADMIN]), userController.getAllUsers)
 router.get('/:id', authorizationMiddleware([ROLES.ADMIN]), userController.getUser)
