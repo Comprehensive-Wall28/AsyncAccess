@@ -252,7 +252,7 @@ const userController = {
         <p>You requested a password reset for your account.</p>
         <p>Enter the following code to reset your password. This code is valid for 10 minutes:</p>
         <h2 style="text-align: center; letter-spacing: 5px; font-size: 2em;">${resetCode}</h2>
-        <p>NOTE: Please, do not insert valid credentials like passwords. Testing purposes only!</p>
+        <p>NOTE: Please, do not insert valid credentials like passwords. Testing purposes only! (Penta Nodes team)</p>
       `;
       const plainTextMessage = `You requested a password reset. Your reset code is: ${resetCode}. It is valid for 10 minutes.`;
 
