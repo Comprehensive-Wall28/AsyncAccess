@@ -75,7 +75,7 @@ const userController = {
           //SameSite: "none", //Re-add when not testing
         })
         .status(200)
-        .json({ message: "login successfully", user });
+        .json({ message: "Logged in successfully", user });
     } catch (error) {
       console.error("Error logging in:", error);
       res.status(500).json({ message: "Server error" });
