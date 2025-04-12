@@ -7,6 +7,11 @@ const userController = {
   register: async (req, res) => {
     try {
       const { email, password, name, role, age } = req.body;
+      
+      const roles = ['Admin', 'Organizer', 'User'];
+      if (!roles.includes(role)) {
+        return res.status(400).json({ message: "Invalid role provided" });
+      }
 
       // Check if the user already exists
       const existingUser = await userModel.findOne({ email });
@@ -14,7 +19,6 @@ const userController = {
         return res.status(409).json({ message: "User already exists" });
       }
 
-      // Hash the password
       const hashedPassword = await bcrypt.hash(password, 10);
 
       // Create a new user
@@ -109,7 +113,6 @@ const userController = {
       const updateData = {};
       const allowedFields = ['name', 'age']; 
 
-      // Build the updateData object only with allowed fields present in the body
       allowedFields.forEach(field => {
         if (req.body[field] !== undefined) {
           updateData[field] = req.body[field];
@@ -131,7 +134,6 @@ const userController = {
       ).select('-password'); // Exclude password from the returned user object
 
       if (!updatedUser) {
-        // This case should be rare if the token is valid, but good practice
         return res.status(404).json({ message: "User not found" });
       }
 
@@ -139,7 +141,6 @@ const userController = {
 
     } catch (error) {
       console.error("Error updating current user profile:", error);
-       // Handle potential validation errors from Mongoose
        if (error.name === 'ValidationError') {
            return res.status(400).json({ message: "Validation failed", errors: error.errors });
        }
@@ -190,7 +191,7 @@ const userController = {
 
     const user = await userModel.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: "email not found" });
+      return res.status(404).json({ message: "Email not found" });
     }
       
       const isMatch = await bcrypt.compare(oldPassword, user.password);

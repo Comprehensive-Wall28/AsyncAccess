@@ -6,11 +6,11 @@ module.exports = function authenticationMiddleware(req, res, next) {
   console.log('inside auth middleware')
 
   if (!cookie) {
-    return res.status(401).json({ message: "No Cookie provided" });
+    return res.status(401).json({ message: "Logged in users only! Please, Log in first" });
   }
   const token = cookie.token;
   if (!token) {
-    return res.status(405).json({ message: "No token provided" });
+    return res.status(405).json({ message: "No token provided! Please, login first" });
   }
 
   jwt.verify(token, secretKey, (error, decoded) => {

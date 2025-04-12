@@ -11,7 +11,7 @@ const app = express();
 
 const bookingRouter = require("./routes/bookingRoutes.js")
 const userRouter = require("./routes/userRoutes.js")
-const eventRouter = require("./routes/eventRoutes.js")
+//const eventRouter = require("./routes/eventRoutes.js")
 const authRouter = require("./routes/authRoutes.js").default
 
 app.use(cors({
