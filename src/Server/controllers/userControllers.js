@@ -184,39 +184,40 @@ const userController = {
       return res.status(500).json({ message: "Server error while updating user role" });
     }
   },
-  updatePasswordLoggedIn: async (req, res) => {
+  updatePassword: async (req, res) => {
     try {
-      const userId = req.user.userId; 
-      const { oldPassword, newPassword } = req.body;
+      const {userId} = req.user.userId;
+      const {  oldPassword, newPassword } = req.body; 
+      
 
       if (!oldPassword || !newPassword) {
         return res.status(400).json({ message: "Old password and new password are required." });
       }
 
+
       const user = await userModel.findById(userId).select('+password'); // Need password to compare
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      const isMatch = await user.comparePassword(oldPassword); 
 
+      const isMatch = await user.comparePassword(oldPassword); 
       if (!isMatch) {
         return res.status(400).json({ message: "Incorrect old password" });
       }
-
       const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-      user.password = hashedNewPassword;
 
+      user.password = hashedNewPassword;
       user.resetPasswordToken = undefined;
       user.resetPasswordExpires = undefined;
 
       await user.save();
-
       return res.status(200).json({ message: "Password updated successfully" });
     } catch (error) {
-      console.error("Error updating logged-in user password:", error);
-      return res.status(500).json({ message: "Server error while updating password" });
+      console.error("Error changing password:", error);
+      return res.status(500).json({ message: "Server error" });
     }
   },
+
 
   requestPasswordReset: async (req, res) => {
     try {

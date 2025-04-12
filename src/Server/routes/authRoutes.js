@@ -9,7 +9,7 @@ router.post("/login", userController.login );
 router.post("/register", userController.register);
 
 
-router.put("/update-password", authenticationMiddleware, userController.updatePasswordLoggedIn);
+router.put("/update-password", authenticationMiddleware, userController.updatePassword);
 
 //(Forgot Password Step 1)
 router.post("/forgetPassword", userController.requestPasswordReset);
