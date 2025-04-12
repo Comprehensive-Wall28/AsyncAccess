@@ -10,7 +10,7 @@ const {
     updateEvent,
     deleteEvent,
     approveEvent
-} = require('../Controllers/eventController');
+} = require('../controllers/eventController');
 
 const ROLES = {
     ADMIN: 'Admin',
