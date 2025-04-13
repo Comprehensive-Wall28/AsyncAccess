@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require("bcrypt");
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -28,11 +29,21 @@ const userSchema = new mongoose.Schema({
         enum: ['User', 'Organizer', 'Admin'],
         default: 'User',
     },
-    creationDate: {
+    resetPasswordToken: {
+        type: String,
+        select: false,
+    },
+    resetPasswordExpires: {
         type: Date,
-        default: Date.now,
+        select: false,
     }
-});
+}, { timestamps: true }); // Adds createdAt and updatedAt automatically
+
+
+// Method to compare passwords
+userSchema.methods.comparePassword = async function(incomingPassword) {
+    return bcrypt.compare(incomingPassword, this.password);
+};
 
 const User = mongoose.model('User', userSchema);
 module.exports = User;
