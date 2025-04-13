@@ -11,34 +11,32 @@ const bookingController = {
 
       // Validation
       if (!eventId || !tickets) {
-        return res.status(400).json({ error: 'Missing required fields' });
+        return res.status(400).json({ error: 'Missing required fields'});
       }
 
       if (!mongoose.Types.ObjectId.isValid(eventId)) {
-        return res.status(400).json({ error: 'Invalid event ID' });
+        return res.status(400).json({ error: 'Invalid event ID'});
       }
 
       // Get event and check availability
       const event = await Event.findById(eventId);
       if (!event) {
-        return res.status(404).json({ error: 'Event not found' });
-      }
-
-      if (event.status !== 'approved') {
-        return res.status(400).json({ error: 'Event is not available for booking' });
+        return res.status(404).json({ error: 'Event not found'});
       }
 
       const availableTickets = event.totalTickets - event.bookedTickets;
       if (tickets > availableTickets) {
-        return res.status(400).json({ error: 'Not enough tickets available' });
+        return res.status(400).json({ error: 'Not enough tickets available'});
       }
 
       // Create booking
       const booking = await Booking.create({
         user: userId,
         event: eventId,
-        tickets,
-        bookingDate: new Date()
+        numberOfTickets: tickets,
+        totalPrice: event.ticketPrice * tickets,
+        bookingDate: new Date(),
+        bookingStatus: 'Confirmed'
       });
 
       // Update event tickets

@@ -34,10 +34,15 @@ const eventSchema = new mongoose.Schema({
         required: true,
         default: 0,
     },
+    bookedTickets: {
+        type: Number,
+        required: true,
+        default: 0,
+    },
     organizer: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true,
+        //required: true,
     },
     createdDate: {
         type: Date,
