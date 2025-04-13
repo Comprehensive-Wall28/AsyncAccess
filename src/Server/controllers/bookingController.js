@@ -96,7 +96,7 @@ const bookingController = {
     }
   },
 
-  deleteBooking: async (req, res) => {
+  cancelBooking: async (req, res) => {
     try {
       const { id } = req.params;
 
@@ -117,11 +117,13 @@ const bookingController = {
       // Update event tickets
       const event = await Event.findById(booking.event);
       if (event) {
-        event.bookedTickets -= booking.tickets;
+        event.bookedTickets -= booking.numberOfTickets;
         await event.save();
       }
 
-      await Booking.findByIdAndDelete(id);
+      booking.bookingStatus = 'Cancelled'
+      await booking.save();
+        
       res.status(200).json({ message: 'Booking cancelled successfully' });
     } catch (err) {
       res.status(500).json({ error: err.message });

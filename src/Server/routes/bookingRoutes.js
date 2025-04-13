@@ -28,7 +28,7 @@ router.delete(
   "/:id",
   authenticationMiddleware,
   authorizationMiddleware(ROLES.USER),
-  bookingController.deleteBooking
+  bookingController.cancelBooking
 );
 
 module.exports = router;
