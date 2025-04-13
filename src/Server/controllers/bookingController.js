@@ -1,6 +1,7 @@
 // bookingController.js
 const Booking = require('../models/booking');
 const Event = require('../models/event');
+const User = require('../models/user');
 const mongoose = require('mongoose');
 
 const bookingController = {
@@ -16,6 +17,23 @@ const bookingController = {
 
       if (!mongoose.Types.ObjectId.isValid(eventId)) {
         return res.status(400).json({ error: 'Invalid event ID'});
+      }
+
+      if(tickets <= 0) {
+        return res.status(400).json({ error: 'Invalid number of tickets'});
+      }
+      
+      const existingBooking = await Booking.findOne({
+        user: userId,
+        event: eventId,
+        bookingStatus: { $ne: 'Cancelled' } 
+      });
+
+      if (existingBooking) {
+        return res.status(409).json({ 
+          error: 'You already have an active booking for this event.',
+          existingBookingId: existingBooking._id 
+        });
       }
 
       // Get event and check availability
@@ -64,7 +82,7 @@ const bookingController = {
       }
 
       // Authorization check
-      if (booking.user.toString() !== req.user.userId && req.user.role !== 'Admin') {
+      if (booking.user.toString() !== req.user.userId) {
         return res.status(403).json({ error: 'Unauthorized access' });
       }
 
