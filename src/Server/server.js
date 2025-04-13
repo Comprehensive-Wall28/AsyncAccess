@@ -26,8 +26,11 @@ app.use(cookieParser())
 app.use("/api/v1", authRouter); //MAKE IT NOT /auth
 
 app.use("/api/v1/users", userRouter); 
+
+app.use("/api/v1/bookings", bookingRouter); 
 app.use("/api/v1/events/", eventRouter);
-//app.use("/api/v1/bookings", bookingRouter); 
+app.use("/api/v1/bookings", bookingRouter); 
+
 
 const startServer = async () => {
   await connectDB();
