@@ -1,25 +1,42 @@
 const express = require('express');
 const router = express.Router();
+const authenticationMiddleware = require('../middleware/authenticationMiddleware');
+const authorizationMiddleware = require('../middleware/authorizationMiddleware');
 
-const eventController = require('../controllers/eventController.js');
+const {
+    getAllEvents,
+    getEvent,
+    createEvent,
+    updateEvent,
+    deleteEvent,
+    approveEvent
+} = require('../controllers/eventController');
 
-//Get User events
-//router.get('/user/:id', getUserEvents);  didn't do it yet
+const ROLES = {
+    ADMIN: 'Admin',
+    ORGANIZER: 'Organizer',
+    USER: 'User'
+};
 
-//Get all events
-router.get('/events', getAllEvents);
-
-//Get one event
-router.get('/events/:id', getEvent);
+router.use(authenticationMiddleware)
 
 //Create event
-//router.post('/events', createEvent);
+router.post('/', authorizationMiddleware([ROLES.ORGANIZER]), createEvent);
+
+//Get all events
+router.get('/',authorizationMiddleware([ROLES.ORGANIZER, ROLES.USER, ROLES.ADMIN]), getAllEvents);
+
+//Get one event
+router.get('/:id', authorizationMiddleware([ROLES.ORGANIZER, ROLES.USER, ROLES.ADMIN]), getEvent);
 
 //Delete event
-router.delete('/events/:id', deleteEvent);
+router.delete('/:id', authorizationMiddleware([ROLES.ORGANIZER, ROLES.ADMIN]), deleteEvent);
 
 //Update event
-router.patch('/events/:id', updateEvent);
+router.patch('/:id', authorizationMiddleware([ROLES.ORGANIZER, ROLES.ADMIN]), updateEvent);
+
+//Approve event
+router.patch('/:id/status', authorizationMiddleware([ROLES.ADMIN]), approveEvent);
 
 module.exports = router;
 

@@ -5,13 +5,13 @@ const cors = require('cors');
 const connectDB = require('./config/database');
 const cookieParser=require('cookie-parser')
 
-const port = process.env.PORT || 4001;
+const port = process.env.PORT
 
 const app = express();
 
 const bookingRouter = require("./routes/bookingRoutes.js")
 const userRouter = require("./routes/userRoutes.js")
-//const eventRouter = require("./routes/eventRoutes.js")
+const eventRouter = require("./routes/eventRoutes.js")
 const authRouter = require("./routes/authRoutes.js").default
 
 app.use(cors({
@@ -26,7 +26,7 @@ app.use(cookieParser())
 app.use("/api/v1", authRouter); //MAKE IT NOT /auth
 
 app.use("/api/v1/users", userRouter); 
-//app.use("/api/v1/events", eventRouter); 
+app.use("/api/v1/events/", eventRouter);
 //app.use("/api/v1/bookings", bookingRouter); 
 
 const startServer = async () => {
