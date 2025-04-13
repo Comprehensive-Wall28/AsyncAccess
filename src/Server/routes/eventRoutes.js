@@ -2,18 +2,14 @@ const express = require('express');
 const router = express.Router();
 
 const {
-    getAllEvents,
-    getEvent,
-    createEvent,
-    updateEvent,
-    deleteEvent, getEventAnalytics
-} = require('../controllers/eventController');
+    getMyEvents,
+    getEventAnalytics
+} = require('../controllers/eventController.js');
 
-//Get User events
-//router.get('/user/:id', getUserEvents);  didn't do it yet
+const authenticate = require('../middleware/authenticationMiddleware.js');
 
 //Get all events
-router.get('/', getAllEvents);
+router.get('/',authenticate, getMyEvents);
 
 //Get analytics... obviously
 router.get('/analytics',getEventAnalytics);

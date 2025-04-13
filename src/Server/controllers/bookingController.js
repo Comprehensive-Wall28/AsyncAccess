@@ -53,7 +53,7 @@ const getMyBookings = async (req, res) => {
         const userId = req.user.userId;
         console.log("ID "+userId)
 
-        //if (!userId) {return res.status(401).json({ error: "Unauthorized: User not logged in" });}
+        if (!userId) {return res.status(401).json({ error: "Unauthorized: User not logged in" });}
 
         // Query bookings that belong to the current user
         const bookings = await Booking.find({userId});
