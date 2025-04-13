@@ -3,8 +3,8 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const secretKey = process.env.SECRET_KEY;
 const bcrypt = require("bcrypt");
-const sendEmail = require("../utils/emailSender"); // Import email utility
-const crypto = require("node:crypto"); //built-in Node.js crypto module
+const sendEmail = require("../utils/emailSender"); 
+const crypto = require("node:crypto"); 
 const userController = {
   register: async (req, res) => {
     try {

@@ -47,8 +47,7 @@ app.get('/', (req, res) => {
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).send('Something broke! You probably did not add all required fields in the request body. \
-     Check the terminal for the error code and create better error handling next time please!');
+  res.status(500).send('Something broke! \n You probably had an invalid input not handled by the method. \n Check the terminal for the error code and create better error handling next time please! \n' + 'Error: ' + err.message);
 });
 
 startServer();

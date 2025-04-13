@@ -33,10 +33,10 @@ router.get('/:id', authorizationMiddleware([ROLES.ORGANIZER, ROLES.USER, ROLES.A
 router.delete('/:id', authorizationMiddleware([ROLES.ORGANIZER, ROLES.ADMIN]), deleteEvent);
 
 //Update event
-router.patch('/:id', authorizationMiddleware([ROLES.ORGANIZER, ROLES.ADMIN]), updateEvent);
+router.put('/:id', authorizationMiddleware([ROLES.ORGANIZER, ROLES.ADMIN]), updateEvent);
 
 //Approve event
-router.patch('/:id/status', authorizationMiddleware([ROLES.ADMIN]), approveEvent);
+router.put('/:id/status', authorizationMiddleware([ROLES.ADMIN]), approveEvent);
 
 module.exports = router;
 

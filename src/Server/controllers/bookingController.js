@@ -42,6 +42,10 @@ const bookingController = {
         return res.status(404).json({ error: 'Event not found'});
       }
 
+      if(event.status !== 'approved') {
+        return res.status(400).json({ error: 'Event is not accepting bookings.'});
+      }
+
       const availableTickets = event.totalTickets - event.bookedTickets;
       if (tickets > availableTickets) {
         return res.status(400).json({ error: 'Not enough tickets available'});

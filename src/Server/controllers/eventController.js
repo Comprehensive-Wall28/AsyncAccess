@@ -32,11 +32,10 @@ const createEvent = async (req, res, next) => {
             image,
             ticketPrice,
             totalTickets,
-            organizer,
-            createdDate
         } = req.body;
 
         const requiredFields = ['title', 'description', 'date', 'location', 'category', 'ticketPrice', 'totalTickets'];
+
         const missingFields = requiredFields.filter(field => {
             return req.body[field] === undefined || req.body[field] === null || req.body[field] === '';
         });
@@ -44,15 +43,15 @@ const createEvent = async (req, res, next) => {
         if (missingFields.length > 0) {
             return res.status(400).json({
                 status: 'fail',
-                message: 'Missing required fields',
+                message: 'Missing required fields.',
                 missingFields
             });
         }
 
-        if (totalTickets < 0) {
+        if (totalTickets < 0 || ticketPrice < 0) {
             return res.status(400).json({
                 status: 'fail',
-                message: 'Total tickets must be a positive integer'
+                message: 'Total tickets and Ticket Price must be a positive integers'
             });
         }
 
@@ -63,13 +62,7 @@ const createEvent = async (req, res, next) => {
             });
         }
 
-        if (ticketPrice < 0){
-            return res.status(400).json({
-                status: 'fail',
-                message: 'Ticket price must be a positive integer'
-            });
-        }
-
+        const organizerId = req.user.userId;
         const newEvent = await Event.create({
             title,
             description,
@@ -79,14 +72,15 @@ const createEvent = async (req, res, next) => {
             image,
             ticketPrice,
             totalTickets,
-            organizer,
-            createdDate,
-            status: 'pending' // the event needs to be approved first
+            organizer : organizerId,
+            status : 'pending',
+            bookedTickets: 0,
+
         });
 
         res.status(201).json({
             status: 'success',
-            message: 'Event created successfully (pending approval)',
+            message: 'Event created successfully and pending approval from an Administrator',
             data: newEvent
         });
     } catch (err) {
@@ -101,12 +95,12 @@ const updateEvent = async (req, res, next) => {
         const { id } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(404).json({ error: 'No such event' });
+            return res.status(404).json({ error: 'Invalid event ID'});
         }
 
         const event = await Event.findById(id);
         if (!event) {
-            return res.status(404).json({ error: 'No such event' });
+            return res.status(404).json({ error: 'No such event'});
         }
 
         const protectedFields = Object.keys(req.body).filter(field =>
@@ -127,15 +121,16 @@ const updateEvent = async (req, res, next) => {
         if (protectedFields.length > 0) {
             return res.status(400).json({
                 error: `You cannot modify protected fields: ${protectedFields.join(', ')}`,
-                fields: protectedFields
             });
         }
 
         const updatedEvent = await Event.findOneAndUpdate(
             { _id: id },
             allowedUpdates,
-            res.body
+            { new: true }
         );
+
+        const toReturn = await Event.findById(id);
 
         res.status(200).json({
             status: 'success',
