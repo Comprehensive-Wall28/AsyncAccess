@@ -81,6 +81,7 @@ const userController = {
       res.status(500).json({ message: "Server error" });
     }
   },
+
   getAllUsers: async (req, res) => {
     try {
       const users = await userModel.find().select('-password');
@@ -92,7 +93,8 @@ const userController = {
     } catch (e) {
       return res.status(500).json({ message: e.message });
     }
-  },
+    },
+
   getUser: async (req, res) => {
     try {
       const user = await userModel.findById(req.params.id).select('-password');

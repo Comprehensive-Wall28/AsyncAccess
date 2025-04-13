@@ -2,6 +2,8 @@ const Booking = require('../models/booking');
 const Event = require('../models/event');
 const User = require('../models/user');
 const mongoose = require('mongoose');
+const authority = require('../middleware/authorizationMiddleware');
+const authenticate = require('../middleware/authenticationMiddleware');
 
 const createBooking = async (req, res, next) => {
     try {
@@ -44,7 +46,6 @@ const createBooking = async (req, res, next) => {
         next(err);
     }
 };
-
 
 // Controller to get the current user's bookings
 const getMyBookings = async (req, res) => {
