@@ -10,18 +10,17 @@ const ROLES = {
     USER: 'User'
 };
 
-//Public routes:
+router.use(authenticationMiddleware)
 
-router.use(authenticationMiddleware);
-router.put("/:id", userController.updateUser);
-router.get("/profile", userController.getCurrentUser)
+router.get("/profile",authorizationMiddleware([ROLES.ADMIN , ROLES.ORGANIZER , ROLES.USER]),
+ userController.getCurrentUser)
 
-// --- Admin Only Routes ---
-// Apply authorization middleware for Admin role
-router.get('/', authorizationMiddleware([ROLES.ADMIN]), userController.getAllUsers);
-router.get('/:id', authorizationMiddleware([ROLES.ADMIN]), userController.getUser);
-router.put('/:id', authorizationMiddleware([ROLES.ADMIN]), userController.updateUser); 
-router.delete('/:id', authorizationMiddleware([ROLES.ADMIN]), userController.deleteUser);
+router.put("/profile",authorizationMiddleware([ROLES.ADMIN , ROLES.ORGANIZER , ROLES.USER]), 
+ userController.updateCurrentUserProfile)
 
+router.get('/', authorizationMiddleware([ROLES.ADMIN]), userController.getAllUsers)
+router.get('/:id', authorizationMiddleware([ROLES.ADMIN]), userController.getUser)
+router.put("/:id", authorizationMiddleware([ROLES.ADMIN]), userController.updateUserById)
+router.delete('/:id', authorizationMiddleware([ROLES.ADMIN]), userController.deleteUser)
 
 module.exports = router;
