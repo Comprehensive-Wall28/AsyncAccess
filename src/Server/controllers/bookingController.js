@@ -45,17 +45,25 @@ const createBooking = async (req, res, next) => {
     }
 };
 
+
+// Controller to get the current user's bookings
 const getMyBookings = async (req, res) => {
     try {
-        console.log("Getting my bookings");
-        const userId = req.user.id; // Ensure `req.user` is set by authentication middleware
-        const bookings = await Booking.find({ userId }); // Replace with your database query
+        const userId = req.user?.id;
+
+        //if (!userId) {return res.status(401).json({ error: "Unauthorized: User not logged in" });}
+
+        // Query bookings that belong to the current user
+        const bookings = await Booking.find({userId});
+
         if (!bookings || bookings.length === 0) {
-            return res.status(404).json({ error: "No bookings found" });
+            return res.status(404).json({ error: "No bookings found for this user" });
         }
-        res.status(200).json(bookings);
+
+        return res.status(200).json(bookings);
     } catch (error) {
-        res.status(500).json({ error: "Server error" });
+        console.error("Error fetching user bookings:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
     }
 };
 

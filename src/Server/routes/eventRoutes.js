@@ -6,25 +6,16 @@ const {
     getEvent,
     createEvent,
     updateEvent,
-    deleteEvent
+    deleteEvent, getEventAnalytics
 } = require('../controllers/eventController');
 
 //Get User events
 //router.get('/user/:id', getUserEvents);  didn't do it yet
 
 //Get all events
-router.get('/events', getAllEvents);
+router.get('/', getAllEvents);
 
-//Get one event
-router.get('/events/:id', getEvent);
-
-//Create event
-router.post('/events', createEvent);
-
-//Delete event
-router.delete('/events/:id', deleteEvent);
-
-//Update event
-router.patch('/events/:id', updateEvent);
+//Get analytics... obviously
+router.get('/analytics',getEventAnalytics);
 
 module.exports = router;
