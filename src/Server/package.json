@@ -1,6 +1,6 @@
 {
-  "name": "seproject",
-  "version": "1.0.0",
+  "name": "async_access",
+  "version": "2.0.0",
   "description": "Software Engineering Project",
   "main": "server.js",
   "scripts": {
