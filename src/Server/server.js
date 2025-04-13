@@ -29,8 +29,6 @@ app.use("/api/v1/users", userRouter);
 //app.use("/api/v1/events", eventRouter); 
 app.use("/api/v1/bookings", bookingRouter); 
 
-
-
 const startServer = async () => {
   await connectDB();
 
@@ -46,7 +44,8 @@ app.get('/', (req, res) => {
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).send('Something broke!');
+  res.status(500).send('Something broke! You probably did not add all required fields in the request body. \
+     Check the terminal for the error code and create better error handling next time please!');
 });
 
 startServer();

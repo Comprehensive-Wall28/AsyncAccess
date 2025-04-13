@@ -12,7 +12,11 @@ const userController = {
       
       const roles = ['Admin', 'Organizer', 'User'];
       if (!roles.includes(role)) {
-        return res.status(400).json({ message: "Invalid role provided" });
+        return res.status(400).json({ message: "Invalid role provided. Inserts: Admin , User , Organizer" });
+      }
+
+      if(!email || !password || !name || !role){
+        return res.status(400).json({ message: "Missing fields. Please provide Name, Email, Password and Role" });
       }
       // Check if the user already exists
       const existingUser = await userModel.findOne({ email });
@@ -45,12 +49,10 @@ const userController = {
 
       const user = await userModel.findOne({ email });
       if (!user) {
-        return res.status(404).json({ message: "email not found" });
+        return res.status(404).json({ message: "Please insert your Email and Password!" });
       }
 
-      console.log("password: ", user.password);
-
-      const isMatch = await user.comparePassword(password); // Use schema method if available
+      const isMatch = await user.comparePassword(password); 
 
       if (!isMatch) {
         return res.status(400).json({ message: "Incorrect password" });
