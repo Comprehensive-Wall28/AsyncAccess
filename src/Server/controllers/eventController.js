@@ -36,6 +36,40 @@ const createEvent = async (req, res, next) => {
             createdDate
         } = req.body;
 
+        const requiredFields = ['title', 'description', 'date', 'location', 'category', 'ticketPrice', 'totalTickets'];
+        const missingFields = requiredFields.filter(field => {
+            return req.body[field] === undefined || req.body[field] === null || req.body[field] === '';
+        });
+
+        if (missingFields.length > 0) {
+            return res.status(400).json({
+                status: 'fail',
+                message: 'Missing required fields',
+                missingFields
+            });
+        }
+
+        if (totalTickets < 0) {
+            return res.status(400).json({
+                status: 'fail',
+                message: 'Total tickets must be a positive integer'
+            });
+        }
+
+        if (totalTickets == 0) {
+            return res.status(400).json({
+                status: 'fail',
+                message: 'Total tickets cannot be 0'
+            });
+        }
+
+        if (ticketPrice < 0){
+            return res.status(400).json({
+                status: 'fail',
+                message: 'Ticket price must be a positive integer'
+            });
+        }
+
         const newEvent = await Event.create({
             title,
             description,
@@ -50,7 +84,11 @@ const createEvent = async (req, res, next) => {
             status: 'pending' // the event needs to be approved first
         });
 
-        res.status(201).json({newEvent});
+        res.status(201).json({
+            status: 'success',
+            message: 'Event created successfully (pending approval)',
+            data: newEvent
+        });
     } catch (err) {
         next(err);
     }
