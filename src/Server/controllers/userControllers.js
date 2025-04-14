@@ -59,7 +59,7 @@ const userController = {
       }
 
       const currentDateTime = new Date();
-      const expiresAt = new Date(+currentDateTime + 18000000); 
+      const expiresAt = new Date(+currentDateTime + 1800000); 
       // Generate a JWT token
       const token = jwt.sign(
         { user: { userId: user._id, role: user.role } },
@@ -69,6 +69,13 @@ const userController = {
         }
       );
 
+      const currentUser = {
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        age: user.age
+     };
+
       return res
         .cookie("token", token, {
           expires: expiresAt,
@@ -77,37 +84,15 @@ const userController = {
           //SameSite: "none", //Re-add when not testing
         })
         .status(200)
-        .json({ message: "Logged in successfully", user });
+        .json({ message: "Logged in successfully", currentUser });
     } catch (error) {
       console.error("Error logging in:", error);
-      res.status(500).json({ message: "Server error" });
+      res.status(500).json({ message: "Server error. Check console for more details." });
     }
   },
-  getAllUsers: async (req, res) => {
-    try {
-      const users = await userModel.find().select('-password');
-      if (!users) {
-        return res.status(404).json({ message: "No users exist!" });
-      }
-      return res.status(200).json(users);
+  
+  //Add getUser and getAllusers here!
 
-    } catch (e) {
-      return res.status(500).json({ message: e.message });
-    }
-  },
-  getUser: async (req, res) => {
-    try {
-      const user = await userModel.findById(req.params.id).select('-password');
-      if (!user) {
-          return res.status(404).json({ message: "User not found" });
-      }
-      return res.status(200).json(user);
-
-    } catch (error) {
-      console.error("Error fetching user by ID:", error);
-      return res.status(500).json({ message: "Server error while fetching user" });
-    }
-  },
   updateCurrentUserProfile: async (req, res) => {
     try {
       const userId = req.user.userId; 
@@ -195,7 +180,7 @@ const userController = {
         return res.status(400).json({ message: "Old password and new password are required." });
       }
 
-      const user = await userModel.findById(userId).select('+password'); // Need password to compare
+      const user = await userModel.findById(userId).select('+password'); 
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
