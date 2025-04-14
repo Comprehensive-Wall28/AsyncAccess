@@ -1,20 +1,16 @@
-import { Router } from "express";
+const { Router } = require("express"); // Use destructuring to get Router
 const router = Router();
-import authenticationMiddleware from '../middleware/authenticationMiddleware.js'; 
-
-import userController from "../controllers/userControllers.js";
+const authenticationMiddleware = require('../middleware/authenticationMiddleware.js');
+const userController = require("../controllers/userControllers.js");
 
 router.post("/login", userController.login );
 
 router.post("/register", userController.register);
 
-
-router.put("/update-password", authenticationMiddleware, userController.updatePassword);
-
+router.put("/update-password", authenticationMiddleware, userController.updatePasswordLoggedIn);
 //(Forgot Password Step 1)
 router.post("/forgetPassword", userController.requestPasswordReset);
-
 //(Forgot Password Step 2)
 router.put("/reset-password", userController.resetPassword);
 
-export default router;
+module.exports = router;

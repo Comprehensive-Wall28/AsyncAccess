@@ -3,8 +3,8 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const secretKey = process.env.SECRET_KEY;
 const bcrypt = require("bcrypt");
-const sendEmail = require("../utils/emailSender"); // Import email utility
-const crypto = require("node:crypto"); //built-in Node.js crypto module
+const sendEmail = require("../utils/emailSender"); 
+const crypto = require("node:crypto"); 
 const userController = {
   register: async (req, res) => {
     try {
@@ -12,7 +12,11 @@ const userController = {
       
       const roles = ['Admin', 'Organizer', 'User'];
       if (!roles.includes(role)) {
-        return res.status(400).json({ message: "Invalid role provided" });
+        return res.status(400).json({ message: "Invalid role provided. Inserts: Admin , User , Organizer" });
+      }
+
+      if(!email || !password || !name || !role){
+        return res.status(400).json({ message: "Missing fields. Please provide Name, Email, Password and Role" });
       }
       // Check if the user already exists
       const existingUser = await userModel.findOne({ email });
@@ -45,19 +49,17 @@ const userController = {
 
       const user = await userModel.findOne({ email });
       if (!user) {
-        return res.status(404).json({ message: "email not found" });
+        return res.status(404).json({ message: "Please insert your Email and Password!" });
       }
 
-      console.log("password: ", user.password);
-
-      const isMatch = await user.comparePassword(password); // Use schema method if available
+      const isMatch = await user.comparePassword(password); 
 
       if (!isMatch) {
         return res.status(400).json({ message: "Incorrect password" });
       }
 
       const currentDateTime = new Date();
-      const expiresAt = new Date(+currentDateTime + 18000000); 
+      const expiresAt = new Date(+currentDateTime + 1800000); 
       // Generate a JWT token
       const token = jwt.sign(
         { user: { userId: user._id, role: user.role } },
@@ -67,6 +69,13 @@ const userController = {
         }
       );
 
+      const currentUser = {
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        age: user.age
+     };
+
       return res
         .cookie("token", token, {
           expires: expiresAt,
@@ -75,37 +84,15 @@ const userController = {
           //SameSite: "none", //Re-add when not testing
         })
         .status(200)
-        .json({ message: "login successfully", user });
+        .json({ message: "Logged in successfully", currentUser });
     } catch (error) {
       console.error("Error logging in:", error);
-      res.status(500).json({ message: "Server error" });
+      res.status(500).json({ message: "Server error. Check console for more details." });
     }
   },
-  getAllUsers: async (req, res) => {
-    try {
-      const users = await userModel.find().select('-password');
-      if (!users) {
-        return res.status(404).json({ message: "No users exist!" });
-      }
-      return res.status(200).json(users);
+  
+  //Add getUser and getAllusers here!
 
-    } catch (e) {
-      return res.status(500).json({ message: e.message });
-    }
-  },
-  getUser: async (req, res) => {
-    try {
-      const user = await userModel.findById(req.params.id).select('-password');
-      if (!user) {
-          return res.status(404).json({ message: "User not found" });
-      }
-      return res.status(200).json(user);
-
-    } catch (error) {
-      console.error("Error fetching user by ID:", error);
-      return res.status(500).json({ message: "Server error while fetching user" });
-    }
-  },
   updateCurrentUserProfile: async (req, res) => {
     try {
       const userId = req.user.userId; 
@@ -194,8 +181,7 @@ const userController = {
         return res.status(400).json({ message: "Old password and new password are required." });
       }
 
-
-      const user = await userModel.findById(userId).select('+password'); // Need password to compare
+      const user = await userModel.findById(userId).select('+password'); 
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
