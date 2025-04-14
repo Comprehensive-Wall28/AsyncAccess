@@ -12,32 +12,41 @@ const getAllEvents = async (req, res, next) => {
 
 const getEventAnalytics = async (req, res) => {
     const { id } = req.params;
-    console.log("getting EVent analytics");
 
     if(!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(404).json(notFoundResponse);
     }
 
-    const event = await Event.findById(id);
-    if(!event) {
-        return res.status(404).json({ error: 'No such event analytics' });
-    }
-    res.status(200).json(event);
-}
+    try {
+        // Get the total number of bookings for the event
+        const bookingsCount = await Booking.aggregate([
+            { $match: { eventId: mongoose.Types.ObjectId(id) } },  // Match the event ID
+            { $count: 'totalBookings' }  // Count the number of bookings
+        ]);
 
-const getEvent = async (req, res) => {
-    const { id } = req.params;
+        const event = await Event.findById(id);  // Get event details
 
-    if(!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(404).json(notFoundResponse);
-    }
+        if (!event) {
+            return res.status(404).json({ error: 'No such event analytics' });
+        }
 
-    const event = await Event.findById(id);
-    if(!event) {
-        return res.status(404).json(notFoundResponse);
+        const totalBookings = bookingsCount.length > 0 ? bookingsCount[0].totalBookings : 0;
+
+        // Respond with event and its analytics
+        res.status(200).json({
+            event,
+            analytics: {
+                totalBookings,
+                remainingTickets: event.totalTickets - totalBookings,
+                revenueGenerated: event.ticketPrice * totalBookings  // Assuming ticketPrice is per booking
+            }
+        });
+    } catch (err) {
+        console.error("Error fetching event analytics:", err);
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
-    res.status(200).json(event);
-}
+};
+
 
 const createEvent = async (req, res, next) => {
     try {
