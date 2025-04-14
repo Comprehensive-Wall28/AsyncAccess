@@ -43,6 +43,10 @@ const eventSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+    bookedTickets: {
+        type: Number,
+        required: true,
+    }
 });
 
 const Event = mongoose.model('Event', eventSchema);

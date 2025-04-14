@@ -12,6 +12,6 @@ const authenticate = require('../middleware/authenticationMiddleware.js');
 router.get('/',authenticate, getMyEvents);
 
 //Get analytics... obviously
-router.get('/analytics',getEventAnalytics);
+router.get('/analytics',authenticate, getEventAnalytics);
 
 module.exports = router;
