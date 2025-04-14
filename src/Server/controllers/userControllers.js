@@ -91,7 +91,31 @@ const userController = {
     }
   },
   
-  //Add getUser and getAllusers here!
+  getAllUsers: async (req, res) => {
+    try {
+      const users = await userModel.find().select('-password');
+      if (!users) {
+        return res.status(404).json({ message: "No users exist!" });
+      }
+      return res.status(200).json(users);
+
+    } catch (e) {
+      return res.status(500).json({ message: e.message });
+    }
+  },
+  getUser: async (req, res) => {
+    try {
+      const user = await userModel.findById(req.params.id).select('-password');
+      if (!user) {
+          return res.status(404).json({ message: "User not found" });
+      }
+      return res.status(200).json(user);
+
+    } catch (error) {
+      console.error("Error fetching user by ID:", error);
+      return res.status(500).json({ message: "Server error while fetching user" });
+    }
+  }, 
 
   updateCurrentUserProfile: async (req, res) => {
     try {
