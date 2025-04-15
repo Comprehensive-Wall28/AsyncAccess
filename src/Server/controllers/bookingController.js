@@ -8,26 +8,28 @@ const authenticate = require('../middleware/authenticationMiddleware');
 
 const bookingController = {
   // Controller to get the current user's bookings
-const getMyBookings = async (req, res) => {
+  getMyBookings: async (req, res) => {
     try {
-        const userId = req.user.userId;
-        console.log("ID "+userId)
+      const userId = req.user.userId;
+      console.log("ID " + userId);
 
-        if (!userId) {return res.status(401).json({ error: "Unauthorized: User not logged in" });}
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not logged in" });
+      }
 
-        // Query bookings that belong to the current user
-        const bookings = await Booking.find({ user: userId });
+      // Query bookings that belong to the current user
+      const bookings = await Booking.find({ user: userId });
 
-        if (!bookings || bookings.length === 0) {
-            return res.status(404).json({ error: "No bookings found for this user" });
-        }
+      if (!bookings || bookings.length === 0) {
+        return res.status(404).json({ error: "No bookings found for this user" });
+      }
 
-        return res.status(200).json(bookings);
+      return res.status(200).json(bookings);
     } catch (error) {
-        console.error("Error fetching user bookings:", error);
-        return res.status(500).json({ error: "Internal Server Error" });
+      console.error("Error fetching user bookings:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
     }
-};
+  },
 
   createBooking: async (req, res) => {
     try {
@@ -36,43 +38,43 @@ const getMyBookings = async (req, res) => {
 
       // Validation
       if (!eventId || !tickets) {
-        return res.status(400).json({ error: 'Missing required fields'});
+        return res.status(400).json({ error: 'Missing required fields' });
       }
 
       if (!mongoose.Types.ObjectId.isValid(eventId)) {
-        return res.status(400).json({ error: 'Invalid event ID'});
+        return res.status(400).json({ error: 'Invalid event ID' });
       }
 
-      if(tickets <= 0) {
-        return res.status(400).json({ error: 'Invalid number of tickets'});
+      if (tickets <= 0) {
+        return res.status(400).json({ error: 'Invalid number of tickets' });
       }
-      
+
       const existingBooking = await Booking.findOne({
         user: userId,
         event: eventId,
-        bookingStatus: { $ne: 'Cancelled' } 
+        bookingStatus: { $ne: 'Cancelled' }
       });
 
       if (existingBooking) {
-        return res.status(409).json({ 
+        return res.status(409).json({
           error: 'You already have an active booking for this event.',
-          existingBookingId: existingBooking._id 
+          existingBookingId: existingBooking._id
         });
       }
 
       // Get event and check availability
       const event = await Event.findById(eventId);
       if (!event) {
-        return res.status(404).json({ error: 'Event not found'});
+        return res.status(404).json({ error: 'Event not found' });
       }
 
-      if(event.status !== 'approved') {
-        return res.status(400).json({ error: 'Event is not accepting bookings.'});
+      if (event.status !== 'approved') {
+        return res.status(400).json({ error: 'Event is not accepting bookings.' });
       }
 
       const availableTickets = event.totalTickets - event.bookedTickets;
       if (tickets > availableTickets) {
-        return res.status(400).json({ error: 'Not enough tickets available'});
+        return res.status(400).json({ error: 'Not enough tickets available' });
       }
 
       // Create booking
@@ -145,9 +147,9 @@ const getMyBookings = async (req, res) => {
         await event.save();
       }
 
-      booking.bookingStatus = 'Cancelled'
+      booking.bookingStatus = 'Cancelled';
       await booking.save();
-        
+
       res.status(200).json({ message: 'Booking cancelled successfully' });
     } catch (err) {
       res.status(500).json({ error: err.message });
@@ -156,6 +158,3 @@ const getMyBookings = async (req, res) => {
 };
 
 module.exports = bookingController;
-/*module.exports = {
-    getMyBookings,
-}*/
