@@ -3,16 +3,21 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const secretKey = process.env.SECRET_KEY;
 const bcrypt = require("bcrypt");
-const sendEmail = require("../utils/emailSender"); // Import email utility
-const crypto = require("node:crypto"); //built-in Node.js crypto module
+const sendEmail = require("../utils/emailSender"); 
+const crypto = require("node:crypto"); 
 const userController = {
   register: async (req, res) => {
     try {
       const { email, password, name, role, age } = req.body;
-
+      
       const roles = ['Admin', 'Organizer', 'User'];
       if (!roles.includes(role)) {
-        return res.status(400).json({ message: "Invalid role provided" });
+        return res.status(400).json({ message: "Invalid role provided. Inserts: Admin , User , Organizer" });
+      }
+
+      if(!email || !password || !name || !role){
+        return res.status(400).json({ message: "Missing fields. Please provide Name, Email, Password and Role" });
+
       }
       // Check if the user already exists
       const existingUser = await userModel.findOne({ email });
@@ -45,19 +50,17 @@ const userController = {
 
       const user = await userModel.findOne({ email });
       if (!user) {
-        return res.status(404).json({ message: "email not found" });
+        return res.status(404).json({ message: "Please insert your Email and Password!" });
       }
-
-      console.log("password: ", user.password);
-
-      const isMatch = await user.comparePassword(password); // Use schema method if available
+      const isMatch = await user.comparePassword(password); 
 
       if (!isMatch) {
         return res.status(400).json({ message: "Incorrect password" });
       }
 
       const currentDateTime = new Date();
-      const expiresAt = new Date(+currentDateTime + 18000000);
+      const expiresAt = new Date(+currentDateTime + 1800000); 
+
       // Generate a JWT token
       const token = jwt.sign(
           { user: { userId: user._id, role: user.role } },
@@ -67,21 +70,27 @@ const userController = {
           }
       );
 
+      const currentUser = {
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        age: user.age
+     };
+
       return res
-          .cookie("token", token, {
-            expires: expiresAt,
-            httpOnly: true,
-            //secure: true, // Re-add when not testing
-            //SameSite: "none", //Re-add when not testing
-          })
-          .status(200)
-          .json({ message: "login successfully", user });
+        .cookie("token", token, {
+          expires: expiresAt,
+          httpOnly: true,
+          //secure: true, // Re-add when not testing
+          //SameSite: "none", //Re-add when not testing
+        })
+        .status(200)
+        .json({ message: "Logged in successfully", currentUser });
     } catch (error) {
       console.error("Error logging in:", error);
-      res.status(500).json({ message: "Server error" });
+      res.status(500).json({ message: "Server error. Check console for more details." });
     }
   },
-
   getAllUsers: async (req, res) => {
     try {
       const users = await userModel.find().select('-password');
@@ -107,7 +116,8 @@ const userController = {
       console.error("Error fetching user by ID:", error);
       return res.status(500).json({ message: "Server error while fetching user" });
     }
-  },
+  }, 
+
   updateCurrentUserProfile: async (req, res) => {
     try {
       const userId = req.user.userId;
@@ -126,12 +136,13 @@ const userController = {
       }
 
       const updatedUser = await userModel.findByIdAndUpdate(
-          userId,
-          updateData,
-          {
-            new: true,
-            runValidators: true
-          }
+
+        userId,
+        updateData,
+        {
+          new: true, 
+          runValidators: true 
+        }
       ).select('-password'); // Exclude password from the user object
 
       if (!updatedUser) {
@@ -142,9 +153,9 @@ const userController = {
 
     } catch (error) {
       console.error("Error updating current user profile:", error);
-      if (error.name === 'ValidationError') {
-        return res.status(400).json({ message: "Validation failed", errors: error.errors });
-      }
+       if (error.name === 'ValidationError') {
+           return res.status(400).json({ message: "Validation failed", errors: error.errors });
+       }
       return res.status(500).json({ message: "Server error while updating profile" });
     }
   },
@@ -153,14 +164,13 @@ const userController = {
       const userIdToUpdate = req.params.id;
       const { role } = req.body;
 
-      if (role === undefined) {
+      if (role === undefined) { 
         return res.status(400).json({ message: "Role is required in the request body to update." });
       }
 
       if(role !== 'Admin' && role !== 'Organizer' && role !== 'User') {
         return res.status(400).json({ message: "Role sent is not valid! (User || Admin || Organizer)" });
       }
-
       const updateData = { role: role };
 
       const updatedUser = await userModel.findByIdAndUpdate(
@@ -186,41 +196,40 @@ const userController = {
       return res.status(500).json({ message: "Server error while updating user role" });
     }
   },
-  updatePassword: async (req, res) => {
+  updatePasswordLoggedIn: async (req, res) => {
     try {
-      const {userId} = req.user.userId;
-      const {  oldPassword, newPassword } = req.body;
+      const userId = req.user.userId; 
+      const { oldPassword, newPassword } = req.body;
 
 
       if (!oldPassword || !newPassword) {
         return res.status(400).json({ message: "Old password and new password are required." });
       }
 
-
-      const user = await userModel.findById(userId).select('+password'); // Need password to compare
+      const user = await userModel.findById(userId).select('+password'); 
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
+      const isMatch = await user.comparePassword(oldPassword); 
 
-      const isMatch = await user.comparePassword(oldPassword);
       if (!isMatch) {
         return res.status(400).json({ message: "Incorrect old password" });
       }
-      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
 
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
       user.password = hashedNewPassword;
+
       user.resetPasswordToken = undefined;
       user.resetPasswordExpires = undefined;
 
       await user.save();
+
       return res.status(200).json({ message: "Password updated successfully" });
     } catch (error) {
-      console.error("Error changing password:", error);
-      return res.status(500).json({ message: "Server error" });
+      console.error("Error updating password:", error);
+      return res.status(500).json({ message: "Server error while updating password" });
     }
   },
-
-
   requestPasswordReset: async (req, res) => {
     try {
       const { email } = req.body;
@@ -240,9 +249,10 @@ const userController = {
 
       // Hash the code before saving
       const hashedCode = crypto
-          .createHash("sha256")
-          .update(resetCode)
-          .digest("hex");
+
+        .createHash("sha256")
+        .update(resetCode)
+        .digest("hex");
 
       // Set hashed code and expiry (e.g., 10 minutes)
       user.resetPasswordToken = hashedCode;
@@ -261,10 +271,11 @@ const userController = {
 
       try {
         await sendEmail(
-            user.email,
-            "Your Password Reset Code",
-            plainTextMessage,
-            message
+
+          user.email,
+          "Your Password Reset Code", 
+          plainTextMessage,
+          message
         );
         console.log(`Password reset code sent to ${user.email}`);
         return res.status(200).json({ message: "If an account with that email exists, a password reset code has been sent." });
@@ -287,26 +298,26 @@ const userController = {
       const { email, code, newPassword } = req.body;
 
       if (!email || !code || !newPassword) {
-        return res.status(400).json({ message: "Email, reset code, and new password are required." });
+          return res.status(400).json({ message: "Email, reset code, and new password are required." });
       }
       // Hash the code received from the body to match the stored one
       const hashedCode = crypto
-          .createHash("sha256")
-          .update(code)
-          .digest("hex");
+        .createHash("sha256")
+        .update(code) 
+        .digest("hex");
 
       const user = await userModel.findOne({
         email: email, // Find by email
         resetPasswordToken: hashedCode, // Compare hashed code
         resetPasswordExpires: { $gt: Date.now() }, // Check if code is still valid
-      }).select('+password');
+      }).select('+password'); 
 
       if (!user) {
         const userExists = await userModel.findOne({ email });
         if (userExists) {
-          console.log(`Invalid or expired code attempt for email: ${email}`);
+            console.log(`Invalid or expired code attempt for email: ${email}`);
         } else {
-          console.log(`Password reset attempt for non-existent email: ${email}`);
+            console.log(`Password reset attempt for non-existent email: ${email}`);
         }
         return res.status(400).json({ message: "Password reset code is invalid or has expired." });
       }
@@ -331,7 +342,7 @@ const userController = {
     try {
       const user = await userModel.findByIdAndDelete(req.params.id);
       if (!user) {
-        return res.status(404).json({ message: "User not found" });
+          return res.status(404).json({ message: "User not found" });
       }
       return res.status(200).json({ user, msg: "User deleted successfully" });
     } catch (error) {

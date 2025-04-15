@@ -34,6 +34,11 @@ const eventSchema = new mongoose.Schema({
         required: true,
         default: 0,
     },
+    bookedTickets: {
+        type: Number,
+        required: true,
+        default: 0,
+    },
     organizer: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -43,10 +48,11 @@ const eventSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
-    bookedTickets: {
-        type: Number,
-        required: true,
-    }
+    status: {
+        type: String,
+        enum: ['pending', 'approved', 'rejected'],
+        default: 'pending',
+    },
 });
 
 const Event = mongoose.model('Event', eventSchema);

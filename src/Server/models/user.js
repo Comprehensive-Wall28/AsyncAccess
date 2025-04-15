@@ -31,19 +31,23 @@ const userSchema = new mongoose.Schema({
     },
     resetPasswordToken: {
         type: String,
-        select: false,
-    },
-    resetPasswordExpires: {
+        select: false, 
+      },
+      resetPasswordExpires: {
         type: Date,
-        select: false,
-    }
-}, { timestamps: true }); // Adds createdAt and updatedAt automatically
+        select: false, 
+      }
+    }, { timestamps: true }); 
 
 
 // Method to compare passwords
 userSchema.methods.comparePassword = async function(incomingPassword) {
     return bcrypt.compare(incomingPassword, this.password);
 };
+
+
+userSchema.index({ email: 1, resetPasswordToken: 1, resetPasswordExpires: 1 });
+
 
 const User = mongoose.model('User', userSchema);
 module.exports = User;
