@@ -71,6 +71,7 @@ const userController = {
       );
 
       const currentUser = {
+        userId: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
@@ -122,7 +123,7 @@ const userController = {
     try {
       const userId = req.user.userId;
       const updateData = {};
-      const allowedFields = ['name', 'age'];
+      const allowedFields = ['name', 'age', 'profilePicture'];
 
       allowedFields.forEach(field => {
         if (req.body[field] !== undefined) {
@@ -156,7 +157,7 @@ const userController = {
        if (error.name === 'ValidationError') {
            return res.status(400).json({ message: "Validation failed", errors: error.errors });
        }
-      return res.status(500).json({ message: "Server error while updating profile" });
+      return res.status(500).json({ message: "Server error while updating profile. Make sure inserts are appropriate" });
     }
   },
   updateUserById: async (req, res) => {

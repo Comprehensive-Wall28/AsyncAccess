@@ -3,71 +3,57 @@ const Event = require('../models/event');
 const mongoose = require("mongoose");
 
 const getMyEvents = async (req, res) => {
-    const { id } = req.params;  // Get the ID from the request parameters
-    console.log("Received event ID:", id);  // Log the ID to check its format
-
-    //if (!mongoose.Types.ObjectId.isValid(id)) {return res.status(400).json({ error: 'Invalid event ID' });}
-
-    const userId = req.user.userId;
-    const userType = req.user.role;
-
-    if (!userId) {return res.status(401).json({ error: "Unauthorized: User not logged in" });}
-
-    if (userType !== "Organizer"&&userType!=="Admin") {return res.status(403).json({ error: "User must be an Organizer" });}
+    const organizerId = req.user.userId;
 
     try {
-        // Get all events for the logged-in user
-        const events = await Event.find({
-            $or: [
-                { userId: userId }, // in case it's saved as a string
-                { userId: new mongoose.Types.ObjectId(userId) } // correct usage with 'new'
-            ]
-        }).select('title');
+        const events = await Event.find({ organizer: organizerId })
+                                  .select('title description date location category image ticketPrice totalTickets bookedTickets status createdAt') 
+                                  .sort({ createdAt: -1 }); //sort by creation date
 
-        if (!events || events.length === 0) {
-            return res.status(404).json({ error: "No events found for this user" });
-        }
-
-        return res.status(200).json(events);  // Return the events with only the selected fields
+        return res.status(200).json(events);
     } catch (error) {
-        console.error("Error fetching user events:", error.message);
-        return res.status(500).json({ error: "Internal Server Error" });
+        console.error("Error fetching organizer events:", error.message);
+        return res.status(500).json({ error: "Internal Server Error while fetching events" });
     }
 };
 
 const getEventAnalytics = async (req, res) => {
     try {
-        const userId = req.user.userId;
-        const userType = req.user.role;
+        const organizerId = req.user.userId;
 
-        if (!userId) {
-            return res.status(401).json({error: "Unauthorized: User not logged in"});
-        }
-
-        if (userType !== "Admin" && userType !== "Organizer") {
-            return res.status(403).json({error: "User must be Organizer or Admin"});
-        }
-
-        const events = await Event.find({
-            $or: [
-                {userId: userId}, // in case it's saved as a string
-                {userId: new mongoose.Types.ObjectId(userId)} // correct usage with 'new'
-            ]
-        });
+        const events = await Event.find({ organizer: organizerId })
+                                  .select('title ticketPrice totalTickets bookedTickets') 
+                                  .sort({ createdAt: -1 }); 
 
         if (!events || events.length === 0) {
-            return res.status(404).json({error: "No events found for this user"});
+            return res.status(404).json({ message: "No events found for this Organizer to generate analytics." });
         }
 
-        return res.status(200).json(events);
+        const eventsAnalytics = events.map(event => {
+            // Calculate percentage, handle potential division by zero
+            const bookedPercentage = event.totalTickets > 0
+                ? parseFloat(((event.bookedTickets / event.totalTickets) * 100).toFixed(2)) 
+                : 0; 
+
+            return {
+                _id: event._id, 
+                title: event.title,
+                ticketPrice: event.ticketPrice,
+                totalTickets: event.totalTickets,
+                bookedTickets: event.bookedTickets,
+                bookedPercentage: bookedPercentage
+            };
+        });
+        return res.status(200).json(eventsAnalytics);
+
     } catch (error) {
-        console.error("Error fetching user events:", error.message);
-        return res.status(500).json({error: "Internal Server Error"});
+        console.error("Error fetching event analytics:", error.message);
+        return res.status(500).json({ error: "Internal Server Error while fetching analytics" });
     }
-}
+};
 
         const getAllEvents = async (req, res) => {
-            const events = await Event.find({}).sort({createdAt: -1});
+            const events = await Event.find({status: 'approved'}).sort({createdAt: -1});
             res.status(200).json(events);
         };
 

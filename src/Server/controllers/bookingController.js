@@ -7,17 +7,14 @@ const authority = require('../middleware/authorizationMiddleware');
 const authenticate = require('../middleware/authenticationMiddleware');
 
 const bookingController = {
-  // Controller to get the current user's bookings
   getMyBookings: async (req, res) => {
     try {
       const userId = req.user.userId;
-      console.log("ID " + userId);
 
       if (!userId) {
-        return res.status(401).json({ error: "Unauthorized: User not logged in" });
+        return res.status(401).json({ error: "Please log in to use this functionality" });
       }
 
-      // Query bookings that belong to the current user
       const bookings = await Booking.find({ user: userId });
 
       if (!bookings || bookings.length === 0) {
@@ -27,7 +24,7 @@ const bookingController = {
       return res.status(200).json(bookings);
     } catch (error) {
       console.error("Error fetching user bookings:", error);
-      return res.status(500).json({ error: "Internal Server Error" });
+      return res.status(500).json({ error: "Internal Server Error. Check console" });
     }
   },
 
@@ -109,11 +106,6 @@ const bookingController = {
       const booking = await Booking.findById(id);
       if (!booking) {
         return res.status(404).json({ error: 'Booking not found' });
-      }
-
-      // Authorization check
-      if (booking.user.toString() !== req.user.userId) {
-        return res.status(403).json({ error: 'Unauthorized access' });
       }
 
       res.status(200).json(booking);
