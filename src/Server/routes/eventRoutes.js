@@ -39,5 +39,3 @@ router.put('/:id', authorizationMiddleware([ROLES.ORGANIZER, ROLES.ADMIN]), upda
 router.put('/:id/status', authorizationMiddleware([ROLES.ADMIN]), approveEvent);
 
 module.exports = router;
-
-
