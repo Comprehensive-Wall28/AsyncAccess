@@ -15,6 +15,7 @@ const ROLES = {
 router.post(
   "/",
   authenticationMiddleware,
+  authorizationMiddleware(ROLES.USER),
   bookingController.createBooking
 );
 

@@ -153,6 +153,10 @@ const getEventAnalytics = async (req, res) => {
                     return res.status(404).json({error: 'No such event'});
                 }
 
+                if (event.organizer.toString() !== req.user.userId) {
+                    return res.status(403).json({ error: 'Forbidden: You are not authorized to update this event.' });
+                }
+
                 const protectedFields = Object.keys(req.body).filter(field =>
                     notAllowed.includes(field)
                 );
@@ -201,11 +205,18 @@ const getEventAnalytics = async (req, res) => {
                     return res.status(400).json({error: 'Invalid event ID'});
                 }
 
-                const deletedEvent = await Event.findByIdAndDelete(id);
+                
+                const event = await Event.findById(id);
 
-                if (!deletedEvent) {
-                    return res.status(404).json({error: 'No such event'});
+                if (!event) {
+                    return res.status(404).json({ error: 'No such event found' });
                 }
+
+                if (event.organizer.toString() !== req.user.userId) {
+                    return res.status(403).json({ error: 'Forbidden: You are not authorized to delete this event.' });
+                }
+
+                const deletedEvent = await Event.findByIdAndDelete(id);
 
                 res.status(200).json({
                     message: 'Event deleted successfully',
@@ -216,6 +227,7 @@ const getEventAnalytics = async (req, res) => {
                 });
 
             } catch (error) {
+                console.log(error)
                 res.status(500).json({error: 'Server error during deletion'});
             }
         };
