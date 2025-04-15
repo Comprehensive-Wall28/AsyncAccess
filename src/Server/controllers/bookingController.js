@@ -35,7 +35,7 @@ const bookingController = {
 
       // Validation
       if (!eventId || !tickets) {
-        return res.status(400).json({ error: 'Missing required fields' });
+        return res.status(400).json({ error: 'Missing required fields, check the eventId and tickets !' });
       }
 
       if (!mongoose.Types.ObjectId.isValid(eventId)) {
