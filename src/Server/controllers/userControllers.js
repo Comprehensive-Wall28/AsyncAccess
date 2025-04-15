@@ -17,6 +17,7 @@ const userController = {
 
       if(!email || !password || !name || !role){
         return res.status(400).json({ message: "Missing fields. Please provide Name, Email, Password and Role" });
+
       }
       // Check if the user already exists
       const existingUser = await userModel.findOne({ email });
@@ -51,7 +52,6 @@ const userController = {
       if (!user) {
         return res.status(404).json({ message: "Please insert your Email and Password!" });
       }
-
       const isMatch = await user.comparePassword(password); 
 
       if (!isMatch) {
@@ -60,13 +60,14 @@ const userController = {
 
       const currentDateTime = new Date();
       const expiresAt = new Date(+currentDateTime + 1800000); 
+
       // Generate a JWT token
       const token = jwt.sign(
-        { user: { userId: user._id, role: user.role } },
-        secretKey,
-        {
-          expiresIn: 3 * 60 * 60,
-        }
+          { user: { userId: user._id, role: user.role } },
+          secretKey,
+          {
+            expiresIn: 3 * 60 * 60,
+          }
       );
 
       const currentUser = {
@@ -90,7 +91,6 @@ const userController = {
       res.status(500).json({ message: "Server error. Check console for more details." });
     }
   },
-  
   getAllUsers: async (req, res) => {
     try {
       const users = await userModel.find().select('-password');
@@ -102,12 +102,13 @@ const userController = {
     } catch (e) {
       return res.status(500).json({ message: e.message });
     }
-  },
+    },
+
   getUser: async (req, res) => {
     try {
       const user = await userModel.findById(req.params.id).select('-password');
       if (!user) {
-          return res.status(404).json({ message: "User not found" });
+        return res.status(404).json({ message: "User not found" });
       }
       return res.status(200).json(user);
 
@@ -119,9 +120,9 @@ const userController = {
 
   updateCurrentUserProfile: async (req, res) => {
     try {
-      const userId = req.user.userId; 
+      const userId = req.user.userId;
       const updateData = {};
-      const allowedFields = ['name', 'age']; 
+      const allowedFields = ['name', 'age'];
 
       allowedFields.forEach(field => {
         if (req.body[field] !== undefined) {
@@ -135,6 +136,7 @@ const userController = {
       }
 
       const updatedUser = await userModel.findByIdAndUpdate(
+
         userId,
         updateData,
         {
@@ -159,8 +161,8 @@ const userController = {
   },
   updateUserById: async (req, res) => {
     try {
-      const userIdToUpdate = req.params.id; 
-      const { role } = req.body; 
+      const userIdToUpdate = req.params.id;
+      const { role } = req.body;
 
       if (role === undefined) { 
         return res.status(400).json({ message: "Role is required in the request body to update." });
@@ -169,16 +171,15 @@ const userController = {
       if(role !== 'Admin' && role !== 'Organizer' && role !== 'User') {
         return res.status(400).json({ message: "Role sent is not valid! (User || Admin || Organizer)" });
       }
-      
       const updateData = { role: role };
 
       const updatedUser = await userModel.findByIdAndUpdate(
-        userIdToUpdate,
-        updateData, 
-        {
-          new: true, 
-          runValidators: true 
-        }
+          userIdToUpdate,
+          updateData,
+          {
+            new: true,
+            runValidators: true
+          }
       ).select('-password');
 
       if (!updatedUser) {
@@ -189,9 +190,9 @@ const userController = {
 
     } catch (error) {
       console.error("Error updating user role by ID:", error);
-       if (error.name === 'ValidationError') {
-           return res.status(400).json({ message: "Validation failed", errors: error.errors });
-       }
+      if (error.name === 'ValidationError') {
+        return res.status(400).json({ message: "Validation failed", errors: error.errors });
+      }
       return res.status(500).json({ message: "Server error while updating user role" });
     }
   },
@@ -199,6 +200,7 @@ const userController = {
     try {
       const userId = req.user.userId; 
       const { oldPassword, newPassword } = req.body;
+
 
       if (!oldPassword || !newPassword) {
         return res.status(400).json({ message: "Old password and new password are required." });
@@ -247,6 +249,7 @@ const userController = {
 
       // Hash the code before saving
       const hashedCode = crypto
+
         .createHash("sha256")
         .update(resetCode)
         .digest("hex");
@@ -268,6 +271,7 @@ const userController = {
 
       try {
         await sendEmail(
+
           user.email,
           "Your Password Reset Code", 
           plainTextMessage,
@@ -346,11 +350,11 @@ const userController = {
       return res.status(500).json({ message: error.message });
     }
   },
-  getCurrentUser: async (req, res) => { 
+  getCurrentUser: async (req, res) => {
     try {
       const userId = req.user.userId;
 
-      const user = await userModel.findById(userId).select('_id name email role age'); 
+      const user = await userModel.findById(userId).select('_id name email role age');
 
       if (!user) {
         return res.status(404).json({ message: "User not found" });

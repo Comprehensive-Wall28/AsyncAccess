@@ -1,7 +1,9 @@
 const { Router } = require("express"); // Use destructuring to get Router
 const router = Router();
+
 const authenticationMiddleware = require('../middleware/authenticationMiddleware.js');
 const userController = require("../controllers/userControllers.js");
+
 
 router.post("/login", userController.login );
 
