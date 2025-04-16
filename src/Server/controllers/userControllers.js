@@ -238,114 +238,114 @@ const userController = {
       return res.status(500).json({ message: "Server error while updating password" });
     }
   },
-    requestPasswordReset: async (req, res) => {
-      try {
-        const { email } = req.body;
-        if (!email) {
-          return res.status(400).json({ message: "Email address is required" });
-        }
-
-        const user = await userModel.findOne({ email });
-        if (!user) {
-          console.log(`Password reset requested for non-existent email: ${email}`);
-          // Don't notify a potential attacker of a valid email (:
-          return res.status(200).json({ message: "If an account with that email exists, a password reset code has been sent." });
-        }
-
-        // Generate a 6-digit code
-        const resetCode = crypto.randomInt(100000, 999999).toString(); // Generate a 6-digit number and convert to string
-
-        // Hash the code before saving
-        const hashedCode = crypto
-
-          .createHash("sha256")
-          .update(resetCode)
-          .digest("hex");
-
-        // Set hashed code and expiry (e.g., 10 minutes)
-        user.resetPasswordToken = hashedCode;
-        user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
-
-        await user.save();
-
-        const message = `
-          <h1>Password Reset Request</h1>
-          <p>You requested a password reset for your account from AsyncAccess.</p>
-          <p>Enter the following code to reset your password. This code is valid for 10 minutes:</p>
-          <h2 style="text-align: center; letter-spacing: 5px; font-size: 2em;">${resetCode}</h2>
-          <p>NOTE: Please, do not insert valid credentials like passwords. Testing purposes only! (Penta-Nodes team)</p>
-        `;
-        const plainTextMessage = `You requested a password reset. Your reset code is: ${resetCode}. It is valid for 10 minutes.`;
-
-        try {
-          await sendEmail(
-
-            user.email,
-            "Your Password Reset Code", 
-            plainTextMessage,
-            message
-          );
-          console.log(`Password reset code sent to ${user.email}`);
-          return res.status(200).json({ message: "If an account with that email exists, a password reset code has been sent." });
-        } catch (emailError) {
-          console.error("Failed to send password reset code email:", emailError);
-          // Clear the fields if email fails
-          user.resetPasswordToken = undefined;
-          user.resetPasswordExpires = undefined;
-          await user.save();
-          return res.status(500).json({ message: "Error sending password reset email. Please try again later." });
-        }
-
-      } catch (error) {
-        console.error("Error requesting password reset:", error);
-        return res.status(500).json({ message: "Server error" });
+  requestPasswordReset: async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ message: "Email address is required" });
       }
-    },
-    resetPassword: async (req, res) => {
+
+      const user = await userModel.findOne({ email });
+      if (!user) {
+        console.log(`Password reset requested for non-existent email: ${email}`);
+        // Don't notify a potential attacker of a valid email (:
+        return res.status(200).json({ message: "If an account with that email exists, a password reset code has been sent." });
+      }
+
+      // Generate a 6-digit code
+      const resetCode = crypto.randomInt(100000, 999999).toString(); // Generate a 6-digit number and convert to string
+
+      // Hash the code before saving
+      const hashedCode = crypto
+
+        .createHash("sha256")
+        .update(resetCode)
+        .digest("hex");
+
+      // Set hashed code and expiry (e.g., 10 minutes)
+      user.resetPasswordToken = hashedCode;
+      user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+      await user.save();
+
+      const message = `
+        <h1>Password Reset Request</h1>
+        <p>You requested a password reset for your account from AsyncAccess.</p>
+        <p>Enter the following code to reset your password. This code is valid for 10 minutes:</p>
+        <h2 style="text-align: center; letter-spacing: 5px; font-size: 2em;">${resetCode}</h2>
+        <p>NOTE: Please, do not insert valid credentials like passwords. Testing purposes only! (Penta-Nodes team)</p>
+      `;
+      const plainTextMessage = `You requested a password reset. Your reset code is: ${resetCode}. It is valid for 10 minutes.`;
+
       try {
-        const { email, code, newPassword } = req.body;
+        await sendEmail(
 
-        if (!email || !code || !newPassword) {
-            return res.status(400).json({ message: "Email, reset code, and new password are required." });
-        }
-        // Hash the code received from the body to match the stored one
-        const hashedCode = crypto
-          .createHash("sha256")
-          .update(code) 
-          .digest("hex");
-
-        const user = await userModel.findOne({
-          email: email, // Find by email
-          resetPasswordToken: hashedCode, // Compare hashed code
-          resetPasswordExpires: { $gt: Date.now() }, // Check if code is still valid
-        }).select('+password'); 
-
-        if (!user) {
-          const userExists = await userModel.findOne({ email });
-          if (userExists) {
-              console.log(`Invalid or expired code attempt for email: ${email}`);
-          } else {
-              console.log(`Password reset attempt for non-existent email: ${email}`);
-          }
-          return res.status(400).json({ message: "Password reset code is invalid or has expired." });
-        }
-        // Set the new password
-        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-        user.password = hashedNewPassword;
-
-        // Clear the reset token/code fields
+          user.email,
+          "Your Password Reset Code", 
+          plainTextMessage,
+          message
+        );
+        console.log(`Password reset code sent to ${user.email}`);
+        return res.status(200).json({ message: "If an account with that email exists, a password reset code has been sent." });
+      } catch (emailError) {
+        console.error("Failed to send password reset code email:", emailError);
+        // Clear the fields if email fails
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;
-
         await user.save();
-
-        return res.status(200).json({ message: "Password has been reset successfully." });
-
-      } catch (error) {
-        console.error("Error resetting password:", error);
-        return res.status(500).json({ message: "Server error while resetting password" });
+        return res.status(500).json({ message: "Error sending password reset email. Please try again later." });
       }
-    },
+
+    } catch (error) {
+      console.error("Error requesting password reset:", error);
+      return res.status(500).json({ message: "Server error" });
+    }
+  },
+  resetPassword: async (req, res) => {
+    try {
+      const { email, code, newPassword } = req.body;
+
+      if (!email || !code || !newPassword) {
+          return res.status(400).json({ message: "Email, reset code, and new password are required." });
+      }
+      // Hash the code received from the body to match the stored one
+      const hashedCode = crypto
+        .createHash("sha256")
+        .update(code) 
+        .digest("hex");
+
+      const user = await userModel.findOne({
+        email: email, // Find by email
+        resetPasswordToken: hashedCode, // Compare hashed code
+        resetPasswordExpires: { $gt: Date.now() }, // Check if code is still valid
+      }).select('+password'); 
+
+      if (!user) {
+        const userExists = await userModel.findOne({ email });
+        if (userExists) {
+            console.log(`Invalid or expired code attempt for email: ${email}`);
+        } else {
+            console.log(`Password reset attempt for non-existent email: ${email}`);
+        }
+        return res.status(400).json({ message: "Password reset code is invalid or has expired." });
+      }
+      // Set the new password
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+      user.password = hashedNewPassword;
+
+      // Clear the reset token/code fields
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+
+      await user.save();
+
+      return res.status(200).json({ message: "Password has been reset successfully." });
+
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      return res.status(500).json({ message: "Server error while resetting password" });
+    }
+  },
   deleteUser: async (req, res) => {
     try {
       const user = await userModel.findByIdAndDelete(req.params.id);
