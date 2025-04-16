@@ -1,4 +1,6 @@
 const userModel = require("../models/user");
+const bookingModel = require("../models/booking");
+const eventModel = require("../models/event");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const secretKey = process.env.SECRET_KEY;
@@ -48,9 +50,13 @@ const userController = {
     try {
       const { email, password } = req.body;
 
+      if(!email || !password){
+        return res.status(400).json({ message: "Missing fields. Please provide Email and Password" });
+      }
+
       const user = await userModel.findOne({ email });
       if (!user) {
-        return res.status(404).json({ message: "Please insert your Email and Password!" });
+        return res.status(404).json({ message: "User not found!" });
       }
       const isMatch = await user.comparePassword(password); 
 
@@ -101,9 +107,10 @@ const userController = {
       return res.status(200).json(users);
 
     } catch (e) {
-      return res.status(500).json({ message: e.message });
+      console.error("Error fetching users:", e);
+      return res.status(500).json({ message: "Server error while fetching users" });
     }
-    },
+  },
 
   getUser: async (req, res) => {
     try {
@@ -157,7 +164,7 @@ const userController = {
        if (error.name === 'ValidationError') {
            return res.status(400).json({ message: "Validation failed", errors: error.errors });
        }
-      return res.status(500).json({ message: "Server error while updating profile. Make sure inserts are appropriate" });
+      return res.status(500).json({ message: "Server error while updating profile." });
     }
   },
   updateUserById: async (req, res) => {
@@ -231,121 +238,123 @@ const userController = {
       return res.status(500).json({ message: "Server error while updating password" });
     }
   },
-  requestPasswordReset: async (req, res) => {
-    try {
-      const { email } = req.body;
-      if (!email) {
-        return res.status(400).json({ message: "Email address is required" });
-      }
-
-      const user = await userModel.findOne({ email });
-      if (!user) {
-        console.log(`Password reset requested for non-existent email: ${email}`);
-        // Don't notify a potential attacker of a valid email (:
-        return res.status(200).json({ message: "If an account with that email exists, a password reset code has been sent." });
-      }
-
-      // Generate a 6-digit code
-      const resetCode = crypto.randomInt(100000, 999999).toString(); // Generate a 6-digit number and convert to string
-
-      // Hash the code before saving
-      const hashedCode = crypto
-
-        .createHash("sha256")
-        .update(resetCode)
-        .digest("hex");
-
-      // Set hashed code and expiry (e.g., 10 minutes)
-      user.resetPasswordToken = hashedCode;
-      user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
-
-      await user.save();
-
-      const message = `
-        <h1>Password Reset Request</h1>
-        <p>You requested a password reset for your account from AsyncAccess.</p>
-        <p>Enter the following code to reset your password. This code is valid for 10 minutes:</p>
-        <h2 style="text-align: center; letter-spacing: 5px; font-size: 2em;">${resetCode}</h2>
-        <p>NOTE: Please, do not insert valid credentials like passwords. Testing purposes only! (Penta-Nodes team)</p>
-      `;
-      const plainTextMessage = `You requested a password reset. Your reset code is: ${resetCode}. It is valid for 10 minutes.`;
-
+    requestPasswordReset: async (req, res) => {
       try {
-        await sendEmail(
+        const { email } = req.body;
+        if (!email) {
+          return res.status(400).json({ message: "Email address is required" });
+        }
 
-          user.email,
-          "Your Password Reset Code", 
-          plainTextMessage,
-          message
-        );
-        console.log(`Password reset code sent to ${user.email}`);
-        return res.status(200).json({ message: "If an account with that email exists, a password reset code has been sent." });
-      } catch (emailError) {
-        console.error("Failed to send password reset code email:", emailError);
-        // Clear the fields if email fails
+        const user = await userModel.findOne({ email });
+        if (!user) {
+          console.log(`Password reset requested for non-existent email: ${email}`);
+          // Don't notify a potential attacker of a valid email (:
+          return res.status(200).json({ message: "If an account with that email exists, a password reset code has been sent." });
+        }
+
+        // Generate a 6-digit code
+        const resetCode = crypto.randomInt(100000, 999999).toString(); // Generate a 6-digit number and convert to string
+
+        // Hash the code before saving
+        const hashedCode = crypto
+
+          .createHash("sha256")
+          .update(resetCode)
+          .digest("hex");
+
+        // Set hashed code and expiry (e.g., 10 minutes)
+        user.resetPasswordToken = hashedCode;
+        user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+        await user.save();
+
+        const message = `
+          <h1>Password Reset Request</h1>
+          <p>You requested a password reset for your account from AsyncAccess.</p>
+          <p>Enter the following code to reset your password. This code is valid for 10 minutes:</p>
+          <h2 style="text-align: center; letter-spacing: 5px; font-size: 2em;">${resetCode}</h2>
+          <p>NOTE: Please, do not insert valid credentials like passwords. Testing purposes only! (Penta-Nodes team)</p>
+        `;
+        const plainTextMessage = `You requested a password reset. Your reset code is: ${resetCode}. It is valid for 10 minutes.`;
+
+        try {
+          await sendEmail(
+
+            user.email,
+            "Your Password Reset Code", 
+            plainTextMessage,
+            message
+          );
+          console.log(`Password reset code sent to ${user.email}`);
+          return res.status(200).json({ message: "If an account with that email exists, a password reset code has been sent." });
+        } catch (emailError) {
+          console.error("Failed to send password reset code email:", emailError);
+          // Clear the fields if email fails
+          user.resetPasswordToken = undefined;
+          user.resetPasswordExpires = undefined;
+          await user.save();
+          return res.status(500).json({ message: "Error sending password reset email. Please try again later." });
+        }
+
+      } catch (error) {
+        console.error("Error requesting password reset:", error);
+        return res.status(500).json({ message: "Server error" });
+      }
+    },
+    resetPassword: async (req, res) => {
+      try {
+        const { email, code, newPassword } = req.body;
+
+        if (!email || !code || !newPassword) {
+            return res.status(400).json({ message: "Email, reset code, and new password are required." });
+        }
+        // Hash the code received from the body to match the stored one
+        const hashedCode = crypto
+          .createHash("sha256")
+          .update(code) 
+          .digest("hex");
+
+        const user = await userModel.findOne({
+          email: email, // Find by email
+          resetPasswordToken: hashedCode, // Compare hashed code
+          resetPasswordExpires: { $gt: Date.now() }, // Check if code is still valid
+        }).select('+password'); 
+
+        if (!user) {
+          const userExists = await userModel.findOne({ email });
+          if (userExists) {
+              console.log(`Invalid or expired code attempt for email: ${email}`);
+          } else {
+              console.log(`Password reset attempt for non-existent email: ${email}`);
+          }
+          return res.status(400).json({ message: "Password reset code is invalid or has expired." });
+        }
+        // Set the new password
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedNewPassword;
+
+        // Clear the reset token/code fields
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;
+
         await user.save();
-        return res.status(500).json({ message: "Error sending password reset email. Please try again later." });
+
+        return res.status(200).json({ message: "Password has been reset successfully." });
+
+      } catch (error) {
+        console.error("Error resetting password:", error);
+        return res.status(500).json({ message: "Server error while resetting password" });
       }
-
-    } catch (error) {
-      console.error("Error requesting password reset:", error);
-      return res.status(500).json({ message: "Server error" });
-    }
-  },
-  resetPassword: async (req, res) => {
-    try {
-      const { email, code, newPassword } = req.body;
-
-      if (!email || !code || !newPassword) {
-          return res.status(400).json({ message: "Email, reset code, and new password are required." });
-      }
-      // Hash the code received from the body to match the stored one
-      const hashedCode = crypto
-        .createHash("sha256")
-        .update(code) 
-        .digest("hex");
-
-      const user = await userModel.findOne({
-        email: email, // Find by email
-        resetPasswordToken: hashedCode, // Compare hashed code
-        resetPasswordExpires: { $gt: Date.now() }, // Check if code is still valid
-      }).select('+password'); 
-
-      if (!user) {
-        const userExists = await userModel.findOne({ email });
-        if (userExists) {
-            console.log(`Invalid or expired code attempt for email: ${email}`);
-        } else {
-            console.log(`Password reset attempt for non-existent email: ${email}`);
-        }
-        return res.status(400).json({ message: "Password reset code is invalid or has expired." });
-      }
-      // Set the new password
-      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-      user.password = hashedNewPassword;
-
-      // Clear the reset token/code fields
-      user.resetPasswordToken = undefined;
-      user.resetPasswordExpires = undefined;
-
-      await user.save();
-
-      return res.status(200).json({ message: "Password has been reset successfully." });
-
-    } catch (error) {
-      console.error("Error resetting password:", error);
-      return res.status(500).json({ message: "Server error while resetting password" });
-    }
-  },
+    },
   deleteUser: async (req, res) => {
     try {
       const user = await userModel.findByIdAndDelete(req.params.id);
       if (!user) {
           return res.status(404).json({ message: "User not found" });
       }
-      return res.status(200).json({ user, msg: "User deleted successfully" });
+      message = await userController.deleteUserData(user._id, user.role); // cascade
+
+      return res.status(200).json({msg: "User deleted successfully with additional data: \n" + message ,user});
     } catch (error) {
       console.error("Error deleting user:", error);
       return res.status(500).json({ message: error.message });
@@ -365,6 +374,25 @@ const userController = {
     } catch (error) {
       console.error("Error fetching current user:", error);
       res.status(500).json({ message: "Server error while fetching user profile" });
+    }
+  },
+  deleteUserData: async (userId, userRole) => {
+    try {
+
+      if(userRole === 'Organizer') {
+        const eventDeletionResult = await eventModel.deleteMany({organizer : userId});
+        console.log(`Deleted ${eventDeletionResult.deletedCount} events for organizer ID: ${userId}`);
+        const returnMessage = `Deleted ${eventDeletionResult.deletedCount} events`
+        return returnMessage;
+      }
+      if(userRole === 'User') {
+        const bookingDeletionResult = await bookingModel.deleteMany({user : userId});
+        console.log(`Deleted ${bookingDeletionResult.deletedCount} bookings for user ID: ${userId}`);
+        const returnMessage = `Deleted ${bookingDeletionResult.deletedCount} bookings`
+        return returnMessage;
+      }
+    } catch (error) {
+      console.error("Error deleting user data:", error);
     }
   },
 };
