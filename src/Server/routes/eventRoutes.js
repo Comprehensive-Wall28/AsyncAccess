@@ -9,7 +9,8 @@ const {
     createEvent,
     updateEvent,
     deleteEvent,
-    approveEvent
+    approveEvent,
+    getAllEventsAdmin
 } = require('../controllers/eventController');
 
 const ROLES = {
@@ -23,6 +24,8 @@ router.get('/', getAllEvents);
 
 //Create event
 router.post('/',authenticationMiddleware, authorizationMiddleware([ROLES.ORGANIZER]), createEvent);
+
+router.get('/review',authenticationMiddleware, authorizationMiddleware([ROLES.ADMIN]), getAllEventsAdmin)
 
 //Get one event
 router.get('/:id', getEvent);

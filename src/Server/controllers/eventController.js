@@ -67,6 +67,11 @@ const getAllEvents = async (req, res) => {
     res.status(200).json(events);
 };
 
+const getAllEventsAdmin = async (req, res) => {
+    const events = await Event.find({status: 'pending'}).sort({createdAt: -1});
+    res.status(200).json(events);
+};
+
 const getEvent = async (req, res) => {
     const {id} = req.params;
 
@@ -290,7 +295,8 @@ module.exports = {
     getEventAnalytics,
     updateEvent,
     deleteEvent,
-    approveEvent
-};
+    approveEvent,
+    getAllEventsAdmin,
+}
         
         
