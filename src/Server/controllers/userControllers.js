@@ -347,16 +347,22 @@ const userController = {
   },
   deleteUser: async (req, res) => {
     try {
-      const user = await userModel.findByIdAndDelete(req.params.id);
+      const user = await userModel.findById(req.params.id); 
       if (!user) {
           return res.status(404).json({ message: "User not found" });
       }
-      message = await userController.deleteUserData(user._id, user.role); // cascade
 
-      return res.status(200).json({msg: "User deleted successfully with additional data: \n" + message ,user});
+      const cascadeMessage = await userController.deleteUserData(user._id, user.role);
+
+      await userModel.findByIdAndDelete(req.params.id);
+
+      return res.status(200).json({
+        msg: `User deleted successfully. Cascade actions:\n${cascadeMessage}`,
+        user: { _id: user._id, email: user.email, role: user.role } 
+      });
     } catch (error) {
       console.error("Error deleting user:", error);
-      return res.status(500).json({ message: error.message });
+      return res.status(500).json({ message: error.message || "Server error during user deletion process." });
     }
   },
   getCurrentUser: async (req, res) => {
@@ -376,22 +382,80 @@ const userController = {
     }
   },
   deleteUserData: async (userId, userRole) => {
+    let messages = []; 
     try {
+      if (userRole === 'Organizer') {
+        const eventsToDelete = await eventModel.find({ organizer: userId }).select('_id');
 
-      if(userRole === 'Organizer') {
-        const eventDeletionResult = await eventModel.deleteMany({organizer : userId});
-        console.log(`Deleted ${eventDeletionResult.deletedCount} events for organizer ID: ${userId}`);
-        const returnMessage = `Deleted ${eventDeletionResult.deletedCount} events`
-        return returnMessage;
+        if (eventsToDelete.length > 0) {
+          const eventIdsToDelete = eventsToDelete.map(event => event._id);
+
+          const bookingDeletionResult = await bookingModel.deleteMany({ event: { $in: eventIdsToDelete } });
+          const bookingMsg = `Deleted ${bookingDeletionResult.deletedCount} bookings associated with the organizer's events.`;
+          console.log(bookingMsg);
+          messages.push(bookingMsg);
+
+          const eventDeletionResult = await eventModel.deleteMany({ _id: { $in: eventIdsToDelete } });
+          const eventMsg = `Deleted ${eventDeletionResult.deletedCount} events organized by the user.`;
+          console.log(eventMsg);
+          messages.push(eventMsg);
+
+        } else {
+          const noEventMsg = "No events found for this organizer to delete.";
+          console.log(noEventMsg);
+          messages.push(noEventMsg);
+        }
+
+      } else if (userRole === 'User') {
+        const confirmedBookings = await bookingModel.find({
+            user: userId,
+            bookingStatus: 'Confirmed' 
+        }).select('event numberOfTickets'); 
+
+        if (confirmedBookings.length > 0) {
+            let updatedEventCount = 0;
+            for (const booking of confirmedBookings) {
+                try {
+                    // Use $inc to decrement bookedTickets safely
+                    const updateResult = await eventModel.findByIdAndUpdate(
+                        booking.event, 
+                        { $inc: { bookedTickets: -booking.numberOfTickets } }, // Decrement by the number of tickets booked
+                        { new: true, runValidators: true } 
+                    );
+                    if (updateResult) {
+                        updatedEventCount++;
+                        console.log(`Returned ${booking.numberOfTickets} tickets to event ${booking.event}`);
+                    } else {
+                        console.warn(`Could not find event ${booking.event} to return tickets for booking ${booking._id}`);
+                    }
+                } catch (eventUpdateError) {
+                    console.error(`Error returning tickets for event ${booking.event} from booking ${booking._id}:`, eventUpdateError);
+                    messages.push(`Error updating event ${booking.event}: ${eventUpdateError.message}`);
+                }
+            }
+             if (updatedEventCount > 0) {
+                messages.push(`Returned tickets to ${updatedEventCount} events due to user deletion.`);
+             }
+        } else {
+             messages.push("No confirmed bookings found for this user to return tickets from.");
+        }
+
+        const bookingDeletionResult = await bookingModel.deleteMany({ user: userId });
+        const userBookingMsg = `Deleted ${bookingDeletionResult.deletedCount} total bookings made by the user.`;
+        console.log(userBookingMsg);
+        messages.push(userBookingMsg);
+
+      } else {
+        const otherRoleMsg = `No specific data cascade defined for role: ${userRole}.`;
+        console.log(otherRoleMsg);
+        messages.push(otherRoleMsg);
       }
-      if(userRole === 'User') {
-        const bookingDeletionResult = await bookingModel.deleteMany({user : userId});
-        console.log(`Deleted ${bookingDeletionResult.deletedCount} bookings for user ID: ${userId}`);
-        const returnMessage = `Deleted ${bookingDeletionResult.deletedCount} bookings`
-        return returnMessage;
-      }
+
+      return messages.join('\n');
+
     } catch (error) {
-      console.error("Error deleting user data:", error);
+      console.error(`Error deleting associated data for user ID ${userId} with role ${userRole}:`, error);
+      throw new Error(`Failed to delete associated data: ${error.message}`);
     }
   },
 };
