@@ -33,4 +33,6 @@ router.delete(
   bookingController.cancelBooking
 );
 
+router.delete("/delete-cancelled",authenticationMiddleware,authorizationMiddleware(ROLES.ADMIN), bookingController.deleteCancelledBookings)
+
 module.exports = router;

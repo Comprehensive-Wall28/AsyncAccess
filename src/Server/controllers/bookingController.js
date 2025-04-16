@@ -146,7 +146,16 @@ const bookingController = {
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
-  }
+  },
+  deleteCancelledBookings: async (req, res) => {
+    try {
+      const cancelledBookings = await Booking.deleteMany({ bookingStatus: 'Cancelled' });
+      return res.status(200).json({ message: `Deleted ${cancelledBookings.deletedCount} cancelled bookings` });
+    } catch (error) {
+      console.error("Error deleting cancelled bookings:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+  },
 };
 
 module.exports = bookingController;

@@ -1,14 +1,24 @@
 const Event = require('../models/event');
+const bookingModel = require("../models/booking")
 
 const mongoose = require("mongoose");
+
+const deleteBookingData = async (eventId) => {
+    try {
+        const bookingDeletionResult = await bookingModel.deleteMany({event : eventId});
+        console.log(`Deleted ${bookingDeletionResult.deletedCount} bookings for event ID: ${eventId}`);
+    } catch (error) {
+        console.error("Error deleting event data:", error);
+    }
+};
 
 const getMyEvents = async (req, res) => {
     const organizerId = req.user.userId;
 
     try {
         const events = await Event.find({ organizer: organizerId })
-                                  .select('title description date location category image ticketPrice totalTickets bookedTickets status createdAt') 
-                                  .sort({ createdAt: -1 }); //sort by creation date
+            .select('title description date location category image ticketPrice totalTickets bookedTickets status createdAt') 
+            .sort({ createdAt: -1 }); //sort by creation date
 
         return res.status(200).json(events);
     } catch (error) {
@@ -205,7 +215,6 @@ const getEventAnalytics = async (req, res) => {
                     return res.status(400).json({error: 'Invalid event ID'});
                 }
 
-                
                 const event = await Event.findById(id);
 
                 if (!event) {
@@ -215,6 +224,8 @@ const getEventAnalytics = async (req, res) => {
                 if (event.organizer.toString() !== req.user.userId) {
                     return res.status(403).json({ error: 'Forbidden: You are not authorized to delete this event.' });
                 }
+
+                await deleteBookingData(id); // Cascade delete
 
                 const deletedEvent = await Event.findByIdAndDelete(id);
 
@@ -272,13 +283,16 @@ const getEventAnalytics = async (req, res) => {
             }
         };
 
-        module.exports = {
-            createEvent,
-            getAllEvents,
-            getEvent,
-            getMyEvents,
-            getEventAnalytics,
-            updateEvent,
-            deleteEvent,
-            approveEvent
-        };
+
+module.exports = {
+    createEvent,
+    getAllEvents,
+    getEvent,
+    getMyEvents,
+    getEventAnalytics,
+    updateEvent,
+    deleteEvent,
+    approveEvent
+};
+        
+        
