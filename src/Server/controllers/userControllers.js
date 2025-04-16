@@ -21,14 +21,12 @@ const userController = {
         return res.status(400).json({ message: "Missing fields. Please provide Name, Email, Password and Role" });
 
       }
-      // Check if the user already exists
       const existingUser = await userModel.findOne({ email });
       if (existingUser) {
         return res.status(409).json({ message: "User already exists" });
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      // Create a new user
       const newUser = new userModel({
         email,
         password: hashedPassword,
@@ -37,7 +35,6 @@ const userController = {
         age,
       });
 
-      // Save the user to the database
       await newUser.save();
 
       res.status(201).json({ message: "User registered successfully" });
@@ -416,7 +413,7 @@ const userController = {
             let updatedEventCount = 0;
             for (const booking of confirmedBookings) {
                 try {
-                    // Use $inc to decrement bookedTickets safely
+                    
                     const updateResult = await eventModel.findByIdAndUpdate(
                         booking.event, 
                         { $inc: { bookedTickets: -booking.numberOfTickets } }, // Decrement by the number of tickets booked

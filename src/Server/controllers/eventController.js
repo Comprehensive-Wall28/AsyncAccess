@@ -1,6 +1,5 @@
 const Event = require('../models/event');
 const bookingModel = require("../models/booking")
-
 const mongoose = require("mongoose");
 
 const deleteBookingData = async (eventId) => {
