@@ -1,4 +1,6 @@
 const userModel = require("../models/user");
+const bookingModel = require("../models/booking");
+const eventModel = require("../models/event");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const secretKey = process.env.SECRET_KEY;
@@ -48,9 +50,13 @@ const userController = {
     try {
       const { email, password } = req.body;
 
+      if(!email || !password){
+        return res.status(400).json({ message: "Missing fields. Please provide Email and Password" });
+      }
+
       const user = await userModel.findOne({ email });
       if (!user) {
-        return res.status(404).json({ message: "Please insert your Email and Password!" });
+        return res.status(404).json({ message: "User not found!" });
       }
       const isMatch = await user.comparePassword(password); 
 
@@ -101,9 +107,10 @@ const userController = {
       return res.status(200).json(users);
 
     } catch (e) {
-      return res.status(500).json({ message: e.message });
+      console.error("Error fetching users:", e);
+      return res.status(500).json({ message: "Server error while fetching users" });
     }
-    },
+  },
 
   getUser: async (req, res) => {
     try {
@@ -157,7 +164,7 @@ const userController = {
        if (error.name === 'ValidationError') {
            return res.status(400).json({ message: "Validation failed", errors: error.errors });
        }
-      return res.status(500).json({ message: "Server error while updating profile. Make sure inserts are appropriate" });
+      return res.status(500).json({ message: "Server error while updating profile." });
     }
   },
   updateUserById: async (req, res) => {
@@ -345,7 +352,9 @@ const userController = {
       if (!user) {
           return res.status(404).json({ message: "User not found" });
       }
-      return res.status(200).json({ user, msg: "User deleted successfully" });
+      message = await userController.deleteUserData(user._id, user.role); // cascade
+
+      return res.status(200).json({msg: "User deleted successfully with additional data: \n" + message ,user});
     } catch (error) {
       console.error("Error deleting user:", error);
       return res.status(500).json({ message: error.message });
@@ -365,6 +374,25 @@ const userController = {
     } catch (error) {
       console.error("Error fetching current user:", error);
       res.status(500).json({ message: "Server error while fetching user profile" });
+    }
+  },
+  deleteUserData: async (userId, userRole) => {
+    try {
+
+      if(userRole === 'Organizer') {
+        const eventDeletionResult = await eventModel.deleteMany({organizer : userId});
+        console.log(`Deleted ${eventDeletionResult.deletedCount} events for organizer ID: ${userId}`);
+        const returnMessage = `Deleted ${eventDeletionResult.deletedCount} events`
+        return returnMessage;
+      }
+      if(userRole === 'User') {
+        const bookingDeletionResult = await bookingModel.deleteMany({user : userId});
+        console.log(`Deleted ${bookingDeletionResult.deletedCount} bookings for user ID: ${userId}`);
+        const returnMessage = `Deleted ${bookingDeletionResult.deletedCount} bookings`
+        return returnMessage;
+      }
+    } catch (error) {
+      console.error("Error deleting user data:", error);
     }
   },
 };
