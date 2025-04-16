@@ -144,7 +144,6 @@ const userController = {
       }
 
       const updatedUser = await userModel.findByIdAndUpdate(
-
         userId,
         updateData,
         {
