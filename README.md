@@ -11,7 +11,6 @@ This document provides a basic overview of the AsyncAccess backend API endpoints
     *   [Events (`/api/v1/events`)](#events-apiv1events)
     *   [Bookings (`/api/v1/bookings`)](#bookings-apiv1bookings)
 3.  [Server Setup](#server-setup)
-4.  [Error Handling](#error-handling)
 ---
 
 ## Overview
@@ -229,13 +228,3 @@ Endpoints for managing event bookings. Corresponds to `routes/bookingRoutes.js` 
 *   **Routers:** Mounts authentication (`/api/v1`), user (`/api/v1/users`), event (`/api/v1/events`), and booking (`/api/v1/bookings`) routes.
 *   **Port:** Runs on `process.env.PORT` or defaults to `5000`.
 *   **Root Route:** Includes a basic `GET /` route for health check.
-
----
-
-## Error Handling
-
-*   A generic error handler middleware is included at the end of `server.js`.
-*   It catches unhandled errors (including those passed via `next(err)` from controllers), logs the stack trace to the console, and sends a `500 Internal Server Error` response with a generic message and the error details (`err.message`).
-*   Specific endpoints include validation and return appropriate `4xx` status codes for client errors (e.g., `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found`, `409 Conflict`) as detailed in the endpoint descriptions above.
-*   Controllers often include `try...catch` blocks to handle specific errors and return relevant status codes and messages, or pass errors to the generic handler using `next(err)`.
-
