@@ -19,6 +19,8 @@ router.post(
   bookingController.createBooking
 );
 
+router.delete("/delete-cancelled",authenticationMiddleware,authorizationMiddleware(ROLES.ADMIN), bookingController.deleteCancelledBookings)
+
 router.get(
   "/:id",
   authenticationMiddleware,
@@ -32,7 +34,5 @@ router.delete(
   authorizationMiddleware(ROLES.USER),
   bookingController.cancelBooking
 );
-
-router.delete("/delete-cancelled",authenticationMiddleware,authorizationMiddleware(ROLES.ADMIN), bookingController.deleteCancelledBookings)
 
 module.exports = router;

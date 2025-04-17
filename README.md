@@ -57,7 +57,7 @@ Handles user registration, login, and password management. Corresponds to `route
     *   **Body:** `{ "oldPassword": "...", "newPassword": "..." }`
     *   **Response:** `200 OK` - Success message. `400 Bad Request` - Missing fields/Incorrect old password. `404 Not Found` - User not found. `500 Server Error`.
 
-*   **`POST /forgetPassword`**
+*   **`PUT /forgetPassword`**
     *   **Description:** (Step 1) Sends a password reset code to the user's email if the account exists.
     *   **Auth:** None required.
     *   **Controller:** `userController.requestPasswordReset`
