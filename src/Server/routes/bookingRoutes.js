@@ -1,3 +1,4 @@
+
 // bookingRoutes.js
 const express = require("express");
 const router = express.Router();
@@ -14,8 +15,11 @@ const ROLES = {
 router.post(
   "/",
   authenticationMiddleware,
+  authorizationMiddleware(ROLES.USER),
   bookingController.createBooking
 );
+
+router.delete("/delete-cancelled",authenticationMiddleware,authorizationMiddleware(ROLES.ADMIN), bookingController.deleteCancelledBookings)
 
 router.get(
   "/:id",
@@ -28,7 +32,7 @@ router.delete(
   "/:id",
   authenticationMiddleware,
   authorizationMiddleware(ROLES.USER),
-  bookingController.deleteBooking
+  bookingController.cancelBooking
 );
 
 module.exports = router;
