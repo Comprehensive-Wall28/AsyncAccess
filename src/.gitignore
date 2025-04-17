@@ -56,7 +56,7 @@ node_modules/
 .yarn-integrity
 
 # dotenv environment variables file
-#.env
+Server/.env
 #.env.test
 
 # IDEs and editors
@@ -67,6 +67,7 @@ node_modules/
 *.njsproj
 *.sln
 *.sw?
+.idea
 
 #vscode database
 .vscode-test/
