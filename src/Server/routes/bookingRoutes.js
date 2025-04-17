@@ -15,8 +15,11 @@ const ROLES = {
 router.post(
   "/",
   authenticationMiddleware,
+  authorizationMiddleware(ROLES.USER),
   bookingController.createBooking
 );
+
+router.delete("/delete-cancelled",authenticationMiddleware,authorizationMiddleware(ROLES.ADMIN), bookingController.deleteCancelledBookings)
 
 router.get(
   "/:id",

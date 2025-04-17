@@ -1,4 +1,6 @@
 const userModel = require("../models/user");
+const bookingModel = require("../models/booking");
+const eventModel = require("../models/event");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const secretKey = process.env.SECRET_KEY;
@@ -19,14 +21,12 @@ const userController = {
         return res.status(400).json({ message: "Missing fields. Please provide Name, Email, Password and Role" });
 
       }
-      // Check if the user already exists
       const existingUser = await userModel.findOne({ email });
       if (existingUser) {
         return res.status(409).json({ message: "User already exists" });
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      // Create a new user
       const newUser = new userModel({
         email,
         password: hashedPassword,
@@ -35,7 +35,6 @@ const userController = {
         age,
       });
 
-      // Save the user to the database
       await newUser.save();
 
       res.status(201).json({ message: "User registered successfully" });
@@ -48,9 +47,13 @@ const userController = {
     try {
       const { email, password } = req.body;
 
+      if(!email || !password){
+        return res.status(400).json({ message: "Missing fields. Please provide Email and Password" });
+      }
+
       const user = await userModel.findOne({ email });
       if (!user) {
-        return res.status(404).json({ message: "Please insert your Email and Password!" });
+        return res.status(404).json({ message: "User not found!" });
       }
       const isMatch = await user.comparePassword(password); 
 
@@ -71,6 +74,7 @@ const userController = {
       );
 
       const currentUser = {
+        userId: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
@@ -100,9 +104,10 @@ const userController = {
       return res.status(200).json(users);
 
     } catch (e) {
-      return res.status(500).json({ message: e.message });
+      console.error("Error fetching users:", e);
+      return res.status(500).json({ message: "Server error while fetching users" });
     }
-    },
+  },
 
   getUser: async (req, res) => {
     try {
@@ -122,7 +127,7 @@ const userController = {
     try {
       const userId = req.user.userId;
       const updateData = {};
-      const allowedFields = ['name', 'age'];
+      const allowedFields = ['name', 'age', 'profilePicture'];
 
       allowedFields.forEach(field => {
         if (req.body[field] !== undefined) {
@@ -136,7 +141,6 @@ const userController = {
       }
 
       const updatedUser = await userModel.findByIdAndUpdate(
-
         userId,
         updateData,
         {
@@ -156,7 +160,7 @@ const userController = {
        if (error.name === 'ValidationError') {
            return res.status(400).json({ message: "Validation failed", errors: error.errors });
        }
-      return res.status(500).json({ message: "Server error while updating profile" });
+      return res.status(500).json({ message: "Server error while updating profile." });
     }
   },
   updateUserById: async (req, res) => {
@@ -340,14 +344,22 @@ const userController = {
   },
   deleteUser: async (req, res) => {
     try {
-      const user = await userModel.findByIdAndDelete(req.params.id);
+      const user = await userModel.findById(req.params.id); 
       if (!user) {
           return res.status(404).json({ message: "User not found" });
       }
-      return res.status(200).json({ user, msg: "User deleted successfully" });
+
+      const cascadeMessage = await userController.deleteUserData(user._id, user.role);
+
+      await userModel.findByIdAndDelete(req.params.id);
+
+      return res.status(200).json({
+        msg: `User deleted successfully. Cascade actions:\n${cascadeMessage}`,
+        user: { _id: user._id, email: user.email, role: user.role } 
+      });
     } catch (error) {
       console.error("Error deleting user:", error);
-      return res.status(500).json({ message: error.message });
+      return res.status(500).json({ message: error.message || "Server error during user deletion process." });
     }
   },
   getCurrentUser: async (req, res) => {
@@ -364,6 +376,83 @@ const userController = {
     } catch (error) {
       console.error("Error fetching current user:", error);
       res.status(500).json({ message: "Server error while fetching user profile" });
+    }
+  },
+  deleteUserData: async (userId, userRole) => {
+    let messages = []; 
+    try {
+      if (userRole === 'Organizer') {
+        const eventsToDelete = await eventModel.find({ organizer: userId }).select('_id');
+
+        if (eventsToDelete.length > 0) {
+          const eventIdsToDelete = eventsToDelete.map(event => event._id);
+
+          const bookingDeletionResult = await bookingModel.deleteMany({ event: { $in: eventIdsToDelete } });
+          const bookingMsg = `Deleted ${bookingDeletionResult.deletedCount} bookings associated with the organizer's events.`;
+          console.log(bookingMsg);
+          messages.push(bookingMsg);
+
+          const eventDeletionResult = await eventModel.deleteMany({ _id: { $in: eventIdsToDelete } });
+          const eventMsg = `Deleted ${eventDeletionResult.deletedCount} events organized by the user.`;
+          console.log(eventMsg);
+          messages.push(eventMsg);
+
+        } else {
+          const noEventMsg = "No events found for this organizer to delete.";
+          console.log(noEventMsg);
+          messages.push(noEventMsg);
+        }
+
+      } else if (userRole === 'User') {
+        const confirmedBookings = await bookingModel.find({
+            user: userId,
+            bookingStatus: 'Confirmed' 
+        }).select('event numberOfTickets'); 
+
+        if (confirmedBookings.length > 0) {
+            let updatedEventCount = 0;
+            for (const booking of confirmedBookings) {
+                try {
+                    
+                    const updateResult = await eventModel.findByIdAndUpdate(
+                        booking.event, 
+                        { $inc: { bookedTickets: -booking.numberOfTickets } }, // Decrement by the number of tickets booked
+                        { new: true, runValidators: true } 
+                    );
+                    if (updateResult) {
+                        updatedEventCount++;
+                        console.log(`Returned ${booking.numberOfTickets} tickets to event ${booking.event}`);
+                    } else {
+                        console.warn(`Could not find event ${booking.event} to return tickets for booking ${booking._id}`);
+                    }
+                } catch (eventUpdateError) {
+                    console.error(`Error returning tickets for event ${booking.event} from booking ${booking._id}:`, eventUpdateError);
+                    messages.push(`Error updating event ${booking.event}: ${eventUpdateError.message}`);
+                }
+            }
+             if (updatedEventCount > 0) {
+                messages.push(`Returned tickets to ${updatedEventCount} events due to user deletion.`);
+             }
+        } else {
+             messages.push("No confirmed bookings found for this user to return tickets from.");
+        }
+
+        const bookingDeletionResult = await bookingModel.deleteMany({ user: userId });
+        const userBookingMsg = `Deleted ${bookingDeletionResult.deletedCount} total bookings made by the user.`;
+        console.log(userBookingMsg);
+        messages.push(userBookingMsg);
+
+      } else {
+        const otherRoleMsg = `No specific data cascade defined for role: ${userRole}.`;
+        console.log(otherRoleMsg);
+        messages.push(otherRoleMsg);
+      }
+
+      return messages.join('\n');
+
+    } catch (error) {
+      console.error(`Error deleting associated data for user ID ${userId} with role ${userRole}:`, error);
+      throw new Error(`Failed to delete associated data: ${error.message}`);
     }
   },
 };

@@ -9,7 +9,8 @@ const {
     createEvent,
     updateEvent,
     deleteEvent,
-    approveEvent
+    approveEvent,
+    getAllEventsAdmin
 } = require('../controllers/eventController');
 
 const ROLES = {
@@ -18,24 +19,24 @@ const ROLES = {
     USER: 'User'
 };
 
-router.use(authenticationMiddleware)
+//Get all events
+router.get('/', getAllEvents);
 
 //Create event
-router.post('/', authorizationMiddleware([ROLES.ORGANIZER]), createEvent);
+router.post('/',authenticationMiddleware, authorizationMiddleware([ROLES.ORGANIZER]), createEvent);
 
-//Get all events
-router.get('/',authorizationMiddleware([ROLES.ORGANIZER, ROLES.USER, ROLES.ADMIN]), getAllEvents);
+router.get('/review',authenticationMiddleware, authorizationMiddleware([ROLES.ADMIN]), getAllEventsAdmin)
 
 //Get one event
-router.get('/:id', authorizationMiddleware([ROLES.ORGANIZER, ROLES.USER, ROLES.ADMIN]), getEvent);
+router.get('/:id', getEvent);
 
 //Delete event
-router.delete('/:id', authorizationMiddleware([ROLES.ORGANIZER, ROLES.ADMIN]), deleteEvent);
+router.delete('/:id',authenticationMiddleware, authorizationMiddleware([ROLES.ORGANIZER, ROLES.ADMIN]), deleteEvent);
 
 //Update event
-router.put('/:id', authorizationMiddleware([ROLES.ORGANIZER, ROLES.ADMIN]), updateEvent);
+router.put('/:id',authenticationMiddleware, authorizationMiddleware([ROLES.ORGANIZER, ROLES.ADMIN]), updateEvent);
 
 //Approve event
-router.put('/:id/status', authorizationMiddleware([ROLES.ADMIN]), approveEvent);
+router.put('/:id/status',authenticationMiddleware, authorizationMiddleware([ROLES.ADMIN]), approveEvent);
 
 module.exports = router;
