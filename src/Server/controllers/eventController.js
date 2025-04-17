@@ -197,9 +197,6 @@ const updateEvent = async (req, res, next) => {
             allowedUpdates,
             {new: true}
         );
-
-        const toReturn = await Event.findById(id);
-
         res.status(200).json({
             status: 'success',
             data: {
