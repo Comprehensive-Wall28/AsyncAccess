@@ -34,9 +34,20 @@ const eventSchema = new mongoose.Schema({
         required: true,
         default: 0,
     },
+    bookedTickets: {
+        type: Number,
+        required: true,
+        default: 0,
+    },
+    bookedPercentage: {
+        type: Number,
+        default: 1,
+        select: false
+    },
     organizer: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
+        required: true,
     },
     createdDate: {
         type: Date,
@@ -48,6 +59,5 @@ const eventSchema = new mongoose.Schema({
         default: 'pending',
     },
 });
-
 const Event = mongoose.model('Event', eventSchema);
 module.exports = Event;

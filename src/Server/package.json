@@ -1,6 +1,6 @@
 {
-  "name": "seproject",
-  "version": "1.0.0",
+  "name": "async_access",
+  "version": "2.0.0",
   "description": "Software Engineering Project",
   "main": "server.js",
   "scripts": {
@@ -21,10 +21,10 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "express": "^4.21.2",
+    "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.14.2",
-    "mongoose": "^8.12.1",
+    "mongodb": "^6.15.0",
+    "mongoose": "^8.13.2",
     "nodemailer": "^6.10.0",
     "nodemon": "^3.1.9",
     "router": "^2.2.0"
