@@ -187,11 +187,12 @@ const updateEvent = async (req, res, next) => {
                 allowedFields: allowedFields
             });
         }
-
-        if (!['approved', 'rejected'].includes(allowedUpdates.status)) {
-            return res.status(400).json({
-                error: 'Status must be either "approved" or "rejected"'
-            });
+        if (isAdmin && allowedUpdates.status !== undefined) {
+            if (!['approved', 'rejected'].includes(allowedUpdates.status)) {
+                return res.status(400).json({
+                    error: 'Status must be either "approved" or "rejected"'
+                });
+            }
         }
 
         if (allowedUpdates.totalTickets !== undefined) {
