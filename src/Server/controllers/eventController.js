@@ -167,13 +167,7 @@ const updateEvent = async (req, res, next) => {
         if (!event) {
             return res.status(404).json({error: 'No such event'});
         }
-
         const isAdmin = req.user.role === 'Admin';
-        const isOrganizer = event.organizer.toString() === req.user.userId;
-
-        if (!isAdmin && !isOrganizer) {
-            return res.status(403).json({ error: 'Forbidden: You are not authorized to update this event.' });
-        }
 
         const allowedFields = isAdmin ? adminAllowedFields : organizerAllowedFields;
         const allowedUpdates = {};
@@ -244,10 +238,9 @@ const deleteEvent = async (req, res) => {
             return res.status(404).json({ error: 'No such event found' });
         }
 
-        const isAdmin = req.user.role === 'Admin';
-        const isOrganizer = event.organizer.toString() === req.user.userId;
+        const isTheOrganizer = event.organizer.toString() === req.user.userId;
 
-        if (!isAdmin && !isOrganizer) {
+        if (!isTheOrganizer && req.user.role !== 'Admin') {
             return res.status(403).json({
                 error: 'Forbidden: You are not authorized to delete this event.'
             });
