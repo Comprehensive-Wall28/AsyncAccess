@@ -9,7 +9,6 @@ const {
     createEvent,
     updateEvent,
     deleteEvent,
-    approveEvent,
     getAllEventsAdmin
 } = require('../controllers/eventController');
 
@@ -19,13 +18,14 @@ const ROLES = {
     USER: 'User'
 };
 
-//Get all events
+//Get all approved events
 router.get('/', getAllEvents);
 
 //Create event
 router.post('/',authenticationMiddleware, authorizationMiddleware([ROLES.ORGANIZER]), createEvent);
 
-router.get('/review',authenticationMiddleware, authorizationMiddleware([ROLES.ADMIN]), getAllEventsAdmin)
+//Get all events regardless of the status
+router.get('/all',authenticationMiddleware, authorizationMiddleware([ROLES.ADMIN]), getAllEventsAdmin)
 
 //Get one event
 router.get('/:id', getEvent);
@@ -35,8 +35,5 @@ router.delete('/:id',authenticationMiddleware, authorizationMiddleware([ROLES.OR
 
 //Update event
 router.put('/:id',authenticationMiddleware, authorizationMiddleware([ROLES.ORGANIZER, ROLES.ADMIN]), updateEvent);
-
-//Approve event
-router.put('/:id/status',authenticationMiddleware, authorizationMiddleware([ROLES.ADMIN]), approveEvent);
 
 module.exports = router;
