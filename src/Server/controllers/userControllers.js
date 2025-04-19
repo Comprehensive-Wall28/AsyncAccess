@@ -413,12 +413,11 @@ const userController = {
             let updatedEventCount = 0;
             for (const booking of confirmedBookings) {
                 try {
-                    
-                    const updateResult = await eventModel.findByIdAndUpdate(
-                        booking.event, 
-                        { $inc: { bookedTickets: -booking.numberOfTickets } }, // Decrement by the number of tickets booked
-                        { new: true, runValidators: true } 
-                    );
+                  const updateResult = await eventModel.findOneAndUpdate(
+                    { _id: booking.event, status: 'approved' }, 
+                    { $inc: { bookedTickets: -booking.numberOfTickets } }, // Action: Decrement bookedTickets
+                    { new: true, runValidators: true } 
+                  );
                     if (updateResult) {
                         updatedEventCount++;
                         console.log(`Returned ${booking.numberOfTickets} tickets to event ${booking.event}`);

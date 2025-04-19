@@ -151,11 +151,11 @@ Endpoints for managing events. Corresponds to `routes/eventRoutes.js` and `contr
     *   **Body:** `{ "title": "...", "description": "...", "date": "...", "location": "...", "category": ["..."], "ticketPrice": ..., "totalTickets": ..., "image": (optional) }`
     *   **Response:** `201 Created` - New event object (pending approval). `400 Bad Request` - Missing/Invalid fields (e.g., negative tickets/price, zero total tickets). `500 Server Error` (passed via `next(err)`).
 
-*   **`GET /review`**
-    *   **Description:** Gets a list of all *pending* events for admin review, sorted by creation date.
+*   **`GET /all`**
+    *   **Description:** Gets a list of all events regardless of the status for the Admin, sorted by creation date.
     *   **Auth:** Required (Role: Admin).
     *   **Controller:** `eventController.getAllEventsAdmin`
-    *   **Response:** `200 OK` - Array of pending event objects.
+    *   **Response:** `200 OK` - Array of event objects.
 
 *   **`GET /:id`**
     *   **Description:** Gets details of a specific event by ID.
@@ -165,11 +165,11 @@ Endpoints for managing events. Corresponds to `routes/eventRoutes.js` and `contr
     *   **Response:** `200 OK` - Event object. `404 Not Found` - Invalid ID or event not found.
 
 *   **`PUT /:id`**
-    *   **Description:** Updates an event's details. Only `totalTickets`, `date`, `location` can be updated. Only the owning Organizer can update their event (even if the requester is Admin).
+    *   **Description:** Updates an event's details. Only `totalTickets`, `date`, `location` can be updated by an Organizer while the status can only be updated by the Admin.
     *   **Auth:** Required (Role: Organizer, Admin).
     *   **Controller:** `eventController.updateEvent`
     *   **Params:** `id` - Event ID.
-    *   **Body:** `{ "totalTickets": (optional), "date": (optional), "location": (optional) }`
+    *   **Body:** `{ "totalTickets": (optional), "date": (optional), "location": (optional), "status": (optional) }`
     *   **Response:** `200 OK` - Updated event object. `400 Bad Request` - Trying to update protected fields. `403 Forbidden` - Not the owner. `404 Not Found` - Invalid ID or event not found. `500 Server Error` (passed via `next(err)`).
 
 *   **`DELETE /:id`**
@@ -178,15 +178,7 @@ Endpoints for managing events. Corresponds to `routes/eventRoutes.js` and `contr
     *   **Controller:** `eventController.deleteEvent`
     *   **Params:** `id` - Event ID.
     *   **Response:** `200 OK` - Success message, details of deleted event (`id`, `title`). `400 Bad Request` - Invalid ID. `403 Forbidden` - Not the owner (if requesting user is Organizer). `404 Not Found` - Event not found. `500 Server Error`.
-
-*   **`PUT /:id/status`**
-    *   **Description:** Approves or rejects a pending event (Admin only).
-    *   **Auth:** Required (Role: Admin).
-    *   **Controller:** `eventController.approveEvent`
-    *   **Params:** `id` - Event ID.
-    *   **Body:** `{ "status": "approved|rejected" }`
-    *   **Response:** `200 OK` - Updated event object with new status. `400 Bad Request` - Invalid status value or event already in that status. `404 Not Found` - Event not found. `500 Server Error` (passed via `next(err)`).
-
+    
 ### Bookings (`/api/v1/bookings`)
 
 Endpoints for managing event bookings. Corresponds to `routes/bookingRoutes.js` and `controllers/bookingController.js`.
