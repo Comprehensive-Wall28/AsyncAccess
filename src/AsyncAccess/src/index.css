@@ -1,0 +1,28 @@
+@layer base, utils, components;
+
+@font-face {
+  font-family: "JetBrainsMonoNFM";
+  /* Use absolute path from the root */
+  src: url("/fonts/JetBrainsMonoNerdFont-Regular.ttf") format("truetype");
+  font-stretch: normal;
+  font-style: normal;
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "JetBrainsMonoNFM";
+  /* Use absolute path from the root */
+  src: url("/fonts/JetBrainsMonoNerdFont-Bold.ttf") format("truetype");
+  font-stretch: normal;
+  font-style: normal;
+  font-weight: 700;
+}
+
+/* --- ADD THIS (or similar) --- */
+/* Apply the font somewhere to test it */
+@layer base {
+  body {
+    font-family: "JetBrainsMonoNFM", monospace; /* Use the defined font */
+  }
+}
+/* ----------------------------- */
