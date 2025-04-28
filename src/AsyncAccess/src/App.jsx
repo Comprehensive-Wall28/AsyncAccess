@@ -1,47 +1,52 @@
+// src/App.jsx
 import React from 'react';
-// Removed ThemeProvider and createTheme imports from here
-import CssBaseline from '@mui/material/CssBaseline'; // Keep CssBaseline if you want its resets applied globally via index.js
 import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
+import Container from '@mui/material/Container';
 
-// Your main application component
-// It no longer creates or provides the theme itself
+// Import the layout component
+import MainLayout from './components/MainLayout';
+
 function App() {
+  // Profile menu logic is now in MainLayout
+
   return (
-    // ThemeProvider is removed from here. It should wrap <App /> in your index.js
-    <>
-      {/* CssBaseline should also ideally be applied once in index.js */}
-      {/* <CssBaseline /> */}
-      <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static">
-          <Toolbar>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Dark Theme App
-            </Typography>
-            <Button color="inherit">Login</Button>
-          </Toolbar>
-        </AppBar>
-        <Box sx={{ p: 3 }}> {/* Add some padding */}
+    // Use MainLayout to wrap the page content
+    <MainLayout>
+      {/* --- Page Specific Content --- */}
+      {/* This Paper provides the rounded border for the main content area */}
+      <Paper
+        elevation={3} // Or adjust as needed
+        sx={{
+          p: 3, // Padding inside the paper
+          borderRadius: theme => theme.shape.borderRadius * 1, // Keep rounded corners
+          // No need for maxWidth here if you want it to fill the main area
+          // Or set a maxWidth like 'lg' or 'xl' if you want the paper centered within the main area
+           //maxWidth: 'lg',
+           margin: 'auto', // Center if maxWidth is set
+        }}
+      >
+        {/* Container can still be used inside Paper for content max-width if desired */}
+        <Container maxWidth="sm"> {/* Or remove if Paper handles width */}
           <Typography variant="h4" gutterBottom>
-            Welcome to the Dark Side!
+            Welcome to AsyncAccess
           </Typography>
-          <Typography paragraph>
-            This application content will now receive the theme (like dark mode)
-            from the ThemeProvider wrapping it in your main entry file (e.g., index.js).
+          <Typography component="p" sx={{ mb: 2 }}>
+            This content is inside the main layout, to the right of the drawer.
+            The surrounding Paper provides the rounded border.
           </Typography>
           <Button variant="contained" color="primary" sx={{ mr: 1 }}>
-            Primary Button
+            Get Started
           </Button>
           <Button variant="contained" color="secondary">
-            Secondary Button
+            Learn More
           </Button>
-        </Box>
-      </Box>
-    </>
-    // ThemeProvider closing tag removed
+        </Container>
+      </Paper>
+      {/* --- End Page Specific Content --- */}
+    </MainLayout>
   );
 }
 
