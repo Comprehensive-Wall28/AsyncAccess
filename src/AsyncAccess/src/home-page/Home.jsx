@@ -7,7 +7,7 @@ import Hero from './components/Hero';
 import LogoCollection from './components/LogoCollection';
 import Highlights from './components/Highlights';
 import Pricing from './components/Pricing';
-import Features from './components/Events';
+import Events from './components/Events';
 import Testimonials from './components/Testimonials';
 import FAQ from './components/FAQ';
 import Footer from './components/Footer';
@@ -20,11 +20,11 @@ export default function Home(props) {
       <Hero />
       <div>
         <LogoCollection />
-        <Features />
-        <Divider />
+        {/* <Events /> */}
+        {/* <Divider /> */}
         {/* <Testimonials /> */}
-        <Divider />
-        <Highlights />
+        {/* <Divider /> */}
+        {/* <Highlights /> */}
         <Divider />
         {/* <Pricing /> */}
         <Divider />
