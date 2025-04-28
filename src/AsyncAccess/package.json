@@ -10,9 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@webtui/css": "^0.0.3",
-    "@webtui/plugin-nf": "^0.0.1",
-    "@webtui/theme-catppuccin": "^0.0.2",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@fontsource/roboto": "^5.2.5",
+    "@mui/icons-material": "^7.0.2",
+    "@mui/material": "^7.0.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
