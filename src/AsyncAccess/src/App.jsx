@@ -1,52 +1,49 @@
-// src/App.jsx
 import React from 'react';
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import Container from '@mui/material/Container';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-// Import the layout component
+// Import your layout and page components
 import MainLayout from './components/MainLayout';
+import HomePageContent from './pages/HomePageContent'; // Keep this if you might use it elsewhere
+import Home from './home-page/Home'; // Import the Home component
 
 function App() {
-  // Profile menu logic is now in MainLayout
-
   return (
-    // Use MainLayout to wrap the page content
-    <MainLayout>
-      {/* --- Page Specific Content --- */}
-      {/* This Paper provides the rounded border for the main content area */}
-      <Paper
-        elevation={3} // Or adjust as needed
-        sx={{
-          p: 3, // Padding inside the paper
-          borderRadius: theme => theme.shape.borderRadius * 1, // Keep rounded corners
-          // No need for maxWidth here if you want it to fill the main area
-          // Or set a maxWidth like 'lg' or 'xl' if you want the paper centered within the main area
-           //maxWidth: 'lg',
-           margin: 'auto', // Center if maxWidth is set
-        }}
-      >
-        {/* Container can still be used inside Paper for content max-width if desired */}
-        <Container maxWidth="sm"> {/* Or remove if Paper handles width */}
-          <Typography variant="h4" gutterBottom>
-            Welcome to AsyncAccess
-          </Typography>
-          <Typography component="p" sx={{ mb: 2 }}>
-            This content is inside the main layout, to the right of the drawer.
-            The surrounding Paper provides the rounded border.
-          </Typography>
-          <Button variant="contained" color="primary" sx={{ mr: 1 }}>
-            Get Started
-          </Button>
-          <Button variant="contained" color="secondary">
-            Learn More
-          </Button>
-        </Container>
-      </Paper>
-      {/* --- End Page Specific Content --- */}
-    </MainLayout>
+    // Router should wrap the entire application content
+    <Router>
+      {/* Routes defines the different paths */}
+      <Routes>
+        {/* --- Updated Route for the root path --- */}
+        {/* This route now renders the Home component directly */}
+        <Route
+          path="/" // Define the path for the home page
+          element={<Home />} // Render the Home component
+        />
+        {/* --- End Updated Route --- */}
+
+
+        {/* Route for the Marketing Page (Optional: Keep as an alias or remove) */}
+        {/* This path also renders the Home component */}
+        <Route
+          path="/marketing" // Define the path for the marketing page
+          element={<Home />} // Render the Home component
+        />
+
+        {/* Add routes for other pages that *should* use MainLayout */}
+        {/* Example: A dashboard page using the original layout */}
+        <Route
+          path="/dashboard"
+          element={
+            <MainLayout>
+              {/* Replace HomePageContent with your actual dashboard component later */}
+              <HomePageContent />
+            </MainLayout>
+          }
+        />
+
+        {/* Add more routes for other pages here */}
+
+      </Routes>
+    </Router>
   );
 }
 
