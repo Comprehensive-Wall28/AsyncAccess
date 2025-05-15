@@ -6,17 +6,20 @@ import CssBaseline from '@mui/material/CssBaseline';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Divider from '@mui/material/Divider';
 import FormLabel from '@mui/material/FormLabel';
-import FormControl from '@mui/material/FormControl';
 import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
+import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
+import FormControl from '@mui/material/FormControl';
 import ForgotPassword from './components/ForgotPassword';
 import AppTheme from '../shared-theme/AppTheme';
 import ColorModeSelect from '../shared-theme/ColorModeSelect';
-import { GoogleIcon, FacebookIcon, SitemarkIcon } from './components/CustomIcons';
+import { SitemarkIcon } from './components/CustomIcons';
+import { useLocation } from 'react-router-dom'; // Import useLocation
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -61,57 +64,85 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
 }));
 
 export default function SignIn(props) {
-  const [emailError, setEmailError] = React.useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
-  const [passwordError, setPasswordError] = React.useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
-  const [open, setOpen] = React.useState(false);
+  const location = useLocation(); // Get location object
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [emailError, setEmailError] = React.useState('');
+  const [emailErrorMessage, setEmailErrorMessage] = React.useState(''); // Added for consistency
+  const [passwordError, setPasswordError] = React.useState('');
+  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState(''); // Added for consistency
+  const [loginError, setLoginError] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  const [showForgotPassword, setShowForgotPassword] = React.useState(false);
+
+  React.useEffect(() => {
+    // Check if email was passed in location state and set it
+    if (location.state?.email) {
+      setEmail(location.state.email);
+    }
+  }, [location.state]); // Re-run if location.state changes
 
   const handleClickOpen = () => {
-    setOpen(true);
+    setShowForgotPassword(true);
   };
 
   const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleSubmit = (event) => {
-    if (emailError || passwordError) {
-      event.preventDefault();
-      return;
-    }
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    setShowForgotPassword(false);
   };
 
   const validateInputs = () => {
-    const email = document.getElementById('email');
-    const password = document.getElementById('password');
-
     let isValid = true;
-
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
-      setEmailError(true);
+    // Email validation
+    if (!email.trim()) {
+      setEmailError('Email is required.');
+      setEmailErrorMessage('Email is required.'); // Keep consistent
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      setEmailError('Please enter a valid email address.'); // Set error message directly
       setEmailErrorMessage('Please enter a valid email address.');
       isValid = false;
     } else {
-      setEmailError(false);
+      setEmailError('');
       setEmailErrorMessage('');
     }
-
-    if (!password.value || password.value.length < 6) {
-      setPasswordError(true);
+    // Password validation
+    if (!password) {
+      setPasswordError('Password is required.');
+      setPasswordErrorMessage('Password is required.'); // Keep consistent
+      isValid = false;
+    } else if (password.length < 6) {
+      setPasswordError('Password must be at least 6 characters long.'); // Set error message directly
       setPasswordErrorMessage('Password must be at least 6 characters long.');
       isValid = false;
     } else {
-      setPasswordError(false);
+      setPasswordError('');
       setPasswordErrorMessage('');
     }
-
     return isValid;
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    // Clear previous errors
+    setLoginError('');
+
+    if (!validateInputs()) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Replace authService.login with your actual authentication logic
+      const userData = await authService.login(email, password);
+      console.log('Login successful:', userData);
+      // TODO: Handle successful login (e.g., redirect, update global state)
+      // For example, if using React Router: history.push('/dashboard');
+      // Or update context: authContext.login(userData.currentUser);
+    } catch (error) {
+      setLoginError(error.message || 'Login failed. Please check your credentials or try again later.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -142,7 +173,7 @@ export default function SignIn(props) {
             <FormControl>
               <FormLabel htmlFor="email">Email</FormLabel>
               <TextField
-                error={emailError}
+                error={!!emailError}
                 helperText={emailErrorMessage}
                 id="email"
                 type="email"
@@ -153,38 +184,41 @@ export default function SignIn(props) {
                 required
                 fullWidth
                 variant="outlined"
-                color={emailError ? 'error' : 'primary'}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onBlur={validateInputs}
               />
             </FormControl>
             <FormControl>
               <FormLabel htmlFor="password">Password</FormLabel>
               <TextField
-                error={passwordError}
+                error={!!passwordError}
                 helperText={passwordErrorMessage}
                 name="password"
                 placeholder="••••••"
                 type="password"
                 id="password"
                 autoComplete="current-password"
-                autoFocus
                 required
                 fullWidth
                 variant="outlined"
-                color={passwordError ? 'error' : 'primary'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onBlur={validateInputs}
               />
             </FormControl>
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
               label="Remember me"
             />
-            <ForgotPassword open={open} handleClose={handleClose} />
+            <ForgotPassword open={showForgotPassword} handleClose={handleClose} />
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              onClick={validateInputs}
+              disabled={loading}
             >
-              Sign in
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign in'}
             </Button>
             <Link
               component="button"
@@ -196,35 +230,7 @@ export default function SignIn(props) {
               Forgot your password?
             </Link>
           </Box>
-          <Divider>or</Divider>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={() => alert('Sign in with Google')}
-              startIcon={<GoogleIcon />}
-            >
-              Sign in with Google
-            </Button>
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={() => alert('Sign in with Facebook')}
-              startIcon={<FacebookIcon />}
-            >
-              Sign in with Facebook
-            </Button>
-            <Typography sx={{ textAlign: 'center' }}>
-              Don&apos;t have an account?{' '}
-              <Link
-                href="/material-ui/getting-started/templates/sign-in/"
-                variant="body2"
-                sx={{ alignSelf: 'center' }}
-              >
-                Sign up
-              </Link>
-            </Typography>
-          </Box>
+          {loginError && <Alert severity="error" sx={{ mt: 2 }}>{loginError}</Alert>}
         </Card>
       </SignInContainer>
     </AppTheme>
