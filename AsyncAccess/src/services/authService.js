@@ -26,6 +26,15 @@ export const requestPasswordReset = async (email) => {
   }
 };
 
+export const signup = async (name, email, password, role ) => {
+  try{
+    const response = await apiClient.post('/register', { name, email, password, role });
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : new Error('Signup failed due to a network or server error.');
+  }
+}
+
 // You can add other auth-related API calls here, e.g., register, logout, resetPassword
 
 export default {

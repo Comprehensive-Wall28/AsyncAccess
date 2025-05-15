@@ -41,9 +41,9 @@ export default function Hero() {
   const navigate = useNavigate(); // Get the navigate function from React Router
 
   const handleStartNowClick = () => {
-    // Navigate to the login page and pass the email state
-    // The login page component can access this via useLocation().state.email
-    navigate('/login', { state: { email: email } });
+    // Navigate to the signup page and pass the email state
+    // The signup page component can access this via useLocation().state.email
+    navigate('/signup', { state: { email: email } });
   };
 
   return (

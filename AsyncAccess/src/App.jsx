@@ -5,36 +5,28 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import MainLayout from './components/MainLayout';
 import Home from './home-page/Home'; // Import the Home component
 import SignIn from './sign-in/SignIn';
+import SignUp from './sign-up/SignUp';
 
 function App() {
   return (
-    // Router should wrap the entire application content
     <Router>
-      {/* Routes defines the different paths */}
       <Routes>
-        {/* --- Updated Route for the root path --- */}
-        {/* This route now renders the Home component directly */}
         <Route
-          path="/" // Define the path for the home page
-          element={<Home />} // Render the Home component
+          path="/"
+          element={<Home />} 
         />
-        {/* --- End Updated Route --- */}
-
         <Route
-          path="/login" // Define the path for the home page
-          element={<SignIn />} // Render the Home component
+          path="/login" 
+          element={<SignIn />} 
         />
-
-
-        {/* Route for the Marketing Page (Optional: Keep as an alias or remove) */}
-        {/* This path also renders the Home component */}
         <Route
-          path="/marketing" // Define the path for the marketing page
-          element={<Home />} // Render the Home component
+          path="/signup"
+          element={<SignUp />}
         />
-
-        {/* Add routes for other pages that *should* use MainLayout */}
-        {/* Example: A dashboard page using the original layout */}
+        <Route
+          path="/marketing"
+          element={<Home />} 
+        />
         <Route
           path="/dashboard"
           element={

@@ -18,7 +18,7 @@ import FormControl from '@mui/material/FormControl';
 import ForgotPassword from './components/ForgotPassword';
 import AppTheme from '../shared-theme/AppTheme';
 import ColorModeSelect from '../shared-theme/ColorModeSelect';
-import { SitemarkIcon } from './components/CustomIcons';
+import AsyncAccessIcon  from '../home-page/components/AsyncAccessIcon.jsx';
 import { useLocation } from 'react-router-dom'; // Import useLocation
 
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -151,13 +151,13 @@ export default function SignIn(props) {
       <SignInContainer direction="column" justifyContent="space-between">
         <ColorModeSelect sx={{ position: 'fixed', top: '1rem', right: '1rem' }} />
         <Card variant="outlined">
-          <SitemarkIcon />
+          <AsyncAccessIcon />
           <Typography
             component="h1"
             variant="h4"
             sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
           >
-            Sign in
+            Welcome Back!
           </Typography>
           <Box
             component="form"
@@ -186,7 +186,6 @@ export default function SignIn(props) {
                 variant="outlined"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                onBlur={validateInputs}
               />
             </FormControl>
             <FormControl>
@@ -204,7 +203,6 @@ export default function SignIn(props) {
                 variant="outlined"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                onBlur={validateInputs}
               />
             </FormControl>
             <FormControlLabel
