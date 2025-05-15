@@ -61,13 +61,13 @@ const getEventAnalytics = async (req, res) => {
     }
 };
 
-const getAllEvents = async (req, res) => {
-    const events = await Event.find({status: 'approved'}).sort({createdAt: -1});
+const getAllEventsAdmin = async (req, res) => {
+    const events = await Event.find().sort({createdAt: -1});
     res.status(200).json(events);
 };
 
-const getAllEventsAdmin = async (req, res) => {
-    const events = await Event.find({status: 'pending'}).sort({createdAt: -1});
+const getAllEvents = async (req, res) => {
+    const events = await Event.find({status: 'approved'}).sort({createdAt: -1});
     res.status(200).json(events);
 };
 
@@ -153,7 +153,8 @@ const createEvent = async (req, res, next) => {
 };
 
 const updateEvent = async (req, res, next) => {
-    const notAllowed = ['_id', 'status', 'organizer', 'createdDate', 'category', 'ticketPrice', 'description', 'title'];
+    const organizerAllowedFields = ['location', 'totalTickets', 'date'];
+    const adminAllowedFields = ['status'];
 
     try {
         const {id} = req.params;
@@ -166,30 +167,45 @@ const updateEvent = async (req, res, next) => {
         if (!event) {
             return res.status(404).json({error: 'No such event'});
         }
+        const isAdmin = req.user.role === 'Admin';
 
-        if (event.organizer.toString() !== req.user.userId) {
-            return res.status(403).json({ error: 'Forbidden: You are not authorized to update this event.' });
-        }
-
-        const protectedFields = Object.keys(req.body).filter(field =>
-            notAllowed.includes(field)
-        );
-
+        const allowedFields = isAdmin ? adminAllowedFields : organizerAllowedFields;
         const allowedUpdates = {};
-        if (req.body.totalTickets !== undefined) {
-            allowedUpdates.totalTickets = req.body.totalTickets;
-        }
-        if (req.body.date !== undefined) {
-            allowedUpdates.date = req.body.date;
-        }
-        if (req.body.location !== undefined) {
-            allowedUpdates.location = req.body.location;
+        const invalidFields = [];
+
+        for (const field in req.body) {
+            if (allowedFields.includes(field)) {
+                allowedUpdates[field] = req.body[field];
+            } else {
+                invalidFields.push(field);
+            }
         }
 
-        if (protectedFields.length > 0) {
+        if (invalidFields.length > 0) {
             return res.status(400).json({
-                error: `You cannot modify protected fields: ${protectedFields.join(', ')}`,
+                error: `You are not allowed to update the following fields: ${invalidFields.join(', ')}`,
+                allowedFields: allowedFields
             });
+        }
+        if (isAdmin && allowedUpdates.status !== undefined) {
+            if (!['approved', 'rejected'].includes(allowedUpdates.status)) {
+                return res.status(400).json({
+                    error: 'Status must be either "approved" or "rejected"'
+                });
+            }
+        }
+
+        if (allowedUpdates.totalTickets !== undefined) {
+            if (allowedUpdates.totalTickets < event.bookedTickets) {
+                return res.status(400).json({
+                    error: `Total tickets cannot be less than already booked tickets (${event.bookedTickets})`,
+                });
+            }
+            if (allowedUpdates.totalTickets < 0) {
+                return res.status(400).json({
+                    error: 'Total tickets must be a positive number',
+                });
+            }
         }
 
         const updatedEvent = await Event.findOneAndUpdate(
@@ -197,6 +213,7 @@ const updateEvent = async (req, res, next) => {
             allowedUpdates,
             {new: true}
         );
+
         res.status(200).json({
             status: 'success',
             data: {
@@ -222,8 +239,12 @@ const deleteEvent = async (req, res) => {
             return res.status(404).json({ error: 'No such event found' });
         }
 
-        if (event.organizer.toString() !== req.user.userId) {
-            return res.status(403).json({ error: 'Forbidden: You are not authorized to delete this event.' });
+        const isTheOrganizer = event.organizer.toString() === req.user.userId;
+
+        if (!isTheOrganizer && req.user.role !== 'Admin') {
+            return res.status(403).json({
+                error: 'Forbidden: You are not authorized to delete this event.'
+            });
         }
 
         await deleteBookingData(id); // Cascade delete
@@ -244,45 +265,6 @@ const deleteEvent = async (req, res) => {
     }
 };
 
-const approveEvent = async (req, res, next) => {
-    try {
-        const {id} = req.params;
-        const {status} = req.body;
-
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(404).json({error: 'No such event'});
-        }
-
-        const event = await Event.findById(id);
-        if (!event) {
-            return res.status(404).json({error: 'Event not found'});
-        }
-
-        if (!['approved', 'rejected'].includes(status)) {
-            return res.status(400).json({
-                message: 'Status must be either "approved" or "rejected"'
-            });
-        }
-
-        if (event.status === status) {
-            return res.status(400).json({
-                message: `Event is already ${status}`
-            });
-        }
-
-        event.status = status;
-        await event.save();
-
-        res.status(200).json({
-            status: 'success',
-            data: {
-                event
-            }
-        });
-    } catch (err) {
-        next(err);
-    }
-};
 module.exports = {
     createEvent,
     getAllEvents,
@@ -291,7 +273,6 @@ module.exports = {
     getEventAnalytics,
     updateEvent,
     deleteEvent,
-    approveEvent,
     getAllEventsAdmin,
 }
         
