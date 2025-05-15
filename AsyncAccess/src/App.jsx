@@ -6,6 +6,8 @@ import MainLayout from './components/MainLayout';
 import Home from './home-page/Home'; // Import the Home component
 import SignIn from './sign-in/SignIn';
 import SignUp from './sign-up/SignUp';
+import Dashboard from './dashboard/Dashboard';
+
 
 function App() {
   return (
@@ -19,6 +21,10 @@ function App() {
           path="/login" 
           element={<SignIn />} 
         />
+           <Route
+          path="/dashboard" 
+          element={<Dashboard />} 
+        />
         <Route
           path="/signup"
           element={<SignUp />}
@@ -27,6 +33,7 @@ function App() {
           path="/marketing"
           element={<Home />} 
         />
+    
         <Route
           path="/dashboard"
           element={

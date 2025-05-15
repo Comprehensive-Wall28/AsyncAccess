@@ -20,6 +20,8 @@ import AppTheme from '../shared-theme/AppTheme';
 import ColorModeSelect from '../shared-theme/ColorModeSelect';
 import AsyncAccessIcon  from '../home-page/components/AsyncAccessIcon.jsx';
 import { useLocation } from 'react-router-dom'; // Import useLocation
+import { AsyncIcon } from '../sign-up/components/CustomIcons.jsx';
+import { Link as route } from 'react-router-dom';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -157,7 +159,7 @@ export default function SignIn(props) {
             variant="h4"
             sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
           >
-            Welcome Back!
+            Sign In
           </Typography>
           <Box
             component="form"
@@ -218,6 +220,18 @@ export default function SignIn(props) {
             >
               {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign in'}
             </Button>
+            <Divider>
+            <Typography sx={{ color: 'text.secondary' }}>or</Typography>
+          </Divider>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Button
+              fullWidth
+              variant="outlined"
+              startIcon={<AsyncIcon />}
+              component={route} to="/signup"
+            >
+              Not registered? Get started now!
+            </Button>
             <Link
               component="button"
               type="button"
@@ -229,6 +243,7 @@ export default function SignIn(props) {
             </Link>
           </Box>
           {loginError && <Alert severity="error" sx={{ mt: 2 }}>{loginError}</Alert>}
+          </Box> {/* This closes the <Box component="form"> */}
         </Card>
       </SignInContainer>
     </AppTheme>
