@@ -1,54 +1,40 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-// Import your layout and page components
 import MainLayout from './components/MainLayout';
-import Home from './home-page/Home'; // Import the Home component
+import Home from './home-page/Home';
+import OrganizerDashboard from "./organizer-page/OrganizerDashboard.jsx";
 import SignIn from './sign-in/SignIn';
 
 function App() {
-  return (
-    // Router should wrap the entire application content
-    <Router>
-      {/* Routes defines the different paths */}
-      <Routes>
-        {/* --- Updated Route for the root path --- */}
-        {/* This route now renders the Home component directly */}
-        <Route
-          path="/" // Define the path for the home page
-          element={<Home />} // Render the Home component
-        />
-        {/* --- End Updated Route --- */}
+    return (
+        <Router>
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<SignIn />} />
+                <Route path="/marketing" element={<Home />} />
 
-        <Route
-          path="/login" // Define the path for the home page
-          element={<SignIn />} // Render the Home component
-        />
+                <Route
+                    path="/dashboard"
+                    element={
+                        <MainLayout>
+                            {/* You can replace this with a general dashboard page */}
+                        </MainLayout>
+                    }
+                />
 
-
-        {/* Route for the Marketing Page (Optional: Keep as an alias or remove) */}
-        {/* This path also renders the Home component */}
-        <Route
-          path="/marketing" // Define the path for the marketing page
-          element={<Home />} // Render the Home component
-        />
-
-        {/* Add routes for other pages that *should* use MainLayout */}
-        {/* Example: A dashboard page using the original layout */}
-        <Route
-          path="/dashboard"
-          element={
-            <MainLayout>
-              {/* Replace HomePageContent with your actual dashboard component later */}
-            </MainLayout>
-          }
-        />
-
-        {/* Add more routes for other pages here */}
-
-      </Routes>
-    </Router>
-  );
+                <Route
+                    path="/organizer/dashboard"
+                    element={
+                        <MainLayout>
+                            <div style={{ color: 'red' }}>Test: Organizer Dashboard Route</div>
+                            <OrganizerDashboard />
+                        </MainLayout>
+                    }
+                />
+            </Routes>
+        </Router>
+    );
 }
 
 export default App;
