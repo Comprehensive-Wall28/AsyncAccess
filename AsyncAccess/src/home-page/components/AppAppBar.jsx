@@ -13,6 +13,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
 import Sitemark from './AsyncAccessIcon';
+import { Link } from 'react-router-dom'; // Import Link
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   display: 'flex',
@@ -79,11 +80,11 @@ export default function AppAppBar() {
               gap: 1,
               alignItems: 'center',
             }}
-          >
-            <Button color="primary" variant="text" size="small">
+          > {/* Use Link component for navigation */}
+            <Button color="primary" variant="text" size="small" component={Link} to="/login">
               Sign in
             </Button>
-            <Button color="primary" variant="contained" size="small">
+            <Button color="primary" variant="contained" size="small" component={Link} to="/signup"> {/* Assuming /signup for this button */}
               Sign up
             </Button>
             <ColorModeIconDropdown />
@@ -121,14 +122,14 @@ export default function AppAppBar() {
                 {/* <MenuItem>Pricing</MenuItem>
                 <MenuItem>FAQ</MenuItem>
                 <MenuItem>Blog</MenuItem> */}
-                <Divider sx={{ my: 3 }} />
+                <Divider sx={{ my: 2 }} /> {/* Adjusted margin slightly */}
                 <MenuItem>
-                  <Button color="primary" variant="contained" fullWidth>
+                  <Button color="primary" variant="contained" fullWidth component={Link} to="/signup">
                     Sign up
                   </Button>
                 </MenuItem>
                 <MenuItem>
-                  <Button color="primary" variant="outlined" fullWidth>
+                  <Button color="primary" variant="outlined" fullWidth component={Link} to="/login">
                     Sign in
                   </Button>
                 </MenuItem>

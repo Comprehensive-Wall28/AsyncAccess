@@ -2,7 +2,7 @@ import * as React from 'react';
 import SvgIcon from '@mui/material/SvgIcon';
 
 export function SitemarkIcon() {
- const logoText = "AsyncAccess";
+const logoText = "AsyncAccess";
 
   // Split the text
   const asyncPart = "Async";
@@ -118,6 +118,7 @@ export function FacebookIcon() {
 }
 
 export function GoogleIcon() {
+
   return (
     <SvgIcon>
       <svg
@@ -142,6 +143,34 @@ export function GoogleIcon() {
         <path
           d="M8 3.18545C9.17818 3.18545 10.2255 3.59273 11.0618 4.37818L13.3527 2.08727C11.9636 0.792727 10.16 0 8 0C4.87273 0 2.17455 1.79636 0.858182 4.41455L3.52 6.48C4.15273 4.58909 5.92 3.18545 8 3.18545Z"
           fill="#EA4335"
+        />
+      </svg>
+    </SvgIcon>
+  );
+}
+
+export function AsyncIcon() {
+  return (
+    <SvgIcon>
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 19 19"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+     
+        <path
+          fill="#B4C0D3"
+          d="m.787 12.567 6.055-2.675 3.485 2.006.704 6.583-4.295-.035.634-4.577-.74-.422-3.625 2.817-2.218-3.697Z"
+        />
+        <path
+          fill="#00D3AB"
+          d="m10.714 11.616 5.352 3.908 2.112-3.767-4.295-1.725v-.845l4.295-1.76-2.112-3.732-5.352 3.908v4.013Z"
+        />
+        <path
+          fill="#4876EF"
+          d="m10.327 7.286.704-6.583-4.295.07.634 4.577-.74.422-3.66-2.816L.786 6.617l6.055 2.676 3.485-2.007Z"
         />
       </svg>
     </SvgIcon>

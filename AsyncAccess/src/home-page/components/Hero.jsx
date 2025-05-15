@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
+import Button from '@mui/material/Button'; // Keep Button from MUI
 import Container from '@mui/material/Container';
 import InputLabel from '@mui/material/InputLabel';
 import Link from '@mui/material/Link';
@@ -9,6 +9,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import visuallyHidden from '@mui/utils/visuallyHidden';
 import { styled } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const StyledBox = styled('div')(({ theme }) => ({
   alignSelf: 'center',
@@ -36,6 +37,15 @@ const StyledBox = styled('div')(({ theme }) => ({
 }));
 
 export default function Hero() {
+  const [email, setEmail] = React.useState(''); // State to hold the email input value
+  const navigate = useNavigate(); // Get the navigate function from React Router
+
+  const handleStartNowClick = () => {
+    // Navigate to the signup page and pass the email state
+    // The signup page component can access this via useLocation().state.email
+    navigate('/signup', { state: { email: email } });
+  };
+
   return (
     <Box
       id="hero"
@@ -109,6 +119,8 @@ export default function Hero() {
             <TextField
               id="email-hero"
               hiddenLabel
+              value={email} // Bind the TextField value to the state
+              onChange={(e) => setEmail(e.target.value)} // Update state on change
               size="small"
               variant="outlined"
               aria-label="Enter your email address"
@@ -125,6 +137,7 @@ export default function Hero() {
               variant="contained"
               color="primary"
               size="small"
+              onClick={handleStartNowClick} // Add the click handler
               sx={{ minWidth: 'fit-content' }}
             >
               Start now
