@@ -1,9 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-// Import your layout and page components
 import MainLayout from './components/MainLayout';
-import Home from './home-page/Home'; // Import the Home component
+import Home from './home-page/Home';
+import OrganizerDashboard from "./organizer-page/OrganizerDashboard.jsx";
 import SignIn from './sign-in/SignIn';
 import SignUp from './sign-up/SignUp';
 import Dashboard from './dashboard/Dashboard';
