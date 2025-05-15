@@ -3,8 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 // Import your layout and page components
 import MainLayout from './components/MainLayout';
-import HomePageContent from './pages/HomePageContent'; // Keep this if you might use it elsewhere
 import Home from './home-page/Home'; // Import the Home component
+import SignIn from './sign-in/SignIn';
 
 function App() {
   return (
@@ -19,6 +19,11 @@ function App() {
           element={<Home />} // Render the Home component
         />
         {/* --- End Updated Route --- */}
+
+        <Route
+          path="/login" // Define the path for the home page
+          element={<SignIn />} // Render the Home component
+        />
 
 
         {/* Route for the Marketing Page (Optional: Keep as an alias or remove) */}
@@ -35,7 +40,6 @@ function App() {
           element={
             <MainLayout>
               {/* Replace HomePageContent with your actual dashboard component later */}
-              <HomePageContent />
             </MainLayout>
           }
         />
