@@ -109,6 +109,10 @@ docs/build/
 # Optional: React DevTools global hook
 .react-devtools-global-hook
 
+# json
+.json
+
+
 # Optional: Generated service worker (often in public dir, depends on setup)
 # /public/service-worker.js
 # /public/precache-manifest.*.js
