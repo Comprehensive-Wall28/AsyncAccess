@@ -16,6 +16,15 @@ export const login = async (email, password) => {
   }
 };
 
+export const logout = async () => {
+  try {
+    const response = await apiClientInstance.post('/users/logout'); // Use POST for logout
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : new Error('Logout failed due to a network or server error.');
+  }
+};
+
 export const requestPasswordReset = async (email) => {
   try {
     const response = await apiClientInstance.put('/forgetPassword', { email });
@@ -33,6 +42,7 @@ export const signup = async (name, email, password, role ) => {
     throw error.response ? error.response.data : new Error('Signup failed due to a network or server error.');
   }
 }
+
 
 export const updateUserProfilePicture = async (file) => {
   try {
@@ -53,6 +63,7 @@ export const updateUserProfilePicture = async (file) => {
 export { apiClientInstance as apiClient };
 
 export default {
+  logout,
   login,
   requestPasswordReset,
   signup, 

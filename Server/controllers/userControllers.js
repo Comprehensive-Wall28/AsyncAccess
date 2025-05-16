@@ -82,7 +82,7 @@ const userController = {
      };
 
       return res
-        .cookie("token", token, {
+        .cookie("token", token, { // Set the token cookie
           expires: expiresAt,
           httpOnly: true,
           //secure: true, // Re-add when not testing
@@ -475,6 +475,16 @@ const userController = {
       throw new Error(`Failed to delete associated data: ${error.message}`);
     }
   },
+  logout: async (req, res) => {
+    try {
+      // Clear the token cookie
+      res.clearCookie('token');
+      res.status(200).json({ message: 'Logged out successfully' });
+    } catch (error) {
+      console.error("Error logging out:", error);
+      res.status(500).json({ message: "Server error during logout." });
+    }
+  }
 };
 
 module.exports = userController;

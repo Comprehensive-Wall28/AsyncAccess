@@ -8,7 +8,6 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import SelectContent from './SelectContent';
 import MenuContent from './MenuContent';
-import CardAlert from './CardAlert';
 import OptionsMenu from './OptionsMenu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
@@ -29,10 +28,23 @@ const Drawer = styled(MuiDrawer)({
   },
 });
 
+const getFirstAndLastName = (fullName) => {
+  if (!fullName) return "";
+  const nameParts = fullName.trim().split(/\s+/);
+  if (nameParts.length === 1) {
+    return nameParts[0]; // Only one name part (e.g., "Cher")
+  }
+  if (nameParts.length > 1) {
+    return `${nameParts[0]} ${nameParts[nameParts.length - 1]}`; // First and Last name
+  }
+  return fullName; // Fallback to full name if an edge case occurs
+};
+
 export default function SideMenu({ currentUser }) {
   const profilePictureSrc = currentUser?.profilePicture
     ? (currentUser.profilePicture.startsWith('http') ? currentUser.profilePicture : `${BACKEND_STATIC_BASE_URL}${currentUser.profilePicture}`)
     : null;
+  const displayName = currentUser ? getFirstAndLastName(currentUser.name) : "Loading...";
 
   return (
     <Drawer
@@ -63,7 +75,6 @@ export default function SideMenu({ currentUser }) {
         }}
       >
         <MenuContent />
-        <CardAlert />
       </Box>
       <Stack
         direction="row"
@@ -85,11 +96,11 @@ export default function SideMenu({ currentUser }) {
         </Avatar>
         <Box sx={{ mr: 'auto' }}>
           <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: '16px' }}>
-            {currentUser ? currentUser.name : "Loading..."}
+            {displayName}
           </Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          {/* <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             {currentUser ? currentUser.email : "Loading..."}
-          </Typography>
+          </Typography> */}
         </Box>
         <OptionsMenu />
       </Stack>

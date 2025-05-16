@@ -35,7 +35,7 @@ export default function UserProfileDisplay({ currentUser, isLoading, setCurrentU
     return (
       <Card sx={{ mt: 2, p: 2, width: '100%' }}>
         <CardContent>
-          <Title>User Profile</Title>
+          <Title>Your Details</Title>
           <Grid container spacing={2} alignItems="center">
             <Grid xs={12} sm={3} sx={{ display: 'flex', justifyContent: 'center' }}>
               <Skeleton variant="circular" width={120} height={120} />
@@ -56,7 +56,7 @@ export default function UserProfileDisplay({ currentUser, isLoading, setCurrentU
     return (
       <Card sx={{ mt: 2, p: 2, width: '100%' }}>
         <CardContent>
-          <Title>User Profile</Title>
+          <Title>Your Details</Title>
           <Typography>Could not load user profile information.</Typography>
         </CardContent>
       </Card>
@@ -99,7 +99,7 @@ export default function UserProfileDisplay({ currentUser, isLoading, setCurrentU
   return (
     <Card sx={{ mt: 2, p: 2, width: '100%' }}>
       <CardContent>
-        <Title>User Profile</Title>
+        <Title>Your Details</Title>
         {uploadError && <Alert severity="error" sx={{ mb: 2 }}>{uploadError}</Alert>}
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} sm={3} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
@@ -133,7 +133,6 @@ export default function UserProfileDisplay({ currentUser, isLoading, setCurrentU
           <Grid item xs={12} sm={9}>
             <Box mb={1}><Typography variant="subtitle1" color="text.secondary">Name:</Typography><Typography variant="h5">{currentUser.name}</Typography></Box>
             <Box mb={1}><Typography variant="subtitle1" color="text.secondary">Email:</Typography><Typography variant="body1">{currentUser.email}</Typography></Box>
-            <Box mb={1}><Typography variant="subtitle1" color="text.secondary">Role:</Typography><Typography variant="body1">{currentUser.role}</Typography></Box>
             {currentUser.age !== undefined && currentUser.age !== null && (
               <Box mb={1}><Typography variant="subtitle1" color="text.secondary">Age:</Typography><Typography variant="body1">{currentUser.age}</Typography></Box>
             )}

@@ -12,6 +12,7 @@ import Copyright from '../internals/components/Copyright';
 // import StatCard from './StatCard';
 
 import UserProfileDisplay from './UserProfileDisplay'; // Import the new component
+import UserBookingsDisplay from './UserBookingsDisplay'; // Import the bookings display component
 
 // const data = [
 //   {
@@ -51,6 +52,9 @@ export default function MainGrid({ currentUser, isLoading, setCurrentUser }) {
     <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
       {/* User Profile Section */}
       <UserProfileDisplay currentUser={currentUser} isLoading={isLoading} setCurrentUser={setCurrentUser} />
+
+      {/* User Bookings Section */}
+      <UserBookingsDisplay currentUser={currentUser} />
 
       {/* 
         The existing dashboard content is commented out to make the profile the main focus.

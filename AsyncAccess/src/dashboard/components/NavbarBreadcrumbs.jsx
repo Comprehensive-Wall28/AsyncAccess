@@ -2,6 +2,7 @@ import * as React from 'react';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import Breadcrumbs, { breadcrumbsClasses } from '@mui/material/Breadcrumbs';
+import { Link as RouterLink } from 'react-router-dom'; // Import Link from react-router-dom
 import NavigateNextRoundedIcon from '@mui/icons-material/NavigateNextRounded';
 
 const StyledBreadcrumbs = styled(Breadcrumbs)(({ theme }) => ({
@@ -21,9 +22,11 @@ export default function NavbarBreadcrumbs() {
       aria-label="breadcrumb"
       separator={<NavigateNextRoundedIcon fontSize="small" />}
     >
-      <Typography variant="body1">Dashboard</Typography>
+      <RouterLink to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Typography variant="body1">Home</Typography>
+      </RouterLink>
       <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 600 }}>
-        Home
+        Your Dashboard
       </Typography>
     </StyledBreadcrumbs>
   );

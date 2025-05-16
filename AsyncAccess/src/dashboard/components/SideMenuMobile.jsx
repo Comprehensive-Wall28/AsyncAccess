@@ -10,7 +10,8 @@ import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 import MenuButton from './MenuButton';
 import MenuContent from './MenuContent';
-import CardAlert from './CardAlert';
+
+import { logout } from '../../services/authService'; // Import the logout function
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 // Same as in UserProfileDisplay.jsx - ensure this is consistent or use a shared config
@@ -22,6 +23,7 @@ function SideMenuMobile({ open, toggleDrawer, currentUser }) {
     ? (currentUser.profilePicture.startsWith('http') ? currentUser.profilePicture : `${BACKEND_STATIC_BASE_URL}${currentUser.profilePicture}`)
     : null;
   return (
+    // ... (Drawer and Stack wrappers)
     <Drawer
       anchor="right"
       open={open}
@@ -34,6 +36,7 @@ function SideMenuMobile({ open, toggleDrawer, currentUser }) {
         },
       }}
     >
+      {/* ... (Inner Stack for content) */}
       <Stack
         sx={{
           maxWidth: '70dvw',
@@ -63,12 +66,27 @@ function SideMenuMobile({ open, toggleDrawer, currentUser }) {
         </Stack>
         <Divider />
         <Stack sx={{ flexGrow: 1 }}>
+          {/* ... (MenuContent) */}
           <MenuContent />
           <Divider />
         </Stack>
-        <CardAlert />
         <Stack sx={{ p: 2 }}>
-          <Button variant="outlined" fullWidth startIcon={<LogoutRoundedIcon />}>
+          <Button
+            variant="outlined"
+            fullWidth
+            startIcon={<LogoutRoundedIcon />}
+            onClick={async () => {
+              try {
+                await logout();
+                // TODO: Handle successful logout, e.g., redirect to login page
+                console.log('Logged out successfully');
+                window.location.href = '/login';
+              } catch (error) {
+                console.error('Logout failed:', error);
+                // TODO: Handle logout error, e.g., show a message
+              }
+            }}
+          >
             Logout
           </Button>
         </Stack>

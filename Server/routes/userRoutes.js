@@ -45,7 +45,6 @@ const upload = multer({
   fileFilter: fileFilter
 });
 
-
 router.use(authenticationMiddleware)
 
 router.get("/profile",authorizationMiddleware([ROLES.ADMIN , ROLES.ORGANIZER , ROLES.USER]),
@@ -59,6 +58,9 @@ router.get('/events',authenticationMiddleware, authorizationMiddleware([ROLES.OR
 
 router.get('/events/analytics',authenticationMiddleware, authorizationMiddleware([ROLES.ORGANIZER])
     , eventController.getEventAnalytics);
+
+// Add the logout route
+router.post('/logout', authenticationMiddleware ,authorizationMiddleware([ROLES.ADMIN , ROLES.ORGANIZER , ROLES.USER]), userController.logout);
 
 //the events and bookings HAVE to come before anything that takes from ids, do not ask me
 //ask the person that decided that javascript should ever touch the backend
