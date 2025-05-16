@@ -9,6 +9,7 @@ import Header from './components/Header';
 import MainGrid from './components/MainGrid';
 import SideMenu from './components/SideMenu';
 import AppTheme from '../shared-theme/AppTheme';
+
 import {
   chartsCustomizations,
   dataGridCustomizations,
@@ -24,37 +25,25 @@ const xThemeComponents = {
 };
 
 export default function Dashboard(props) {
-  return (
-    <AppTheme {...props} themeComponents={xThemeComponents}>
-      <CssBaseline enableColorScheme />
-      <Box sx={{ display: 'flex' }}>
-        <SideMenu />
-        <AppNavbar />
-        {/* Main content */}
-        <Box
-          component="main"
-          sx={(theme) => ({
-            flexGrow: 1,
-            backgroundColor: theme.vars
-              ? `rgba(${theme.vars.palette.background.defaultChannel} / 1)`
-              : alpha(theme.palette.background.default, 1),
-            overflow: 'auto',
-          })}
-        >
-          <Stack
-            spacing={2}
-            sx={{
-              alignItems: 'center',
-              mx: 3,
-              pb: 5,
-              mt: { xs: 8, md: 0 },
-            }}
-          >
-            <Header />
-            <MainGrid />
-          </Stack>
-        </Box>
-      </Box>
-    </AppTheme>
-  );
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        fetch('/api/v1/me', { credentials: 'include' })
+            .then(res => res.ok ? res.json() : null)
+            .then(data => setUser(data))
+            .catch(() => setUser(null));
+    }, []);
+
+    return (
+        <AppTheme {...props} themeComponents={xThemeComponents}>
+            <CssBaseline enableColorScheme />
+            <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+                <Stack spacing={2} sx={{ width: '100%' }}>
+                    <Header />
+                    {user && <div>Welcome, {user.name}!</div>}
+                    <MainGrid />
+                </Stack>
+            </Box>
+        </AppTheme>
+    );
 }
