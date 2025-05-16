@@ -26,7 +26,7 @@ const eventRouter = require("./routes/eventRoutes.js")
 const authRouter = require("./routes/authRoutes.js")
 
 app.use(cors({
-  origin:  ['http://localhost:5173', 'http://localhost:5174'],
+  origin:  ['http://localhost:5173', 'http://localhost:5174', 'https://asyncaccess.onrender.com'],
   credentials: true,
 }));
 
