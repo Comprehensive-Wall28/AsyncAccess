@@ -56,7 +56,6 @@ function OrganizerDashboard() {
                         className="booking-box"
                         onClick={() => navigate(`/bookings/${booking._id}`)}
                     >
-                      // JavaScript (React JSX)
                       <div className="booking-header">
                         <h3>{booking.title || 'Untitled Event'}</h3>
                         {booking.category && (
@@ -85,7 +84,7 @@ function OrganizerDashboard() {
                         )}
                         {booking.location && (
                             <p>
-                              <span className="detail-label">📍 Location:</span>
+                              <span className="detail-label">📍 Location: </span>
                               <span>{booking.location}</span>
                             </p>
                         )}

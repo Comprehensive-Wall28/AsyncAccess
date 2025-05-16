@@ -1,5 +1,13 @@
+/*.booking-card {
+    border: 1px solid #e0e0e0;
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}*/
+
 .booking-card {
-    background: #fff;
+    background: #55d1da;
     border-radius: 16px;
     padding: 2rem;
     max-width: 720px;
@@ -63,11 +71,29 @@
 }
 
 .themes {
-    margin-top: 1rem;
+    margin-top: 1.5rem;
     font-size: 1rem;
 }
 
+.theme-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem; /* creates space between theme tags */
+    margin-top: 0.5rem;
+}
+
 .theme-badge {
-    display: inline-block;
-    background: #e3f2fd;
+    background-color: #e0f2f1;
+    color: #00695c;
+    padding: 0.35rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    wrap-option: wrap;
+}
+
+.event-image {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-top: 0.5rem;
 }

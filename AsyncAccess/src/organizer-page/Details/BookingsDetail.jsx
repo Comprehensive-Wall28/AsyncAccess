@@ -55,6 +55,12 @@ function BookingsDetail() {
                             <span>{booking.location}</span>
                         </div>
                     )}
+                    {booking.image && (
+                        <div className="detail-item">
+                            <img src={booking.image} alt="Failed to load image!" className="event-image" />
+                        </div>
+                    )}
+
                 </div>
 
                 <div className="details-column">
@@ -84,7 +90,11 @@ function BookingsDetail() {
             {booking.category && (
                 <div className="themes">
                     <strong>Themes:</strong>
-                    <span className="theme-badge">{booking.category}</span>
+                    <div className="theme-badges">
+                        {String(booking.category).split(',').map((theme, index) => (
+                            <span key={index} className="theme-badge">{theme.trim()}</span>
+                        ))}
+                    </div>
                 </div>
             )}
 
