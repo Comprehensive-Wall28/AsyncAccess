@@ -1,5 +1,5 @@
 // AsyncAccess/src/organizer-page/Dashboard.jsx
-import './css/style.css';
+import './components/organizerdashboard.css';
 import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 
@@ -33,6 +33,7 @@ function OrganizerDashboard() {
   }, []);
 
   return (
+
       <div className="organizer-dashboard">
         <h1>Organizer Dashboard</h1>
         <div className="bookings-container">
@@ -52,31 +53,52 @@ function OrganizerDashboard() {
                     <div
                         key={booking.id}
                         className="booking-box"
-                        onClick={() => navigate(`/bookings/${booking._id}`)}                    >
+                        onClick={() => navigate(`/bookings/${booking._id}`)}
+                    >
+                      // JavaScript (React JSX)
                       <div className="booking-header">
                         <h3>{booking.title || 'Untitled Event'}</h3>
+                        {booking.category && (
+                            Array.isArray(booking.category) ? (
+                                booking.category.map((cat, index) =>
+                                    cat ? <span key={index} className="category-chip">{cat}</span> : null
+                                )
+                            ) : (
+                                <span className="category-chip">{booking.category}</span>
+                            )
+                        )}
                       </div>
+
                       <div className="booking-details">
                         {booking.date && (
                             <p>
-                              <span className="detail-label">Date:</span>
+                              <span className="detail-label">📅 Date:</span>
                               <span>{new Date(booking.date).toLocaleDateString()}</span>
                             </p>
                         )}
                         {booking.time && (
                             <p>
-                              <span className="detail-label">Time:</span>
+                              <span className="detail-label">🕒 Time:</span>
                               <span>{booking.time}</span>
                             </p>
                         )}
                         {booking.location && (
                             <p>
-                              <span className="detail-label">Location:</span>
+                              <span className="detail-label">📍 Location:</span>
                               <span>{booking.location}</span>
                             </p>
                         )}
                       </div>
+
+                      <div className="booking-footer">
+                        {booking.status && (
+                            <span className={`status-badge ${booking.status.toLowerCase()}`}>
+        {booking.status}
+      </span>
+                        )}
+                      </div>
                     </div>
+
                 ))}
               </div>
           )}

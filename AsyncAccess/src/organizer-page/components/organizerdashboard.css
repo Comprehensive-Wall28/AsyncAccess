@@ -1,3 +1,116 @@
+/* Organizer Dashboard Styles */
+.organizer-dashboard {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.bookings-container {
+    margin-top: 2rem;
+}
+
+/* Grid layout for booking boxes */
+.bookings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+/* In file `AsyncAccess/src/organizer-page/components/organizerdashboard.css` */
+.booking-title {
+    color: \#333333; /* Change to your desired font color */
+}
+
+.booking-date {
+    color: \#555555; /* Change to your desired font color */
+}
+
+/* Individual booking box styling */
+.booking-box {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    padding: 1rem;
+    min-height: 220px; /* key fix */
+}
+
+.booking-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.booking-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.booking-footer {
+    margin-top: 1rem;
+}
+
+.booking-box:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.cancelled-booking-header {
+    background: #3fb6ff;
+    color: white;
+    padding: 1rem;
+}
+
+.booking-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.booking-details {
+    padding: 1rem;
+}
+
+.booking-details p {
+    margin: 0.5rem 0;
+    display: flex;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #555;
+    min-width: 80px;
+    display: inline-block;
+}
+
+/* Status boxes */
+.loading-box,
+.error-box,
+.empty-box {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.error-box {
+    background: #fff0f0;
+    border-left: 4px solid #ff3b3b;
+}
+
+.empty-box {
+    background: #f8f9fa;
+}
+
 .category-chip {
     background: #e3f2fd;
     color: #1565c0;
@@ -27,10 +140,4 @@
 .status-badge.cancelled {
     background: #ffe0e0;
     color: #c62828;
-}
-
-.booking-footer {
-    padding: 0 1rem 1rem;
-    display: flex;
-    justify-content: flex-start;
 }
