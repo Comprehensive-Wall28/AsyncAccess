@@ -1,6 +1,7 @@
 // AsyncAccess/src/organizer-page/Event-Handling/BookingsDetail.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import './style.css';
 
 function BookingsDetail() {
     const { id } = useParams();
@@ -49,9 +50,16 @@ function BookingsDetail() {
     return (
         <div className="booking-detail">
             <h2>{booking.title || 'Untitled Event'}</h2>
+
             {booking.date && <p><strong>Date:</strong> {new Date(booking.date).toLocaleDateString()}</p>}
             {booking.time && <p><strong>Time:</strong> {booking.time}</p>}
             {booking.location && <p><strong>Location:</strong> {booking.location}</p>}
+            {booking.category && <p><strong>Themes:</strong> {booking.category}</p>}
+            {booking.ticketPrice && <p><strong>Ticket Price:</strong> {booking.ticketPrice}</p>}
+            {booking.totalTickets && <p><strong>Total Tickets:</strong> {booking.totalTickets}</p>}
+            {booking.bookedTickets && <p><strong>Booked Tickets:</strong> {booking.bookedTickets}</p>}
+            {booking.status && <p><strong>Status:</strong> {booking.status}</p>}
+            {/*{booking.createdDate && <p><strong>created date:</strong> {new Date(booking.createdDate).toLocaleDateString()}</p>}*/}
             <p><strong>Description:</strong> {booking.description || 'No description provided'}</p>
         </div>
     );
