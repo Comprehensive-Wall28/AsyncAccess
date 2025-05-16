@@ -22,6 +22,7 @@ import ColorModeSelect from '../shared-theme/ColorModeSelect';
 import { AsyncIcon } from './components/CustomIcons';
 import AsyncAccessIcon  from '../home-page/components/AsyncAccessIcon.jsx';
 import { Link as route } from 'react-router-dom';
+import { signup } from '../services/authService'; // Import the signup function
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
