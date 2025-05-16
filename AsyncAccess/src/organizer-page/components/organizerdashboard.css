@@ -19,11 +19,11 @@
 
 /* In file `AsyncAccess/src/organizer-page/components/organizerdashboard.css` */
 .booking-title {
-    color: \#333333; /* Change to your desired font color */
+    color: #333333;  /* Change to your desired font color */
 }
 
 .booking-date {
-    color: \#555555; /* Change to your desired font color */
+    color: #555555; /* Change to your desired font color */
 }
 
 /* Individual booking box styling */
