@@ -71,8 +71,6 @@ export default function OptionsMenu() {
           },
         }}
       >
-        <MenuItem onClick={handleClose}>My account</MenuItem>
-        <Divider />
         <MenuItem
           onClick={handleLogout} // Updated onClick handler
           sx={{

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Box, Paper, Typography, List, ListItem, ListItemText, ListItemAvatar, Avatar,
-  IconButton, TextField, Button, CircularProgress, Alert, Divider, Stack, Input
+  Box, Paper, Typography, List, ListItem, ListItemText, Avatar,
+  IconButton, Button, CircularProgress, Alert, Divider, Stack, Input,
+  OutlinedInput, InputAdornment, FormControl // Added OutlinedInput, InputAdornment, FormControl
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
@@ -133,33 +134,72 @@ export default function UserProfile() {
   }
 
   const renderEditableField = (label, field, value) => (
-    <ListItem secondaryAction={
-      editingField === field ? (
-        <Stack direction="row" spacing={1}>
-          <IconButton edge="end" aria-label="save" onClick={() => handleSave(field)} disabled={isLoading}>
-            <SaveIcon />
+    <ListItem
+      secondaryAction={ // This will now hold Edit or Save/Cancel
+        editingField === field ? (
+          <Stack direction="row" spacing={0.5}> {/* Save/Cancel buttons */}
+            <IconButton
+              aria-label="save"
+              onClick={() => handleSave(field)}
+              disabled={isLoading || String(editValue) === String(value)} // Disable if value hasn't changed
+              size="small"
+              edge="end"
+            >
+              <SaveIcon fontSize="small" />
+            </IconButton>
+            <IconButton
+              aria-label="cancel"
+              onClick={handleCancelEdit}
+              disabled={isLoading}
+              size="small"
+              edge="end"
+            >
+              <CancelIcon fontSize="small" />
+            </IconButton>
+          </Stack>
+        ) : ( // Edit button
+          <IconButton
+            edge="end"
+            aria-label="edit"
+            onClick={() => handleEdit(field, value)}
+            disabled={isLoading}
+            size="small" // Consistent button size
+          >
+            <EditIcon fontSize="small" /> {/* Consistent icon size */}
           </IconButton>
-          <IconButton edge="end" aria-label="cancel" onClick={handleCancelEdit} disabled={isLoading}>
-            <CancelIcon />
-          </IconButton>
-        </Stack>
-      ) : (
-        <IconButton edge="end" aria-label="edit" onClick={() => handleEdit(field, value)} disabled={isLoading}>
-          <EditIcon />
-        </IconButton>
-      )
-    }>
-      {editingField === field ? (
-        <TextField
-          variant="standard"
-          fullWidth
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          type={field === 'age' ? 'number' : 'text'}
-        />
-      ) : (
-        <ListItemText primary={label} secondary={value || 'Not set'} />
-      )}
+        )
+      }
+      // sx={{ alignItems: 'flex-start' }} // Optional: if vertical alignment needs adjustment for taller content
+    >
+      <ListItemText
+        primary={label}
+        secondary={
+          editingField === field ? (
+            <FormControl
+              variant="outlined"
+              size="small"
+              sx={{
+                width: { xs: '100%', sm: '25ch', md: '30ch' }, // Narrower, responsive width like Search.jsx
+                mt: 0.5, // Space between label (primary) and input (secondary)
+              }}
+            >
+              <OutlinedInput
+                id={`edit-${field}-${user?._id || 'user'}`}
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                type={field === 'age' ? 'number' : 'text'}
+                placeholder={`New ${label.toLowerCase()}`}
+                autoFocus
+                // Icons are now in secondaryAction, so no endAdornment here
+              />
+            </FormControl>
+          ) : (
+            // Ensure value is a string for ListItemText, or "Not set"
+            value !== null && value !== undefined && value !== '' ? String(value) : 'Not set'
+          )
+        }
+        primaryTypographyProps={{ sx: { mb: editingField === field ? 0.5 : 0 } }} // Margin below label when editing
+      />
     </ListItem>
   );
 
@@ -170,7 +210,7 @@ export default function UserProfile() {
       : null;
 
   return (
-    <Paper elevation={3} sx={{ p: 3, maxWidth: 600, margin: 'auto', mt: 4 }}>
+    <Paper elevation={3} sx={{ p: 3, width: '100%', mt: 4 }}> {/* Removed maxWidth and margin: 'auto', added width: '100%' */}
       <Typography variant="h5" gutterBottom component="div" sx={{ mb: 2 }}>
         User Information
       </Typography>
@@ -193,11 +233,7 @@ export default function UserProfile() {
               inputRef={fileInputRef}
               id="profile-picture-input"
             />
-            <label htmlFor="profile-picture-input">
-              <Button variant="outlined" component="span" startIcon={<PhotoCamera />} disabled={isLoading}>
-                Change Picture
-              </Button>
-            </label>
+      
             {profilePictureFile && (
               <Button variant="contained" color="primary" onClick={handleProfilePictureUpload} disabled={isLoading} sx={{mt: 1}}>
                 Save Picture

@@ -37,10 +37,10 @@ export default function UserProfileDisplay({ currentUser, isLoading, setCurrentU
         <CardContent>
           <Title>Your Details</Title>
           <Grid container spacing={2} alignItems="center">
-            <Grid xs={12} sm={3} sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Grid xs={12} sm={3} sx={{ display: 'flex', justifyContent: 'center' }}> {/* Removed item prop */}
               <Skeleton variant="circular" width={120} height={120} />
             </Grid>
-            <Grid xs={12} sm={9}>
+            <Grid xs={12} sm={9}> {/* Removed item prop */}
               <Skeleton variant="text" sx={{ fontSize: '1.8rem' }} width="60%" />
               <Skeleton variant="text" width="80%" />
               <Skeleton variant="text" width="70%" />
@@ -102,7 +102,7 @@ export default function UserProfileDisplay({ currentUser, isLoading, setCurrentU
         <Title>Your Details</Title>
         {uploadError && <Alert severity="error" sx={{ mb: 2 }}>{uploadError}</Alert>}
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={3} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+          <Grid xs={12} sm={3} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}> {/* Removed item prop */}
             <input
               type="file"
               hidden
@@ -130,12 +130,9 @@ export default function UserProfileDisplay({ currentUser, isLoading, setCurrentU
               {isUploading && <CircularProgress size={120} sx={{ position: 'absolute', top: 0, left: 0, zIndex: 1, color: 'primary.main' }} />}
             </Box>
           </Grid>
-          <Grid item xs={12} sm={9}>
+          <Grid xs={12} sm={9}> {/* Removed item prop */}
             <Box mb={1}><Typography variant="subtitle1" color="text.secondary">Name:</Typography><Typography variant="h5">{currentUser.name}</Typography></Box>
             <Box mb={1}><Typography variant="subtitle1" color="text.secondary">Email:</Typography><Typography variant="body1">{currentUser.email}</Typography></Box>
-            {currentUser.age !== undefined && currentUser.age !== null && (
-              <Box mb={1}><Typography variant="subtitle1" color="text.secondary">Age:</Typography><Typography variant="body1">{currentUser.age}</Typography></Box>
-            )}
           </Grid>
         </Grid>
       </CardContent>

@@ -53,14 +53,17 @@ export default function AppAppBar() {
         <StyledToolbar variant="dense" disableGutters>
           <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', px: 0 }}>
             <Sitemark />
-            <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-              <Button variant="text" color="info" size="small">
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, ml: 2 }}> {/* Added ml: 2 here */}
+              <Button variant="text" color="info" size="small" component={Link} to="/dashboard" sx={{ px: 1 }}>
+                Your Dashboard
+              </Button>
+              <Button variant="text" color="info" size="small" sx={{ px: 1 }}>
                 Events
               </Button>
               {/* <Button variant="text" color="info" size="small">
                 Testimonials
               </Button> */}
-              <Button variant="text" color="info" size="small">
+              <Button variant="text" color="info" size="small" sx={{ px: 1 }}>
                 Highlights
               </Button>
               {/* <Button variant="text" color="info" size="small">
@@ -116,9 +119,11 @@ export default function AppAppBar() {
                   </IconButton>
                 </Box>
 
-                <MenuItem>Features</MenuItem>
-                <MenuItem>Events</MenuItem>
-                <MenuItem>Highlights</MenuItem>
+                
+                {/* <MenuItem>Events</MenuItem> */}
+                <Button color="primary" variant="outlined" fullWidth component={Link} to="/dashboard">
+                  Your Dashboard
+                </Button>
                 {/* <MenuItem>Pricing</MenuItem>
                 <MenuItem>FAQ</MenuItem>
                 <MenuItem>Blog</MenuItem> */}

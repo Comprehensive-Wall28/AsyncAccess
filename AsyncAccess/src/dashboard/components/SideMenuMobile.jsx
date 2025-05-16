@@ -10,12 +10,9 @@ import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 import MenuButton from './MenuButton';
 import MenuContent from './MenuContent';
-
-import { logout } from '../../services/authService'; // Import the logout function
+import { logout } from '../../services/authService'; 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
-// Same as in UserProfileDisplay.jsx - ensure this is consistent or use a shared config
-// Use the root URL of your backend server where static files are hosted.
 const BACKEND_STATIC_BASE_URL = import.meta.env.VITE_BACKEND_SERVER_URL;
 
 function SideMenuMobile({ open, toggleDrawer, currentUser, onMenuItemClick, selectedItem }) {
@@ -78,12 +75,10 @@ function SideMenuMobile({ open, toggleDrawer, currentUser, onMenuItemClick, sele
             onClick={async () => {
               try {
                 await logout();
-                // TODO: Handle successful logout, e.g., redirect to login page
                 console.log('Logged out successfully');
                 window.location.href = '/login';
               } catch (error) {
                 console.error('Logout failed:', error);
-                // TODO: Handle logout error, e.g., show a message
               }
             }}
           >
