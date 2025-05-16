@@ -12,7 +12,7 @@ import MenuButton from './MenuButton';
 import MenuContent from './MenuContent';
 import CardAlert from './CardAlert';
 
-function SideMenuMobile({ open, toggleDrawer }) {
+function SideMenuMobile({ open, toggleDrawer, currentUser }) {
   return (
     <Drawer
       anchor="right"
@@ -39,12 +39,12 @@ function SideMenuMobile({ open, toggleDrawer }) {
           >
             <Avatar
               sizes="small"
-              alt="Riley Carter"
+              alt={currentUser ? currentUser.name : "User"}
               src="/static/images/avatar/7.jpg"
               sx={{ width: 24, height: 24 }}
             />
             <Typography component="p" variant="h6">
-              Riley Carter
+              {currentUser ? currentUser.name : "Loading..."}
             </Typography>
           </Stack>
           <MenuButton showBadge>
@@ -69,6 +69,7 @@ function SideMenuMobile({ open, toggleDrawer }) {
 
 SideMenuMobile.propTypes = {
   open: PropTypes.bool,
+  currentUser: PropTypes.object,
   toggleDrawer: PropTypes.func.isRequired,
 };
 
