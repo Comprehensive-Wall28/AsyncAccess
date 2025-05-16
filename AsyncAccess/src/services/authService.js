@@ -1,8 +1,7 @@
 // src/services/authService.js
 import axios from 'axios';
-import authService from '../services/authService';
 
-const API_BASE_URL ='http://localhost:5173/api/v1';
+const API_BASE_URL ='http://localhost:3000/api/v1';
 
 // This is the axios instance. It's already named apiClient internally.
 const apiClientInstance = axios.create({
@@ -11,11 +10,13 @@ const apiClientInstance = axios.create({
 });
 
 export const login = async (email, password) => {
+  console.log('login called with:', email); // Add this line
   try {
     const response = await apiClientInstance.post('/login', { email, password });
     return response.data;
   } catch (error) {
-    throw error.response ? error.response.data : new Error('Login failed due to a network or server error.');
+    console.error('Login error:', error, error?.response?.data);
+    throw error.response ? error.response.data : new Error(error?.response);
   }
 };
 
