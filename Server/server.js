@@ -25,14 +25,14 @@ const userRouter = require("./routes/userRoutes.js")
 const eventRouter = require("./routes/eventRoutes.js")
 const authRouter = require("./routes/authRoutes.js")
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser())
+
 app.use(cors({
   origin:  ['*'], //I hate cors, this will be changed
   credentials: true,
 }));
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser())
 
 app.use("/api/v1", authRouter); 
 app.use("/api/v1/users", userRouter); 
