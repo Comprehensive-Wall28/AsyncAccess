@@ -16,6 +16,7 @@ if (!process.env.MONGODB_URI) {
 if(!process.env.EMAIL_HOST || !process.env.EMAIL_PORT || !process.env.EMAIL_USER || !process.env.EMAIL_PASS || !process.env.EMAIL_SECURE || !process.env.EMAIL_FROM){
   console.error("WARNING : Missing env variables for 2FA function");
 }
+
 const port = process.env.PORT ||  3000
 const app = express();
 
@@ -29,7 +30,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser())
 
 app.use(cors({
-  origin:  ['https://asyncaccess.pages.dev', 'https://asyncaccess.pages.dev/', 'http://localhost:5174'], //I hate cors, this will be changed
+  origin:  ['http://localhost:3000','https://asyncaccess.pages.dev', 'https://asyncaccess.pages.dev/', 'http://localhost:5174','http://localhost:5173'], //I hate cors, this will be changed
   credentials: true,
 }));
 
