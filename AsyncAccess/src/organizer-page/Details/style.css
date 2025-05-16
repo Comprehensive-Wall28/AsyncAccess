@@ -1,13 +1,72 @@
-/* CSS file (e.g. style.css) */
-.themes-container {
+.booking-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 720px;
+    margin: 2rem auto;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    font-family: 'Segoe UI', sans-serif;
+    color: #111;
+}
+
+.event-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+.details-grid {
     display: flex;
+    justify-content: space-between;
+    gap: 2rem;
     flex-wrap: wrap;
-    gap: 10px; /* gap between theme badges */
+    margin-bottom: 1.5rem;
+}
+
+.details-column {
+    flex: 1;
+    min-width: 280px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    color: #333;
+}
+
+.detail-item .icon {
+    color: #1976d2;
+    margin-right: 0.75rem;
+    font-size: 1.2rem;
+}
+
+.detail-row {
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    background-color: #e0f7fa;
+    color: #00796b;
+    margin-left: 0.5rem;
+}
+
+.status-badge.active {
+    background-color: #c8f7dc;
+    color: #2e7d32;
+}
+
+.themes {
+    margin-top: 1rem;
+    font-size: 1rem;
 }
 
 .theme-badge {
-    background: #f1f1f1;
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 0.9rem;
-}
+    display: inline-block;
+    background

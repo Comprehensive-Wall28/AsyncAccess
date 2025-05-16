@@ -1,0 +1,36 @@
+.category-chip {
+    background: #e3f2fd;
+    color: #1565c0;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    margin-left: 0.5rem;
+    display: inline-block;
+    font-weight: 500;
+}
+
+.status-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.3rem 0.75rem;
+    border-radius: 12px;
+    text-transform: capitalize;
+    display: inline-block;
+    margin-top: 0.5rem;
+}
+
+.status-badge.active {
+    background: #c8f7dc;
+    color: #2e7d32;
+}
+
+.status-badge.cancelled {
+    background: #ffe0e0;
+    color: #c62828;
+}
+
+.booking-footer {
+    padding: 0 1rem 1rem;
+    display: flex;
+    justify-content: flex-start;
+}
