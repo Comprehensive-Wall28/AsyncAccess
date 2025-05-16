@@ -1,12 +1,13 @@
 // src/services/authService.js
 import axios from 'axios';
+import authService from '../services/authService';
 
 const API_BASE_URL ='http://localhost:5173/api/v1';
 
 // This is the axios instance. It's already named apiClient internally.
 const apiClientInstance = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true, 
+  withCredentials: true,
 });
 
 export const login = async (email, password) => {

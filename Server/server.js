@@ -7,17 +7,16 @@ const cookieParser=require('cookie-parser')
 
 if (!process.env.SECRET_KEY) {
   console.error("FATAL ERROR: SECRET_KEY environment variable is not set.");
-  process.exit(1); 
+  process.exit(1);
 }
-if (!process.env.MONGODB_URI) { 
+if (!process.env.MONGODB_URI) {
   console.error("FATAL ERROR: DATABASE_URI environment variable is not set.");
   process.exit(1);
 }
 if(!process.env.EMAIL_HOST || !process.env.EMAIL_PORT || !process.env.EMAIL_USER || !process.env.EMAIL_PASS || !process.env.EMAIL_SECURE || !process.env.EMAIL_FROM){
   console.error("WARNING : Missing env variables for 2FA function");
 }
-const port = process.env.PORT || 5000
-
+const port = /*process.env.PORT || */ 3000
 const app = express();
 
 const bookingRouter = require("./routes/bookingRoutes.js")
@@ -38,7 +37,6 @@ app.use("/api/v1", authRouter);
 app.use("/api/v1/users", userRouter); 
 app.use("/api/v1/bookings", bookingRouter); 
 app.use("/api/v1/events", eventRouter);
-
 
 const startServer = async () => {
   await connectDB();
