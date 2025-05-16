@@ -80,16 +80,18 @@ const userController = {
         role: user.role,
         age: user.age
      };
+     const isProduction = process.env.NODE_ENV === 'production';
 
       return res
         .cookie("token", token, { // Set the token cookie
           expires: expiresAt,
           httpOnly: true,
-          //secure: true, // Re-add when not testing
-          //SameSite: "none", //Re-add when not testing
+          secure: isProduction, // Set to true in production (HTTPS)
+          sameSite: isProduction ? "none" : "lax", // "none" for cross-site requests in production
         })
         .status(200)
         .json({ message: "Logged in successfully", currentUser });
+
     } catch (error) {
       console.error("Error logging in:", error);
       res.status(500).json({ message: "Server error. Check console for more details." });
