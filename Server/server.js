@@ -30,7 +30,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser())
 
 app.use(cors({
-  origin:  ['*'], //I hate cors, this will be changed
+  origin:  ['https://asyncaccess.pages.dev', 'https://asyncaccess.pages.dev/'], //I hate cors, this will be changed
   credentials: true,
 }));
 
