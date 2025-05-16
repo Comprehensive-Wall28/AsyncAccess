@@ -33,7 +33,7 @@ export default function AsyncAccessIcon() {
 
   return (
     <Link to="/" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
-      <SvgIcon sx={{ height: 21, width: outerWidth, mr: 2 }}>
+      <SvgIcon sx={{ height: 21, width: outerWidth }}>
         <svg
           width={svgInternalWidth} 
           height={19}

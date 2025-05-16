@@ -18,7 +18,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 // Use the root URL of your backend server where static files are hosted.
 const BACKEND_STATIC_BASE_URL = import.meta.env.VITE_BACKEND_SERVER_URL;
 
-function SideMenuMobile({ open, toggleDrawer, currentUser }) {
+function SideMenuMobile({ open, toggleDrawer, currentUser, onMenuItemClick, selectedItem }) {
   const profilePictureSrc = currentUser?.profilePicture
     ? (currentUser.profilePicture.startsWith('http') ? currentUser.profilePicture : `${BACKEND_STATIC_BASE_URL}${currentUser.profilePicture}`)
     : null;
@@ -67,7 +67,7 @@ function SideMenuMobile({ open, toggleDrawer, currentUser }) {
         <Divider />
         <Stack sx={{ flexGrow: 1 }}>
           {/* ... (MenuContent) */}
-          <MenuContent />
+          <MenuContent onMenuItemClick={onMenuItemClick} selectedItem={selectedItem} />
           <Divider />
         </Stack>
         <Stack sx={{ p: 2 }}>
@@ -98,6 +98,8 @@ function SideMenuMobile({ open, toggleDrawer, currentUser }) {
 SideMenuMobile.propTypes = {
   open: PropTypes.bool,
   currentUser: PropTypes.object,
+  onMenuItemClick: PropTypes.func,
+  selectedItem: PropTypes.string,
   toggleDrawer: PropTypes.func.isRequired,
 };
 

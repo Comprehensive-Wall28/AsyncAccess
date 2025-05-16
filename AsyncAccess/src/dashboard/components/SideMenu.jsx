@@ -6,10 +6,10 @@ import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import SelectContent from './SelectContent';
 import MenuContent from './MenuContent';
 import OptionsMenu from './OptionsMenu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import AsyncAccessLogo from '../../home-page/components/AsyncAccessIcon';
 
 // Same as in UserProfileDisplay.jsx - ensure this is consistent or use a shared config
 // Use the root URL of your backend server where static files are hosted.
@@ -40,7 +40,7 @@ const getFirstAndLastName = (fullName) => {
   return fullName; // Fallback to full name if an edge case occurs
 };
 
-export default function SideMenu({ currentUser }) {
+export default function SideMenu({ currentUser, onMenuItemClick, selectedItem }) {
   const profilePictureSrc = currentUser?.profilePicture
     ? (currentUser.profilePicture.startsWith('http') ? currentUser.profilePicture : `${BACKEND_STATIC_BASE_URL}${currentUser.profilePicture}`)
     : null;
@@ -59,11 +59,13 @@ export default function SideMenu({ currentUser }) {
       <Box
         sx={{
           display: 'flex',
+          alignItems: 'center', // Added for vertical centering
+          justifyContent: 'center', // Added for horizontal centering
           mt: 'calc(var(--template-frame-height, 0px) + 4px)',
           p: 1.5,
         }}
       >
-        <SelectContent />
+        <AsyncAccessLogo />
       </Box>
       <Divider />
       <Box
@@ -74,7 +76,7 @@ export default function SideMenu({ currentUser }) {
           flexDirection: 'column',
         }}
       >
-        <MenuContent />
+        <MenuContent onMenuItemClick={onMenuItemClick} selectedItem={selectedItem} />
       </Box>
       <Stack
         direction="row"
