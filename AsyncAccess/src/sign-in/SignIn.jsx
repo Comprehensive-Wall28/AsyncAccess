@@ -20,6 +20,8 @@ import AppTheme from '../shared-theme/AppTheme';
 import ColorModeSelect from '../shared-theme/ColorModeSelect';
 import AsyncAccessIcon  from '../home-page/components/AsyncAccessIcon.jsx';
 import { useLocation } from 'react-router-dom'; // Import useLocation
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import authService from '../services/authService'; // Import authService
 import { AsyncIcon } from '../sign-up/components/CustomIcons.jsx';
 import { Link as route } from 'react-router-dom';
 
@@ -76,6 +78,8 @@ export default function SignIn(props) {
   const [loginError, setLoginError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [showForgotPassword, setShowForgotPassword] = React.useState(false);
+  const [rememberMe, setRememberMe] = React.useState(false); // State for "Remember me"
+  const navigate = useNavigate(); // Hook for navigation
 
   React.useEffect(() => {
     // Check if email was passed in location state and set it
@@ -134,14 +138,21 @@ export default function SignIn(props) {
 
     setLoading(true);
     try {
-      // Replace authService.login with your actual authentication logic
       const userData = await authService.login(email, password);
-      console.log('Login successful:', userData);
-      // TODO: Handle successful login (e.g., redirect, update global state)
-      // For example, if using React Router: history.push('/dashboard');
-      // Or update context: authContext.login(userData.currentUser);
+      console.log('Login successful:', userData); // userData contains { message, currentUser }
+
+      if (rememberMe && userData.currentUser) {
+        localStorage.setItem('currentUser', JSON.stringify(userData.currentUser));
+      } else {
+        localStorage.removeItem('currentUser'); // Clear if not "Remember me" or no currentUser
+      }
+
+      // Redirect to dashboard
+      navigate('/dashboard', { replace: true }); // replace: true prevents going back to login
+
     } catch (error) {
-      setLoginError(error.message || 'Login failed. Please check your credentials or try again later.');
+      // The error from authService.js might be an object with a message property
+      setLoginError(error.message || (typeof error === 'string' ? error : 'Login failed. Please check your credentials or try again later.'));
     } finally {
       setLoading(false);
     }
@@ -208,7 +219,11 @@ export default function SignIn(props) {
               />
             </FormControl>
             <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
+              control={
+                <Checkbox 
+                  checked={rememberMe} 
+                  onChange={(e) => setRememberMe(e.target.checked)} 
+                  color="primary" />}
               label="Remember me"
             />
             <ForgotPassword open={showForgotPassword} handleClose={handleClose} />
