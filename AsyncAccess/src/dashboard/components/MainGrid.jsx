@@ -46,11 +46,11 @@ import UserProfileDisplay from './UserProfileDisplay'; // Import the new compone
 //   },
 // ];
 
-export default function MainGrid({ currentUser, isLoading }) {
+export default function MainGrid({ currentUser, isLoading, setCurrentUser }) {
   return (
     <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
       {/* User Profile Section */}
-      <UserProfileDisplay currentUser={currentUser} isLoading={isLoading} />
+      <UserProfileDisplay currentUser={currentUser} isLoading={isLoading} setCurrentUser={setCurrentUser} />
 
       {/* 
         The existing dashboard content is commented out to make the profile the main focus.

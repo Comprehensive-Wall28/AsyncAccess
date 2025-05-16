@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const connectDB = require('./config/database');
 const cookieParser=require('cookie-parser')
+const path = require('path');
 
 if (!process.env.SECRET_KEY) {
   console.error("FATAL ERROR: SECRET_KEY environment variable is not set.");
@@ -32,6 +33,8 @@ app.use(cors({
   origin:  ['https://asyncaccess.pages.dev', 'https://asyncaccess.pages.dev/', 'http://localhost:5174'], //I hate cors, this will be changed
   credentials: true,
 }));
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use("/api/v1", authRouter); 
 app.use("/api/v1/users", userRouter); 

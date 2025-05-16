@@ -11,8 +11,16 @@ import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 import MenuButton from './MenuButton';
 import MenuContent from './MenuContent';
 import CardAlert from './CardAlert';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+
+// Same as in UserProfileDisplay.jsx - ensure this is consistent or use a shared config
+// Use the root URL of your backend server where static files are hosted.
+const BACKEND_STATIC_BASE_URL = import.meta.env.VITE_BACKEND_SERVER_URL;
 
 function SideMenuMobile({ open, toggleDrawer, currentUser }) {
+  const profilePictureSrc = currentUser?.profilePicture
+    ? (currentUser.profilePicture.startsWith('http') ? currentUser.profilePicture : `${BACKEND_STATIC_BASE_URL}${currentUser.profilePicture}`)
+    : null;
   return (
     <Drawer
       anchor="right"
@@ -39,10 +47,12 @@ function SideMenuMobile({ open, toggleDrawer, currentUser }) {
           >
             <Avatar
               sizes="small"
-              alt={currentUser ? currentUser.name : "User"}
-              src="/static/images/avatar/7.jpg"
+              alt={currentUser?.name || "User"}
+              src={profilePictureSrc}
               sx={{ width: 24, height: 24 }}
-            />
+            >
+              {!profilePictureSrc && <AccountCircleIcon />}
+            </Avatar>
             <Typography component="p" variant="h6">
               {currentUser ? currentUser.name : "Loading..."}
             </Typography>

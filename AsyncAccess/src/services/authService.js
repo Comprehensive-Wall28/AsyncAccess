@@ -1,10 +1,7 @@
-// src/services/authService.js
 import axios from 'axios';
-import authService from '../services/authService';
 
 const API_BASE_URL ='http://localhost:5173/api/v1';
 
-// This is the axios instance. It's already named apiClient internally.
 const apiClientInstance = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
@@ -37,13 +34,27 @@ export const signup = async (name, email, password, role ) => {
   }
 }
 
-// Export the configured axios instance for direct use.
-// We'll export it with the name 'apiClient' so Dashboard.jsx can use it as such.
+export const updateUserProfilePicture = async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append('profilePictureFile', file); // 'profilePictureFile' is the field name backend (multer) will expect
+
+    const response = await apiClientInstance.put('/users/profile', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data; // Should return { user: updatedUser, msg: "..." }
+  } catch (error) {
+    throw error.response ? error.response.data : new Error('Profile picture upload failed due to a network or server error.');
+  }
+};
+
 export { apiClientInstance as apiClient };
 
-// You can add other auth-related API calls here, e.g., register, logout, resetPassword
 export default {
   login,
   requestPasswordReset,
-  signup, // Added for consistency
+  signup, 
+  updateUserProfilePicture,
 };

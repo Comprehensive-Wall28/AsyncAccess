@@ -126,8 +126,13 @@ const userController = {
   updateCurrentUserProfile: async (req, res) => {
     try {
       const userId = req.user.userId;
-      const updateData = {};
-      const allowedFields = ['name', 'age', 'profilePicture'];
+      const updateData = {}; // Initialize empty update object
+      const allowedFields = ['name', 'age']; // Fields from req.body that are allowed
+
+      // Handle file validation error from multer's fileFilter
+      if (req.fileValidationError) {
+        return res.status(400).json({ message: req.fileValidationError });
+      }
 
       allowedFields.forEach(field => {
         if (req.body[field] !== undefined) {
@@ -135,14 +140,26 @@ const userController = {
         }
       });
 
-      // Check if there's anything valid to update
-      if (Object.keys(updateData).length === 0) {
+      // Handle profile picture update from uploaded file
+      if (req.file) {
+        // Path to be stored, e.g., '/uploads/profile-pictures/your-file-name.jpg'
+        // This path assumes your server is set up to serve static files from a 'public' directory
+        // and multer saves files into 'public/uploads/profile-pictures/'
+        updateData.profilePicture = `/uploads/profile-pictures/${req.file.filename}`;
+      } else if (req.body.profilePicture !== undefined && (req.body.profilePicture === "" || req.body.profilePicture === null)) {
+        // Allow clearing the profile picture by sending an empty string or null in the body
+        // This is useful if you want to allow users to remove their picture without uploading a new one.
+        updateData.profilePicture = null;
+      }
+
+      // Check if there's anything to update
+      if (Object.keys(updateData).length === 0 && !req.file) { // also check req.file if it's the only update
         return res.status(400).json({ message: "No valid fields provided for update." });
       }
 
       const updatedUser = await userModel.findByIdAndUpdate(
         userId,
-        updateData,
+        { $set: updateData }, // Use $set to only update provided fields
         {
           new: true, 
           runValidators: true 
@@ -157,7 +174,10 @@ const userController = {
 
     } catch (error) {
       console.error("Error updating current user profile:", error);
-       if (error.name === 'ValidationError') {
+       if (error instanceof multer.MulterError) {
+        return res.status(400).json({ message: `Multer error: ${error.message}` });
+       }
+       if (error.name === 'ValidationError') { // Mongoose validation error
            return res.status(400).json({ message: "Validation failed", errors: error.errors });
        }
       return res.status(500).json({ message: "Server error while updating profile." });
@@ -366,7 +386,8 @@ const userController = {
     try {
       const userId = req.user.userId;
 
-      const user = await userModel.findById(userId).select('_id name email role age');
+      // Include profilePicture in the select statement
+      const user = await userModel.findById(userId).select('_id name email role age profilePicture');
 
       if (!user) {
         return res.status(404).json({ message: "User not found" });

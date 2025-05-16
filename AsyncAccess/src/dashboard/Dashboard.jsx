@@ -99,7 +99,7 @@ export default function Dashboard(props) {
           >
             <Header />
             {error && !currentUser && <Alert severity="error" sx={{ width: '100%', mt: 2 }}>{error}</Alert>}
-            <MainGrid currentUser={currentUser} isLoading={isLoading} />
+            <MainGrid currentUser={currentUser} isLoading={isLoading} setCurrentUser={setCurrentUser} />
           </Stack>
         </Box>
       </Box>
