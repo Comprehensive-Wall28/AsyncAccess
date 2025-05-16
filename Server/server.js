@@ -16,7 +16,7 @@ if (!process.env.MONGODB_URI) {
 if(!process.env.EMAIL_HOST || !process.env.EMAIL_PORT || !process.env.EMAIL_USER || !process.env.EMAIL_PASS || !process.env.EMAIL_SECURE || !process.env.EMAIL_FROM){
   console.error("WARNING : Missing env variables for 2FA function");
 }
-const port = /*process.env.PORT || */ 3000
+const port = process.env.PORT ||  3000
 const app = express();
 
 const bookingRouter = require("./routes/bookingRoutes.js")
@@ -24,17 +24,18 @@ const userRouter = require("./routes/userRoutes.js")
 const eventRouter = require("./routes/eventRoutes.js")
 const authRouter = require("./routes/authRoutes.js")
 
-app.use(cors({
-  origin:  ['http://localhost:3000', 'http://localhost:5001'],
-  credentials: true,
-}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser())
 
-app.use("/api/v1", authRouter);
-app.use("/api/v1/users", userRouter);
-app.use("/api/v1/bookings", bookingRouter);
+app.use(cors({
+  origin:  ['https://asyncaccess.pages.dev', 'https://asyncaccess.pages.dev/', 'http://localhost:5174'], //I hate cors, this will be changed
+  credentials: true,
+}));
+
+app.use("/api/v1", authRouter); 
+app.use("/api/v1/users", userRouter); 
+app.use("/api/v1/bookings", bookingRouter); 
 app.use("/api/v1/events", eventRouter);
 
 const startServer = async () => {

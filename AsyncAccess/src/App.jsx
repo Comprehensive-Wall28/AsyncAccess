@@ -6,7 +6,7 @@ import SignIn from './sign-in/SignIn';
 import SignUp from './sign-up/SignUp';
 import Dashboard from './dashboard/Dashboard';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import OrganizerDashboard from './organizer-page/OrganizerDashboard';
+import OrganizerDashboard from './organizer-page/Dashboard';
 
 function App() {
   return (
