@@ -7,6 +7,7 @@ import SignUp from './sign-up/SignUp';
 import Dashboard from './dashboard/Dashboard';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import OrganizerDashboard from './organizer-page/Dashboard';
+
 import BookingsDetail from './organizer-page/Details/BookingsDetail.jsx';
 
 function App() {
