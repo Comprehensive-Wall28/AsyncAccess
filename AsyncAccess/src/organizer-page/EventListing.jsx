@@ -1,6 +1,8 @@
 import './components/EventListings.css';
 import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
+import NotFound from '../components/NotFoundComponent';
+import {Navigate } from 'react-router-dom';
 import {
   FaMapMarkerAlt,
   FaCalendarAlt,
@@ -13,7 +15,13 @@ function EventListing() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const user = JSON.parse(localStorage.getItem('user')) || {};
+  const userRole = user.role || 'User';
   const navigate = useNavigate();
+
+  if (userRole === 'User') {
+    return <NotFound />;
+  }
 
   useEffect(() => {
     const fetchEvents = async () => {
