@@ -50,7 +50,7 @@ export default function Dashboard(props) {
           if (err.response.status === 401 || err.response.status === 403) {
             setError('Authentication required. Redirecting to sign-in...');
             localStorage.removeItem('currentUser');
-            setTimeout(() => navigate('/signin', { state: { from: 'dashboard_auth_error' } }), 2000);
+            setTimeout(() => navigate('/login', { state: { from: 'dashboard_auth_error' } }), 2000);
             // No return here, allow finally to run. Component might unmount after navigate.
           } else {
             setError(err.response.data?.message || `Server error: ${err.response.status}`);

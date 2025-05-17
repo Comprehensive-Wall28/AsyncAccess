@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { FaCalendarAlt, FaClock, FaMapMarkerAlt } from 'react-icons/fa';
 import './style.css';
 
-function BookingsDetail() {
+function EventAnalytics() {
     const { id } = useParams();
     const [booking, setBooking] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -57,7 +57,27 @@ function BookingsDetail() {
                     )}
                     {booking.image && (
                         <div className="detail-item">
-                            <img src={booking.image} alt="Failed to load image!" className="event-image" />
+                          {booking.image && (
+                            <div className="image-container">
+                              <div className="image-loader"></div>
+                              <img
+                                src={booking.image}
+                                alt="Event"
+                                className="event-image"
+                                onLoad={(e) => e.target.classList.add('loaded')}
+                                onError={(e) => {
+                                  // Hide the loader when image fails to load
+                                  const loader = e.target.previousElementSibling;
+                                  if (loader) loader.style.display = 'none';
+
+                                  // Hide the image and show the error message
+                                  e.target.style.display = 'none';
+                                  e.target.nextElementSibling.style.display = 'block';
+                                }}
+                              />
+                              <div className="image-error">Failed to load image!</div>
+                            </div>
+                          )}
                         </div>
                     )}
 
@@ -106,4 +126,4 @@ function BookingsDetail() {
     );
 }
 
-export default BookingsDetail;
+export default EventAnalytics;
