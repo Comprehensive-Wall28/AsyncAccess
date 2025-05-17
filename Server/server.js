@@ -16,7 +16,6 @@ if (!process.env.MONGODB_URI) {
 if(!process.env.EMAIL_HOST || !process.env.EMAIL_PORT || !process.env.EMAIL_USER || !process.env.EMAIL_PASS || !process.env.EMAIL_SECURE || !process.env.EMAIL_FROM){
   console.error("WARNING : Missing env variables for 2FA function");
 }
-
 const port = process.env.PORT ||  3000
 const app = express();
 
@@ -30,28 +29,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser())
 
 app.use(cors({
-  origin: (origin, callback) => {
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'https://asyncaccess.pages.dev',
-      'http://localhost:5174',
-      'http://localhost:5173',
-      'http://localhost:5175',
-
-    ];
-
-    // For debugging - log the origin that's trying to access
-    console.log('Request from origin:', origin);
-
-    if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    return callback(new Error('Not allowed by CORS'));
-  },
+  origin:  ['https://asyncaccess.pages.dev', 'https://asyncaccess.pages.dev/', 'http://localhost:5174'], //I hate cors, this will be changed
   credentials: true,
 }));
-
 
 app.use("/api/v1", authRouter); 
 app.use("/api/v1/users", userRouter); 

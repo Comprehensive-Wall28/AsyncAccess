@@ -14,7 +14,9 @@ const bookingController = {
         return res.status(401).json({ error: "Please log in to use this functionality" });
       }
 
-      const bookings = await Booking.find({ user: userId });
+      // Populate the 'event' field with 'title' and 'date' from the Event model
+      // Also populate the 'user' field with 'name' and 'email' for completeness, though not strictly needed by current frontend
+      const bookings = await Booking.find({ user: userId }).populate('event', 'title date').populate('user', 'name email');
 
       if (!bookings || bookings.length === 0) {
         return res.status(404).json({ error: "No bookings found for this user" });
@@ -131,17 +133,28 @@ const bookingController = {
         return res.status(403).json({ error: 'Cannot cancel another user\'s booking' });
       }
 
+      // Prevent cancelling already cancelled bookings
+      if (booking.bookingStatus === 'Cancelled') {
+        return res.status(400).json({ error: 'Booking is already cancelled.' });
+      }
+
       // Update event tickets
-      const event = await Event.findById(booking.event);
-      if (event) {
-        event.bookedTickets -= booking.numberOfTickets;
-        await event.save();
+      // Only return tickets if the booking was 'Confirmed'
+      if (booking.bookingStatus === 'Confirmed') {
+        const event = await Event.findById(booking.event);
+        if (event) {
+          event.bookedTickets -= booking.numberOfTickets;
+          if (event.bookedTickets < 0) event.bookedTickets = 0; // Ensure not negative
+          await event.save();
+        }
       }
 
       booking.bookingStatus = 'Cancelled';
       await booking.save();
 
-      res.status(200).json({ message: 'Booking cancelled successfully' });
+      // Populate event details for the returned booking, similar to getMyBookings
+      const updatedBooking = await Booking.findById(booking._id).populate('event', 'title date');
+      res.status(200).json({ message: 'Booking cancelled successfully', booking: updatedBooking });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
