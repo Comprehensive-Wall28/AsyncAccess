@@ -58,8 +58,8 @@ node_modules/ # This is already listed above, but harmless to have twice.
 .yarn-integrity
 
 # dotenv environment variables file
-Server/.env
-AsyncAccess/src/.env
+/Server/.env
+/AsyncAccess/src/.env
 #.env.test
 
 # IDEs and editors
