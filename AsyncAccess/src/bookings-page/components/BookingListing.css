@@ -1,0 +1,26 @@
+.booking-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #00001e;
+  border-radius: 8px;
+    margin: 5rem;
+}
+
+.booking-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: #161142;
+    border-radius: 8px;
+}
+
+.loading-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+

@@ -39,7 +39,7 @@ export const signup = async (name, email, password, role ) => {
 }
 
 // Export the configured axios instance for direct use.
-// We'll export it with the name 'apiClient' so EventListing.jsx can use it as such.
+// We'll export it with the name 'apiClient' so BookingListing.jsx can use it as such.
 export { apiClientInstance as apiClient };
 
 // You can add other auth-related API calls here, e.g., register, logout, resetPassword
