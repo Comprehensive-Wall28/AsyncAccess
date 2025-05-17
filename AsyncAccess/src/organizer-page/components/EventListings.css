@@ -4,15 +4,55 @@
     padding: 10rem;
     max-width: 1200px;
     /*background: linear-gradient(to bottom, #14a875, #00c4ff, #256e93);*/
-    background-color: #f7f9fc;
-    background-image: url('./assets/images/gradient-bg.png');
+    background-color: #141415;
     background-repeat: repeat;
     opacity: 0.98;
     min-width: 100%;
     border-radius: 12px; /* Optional: adds rounded corners */
     padding: 2rem;
-    max-width: 1200px;
     margin: 0 auto;
+}
+
+/* Add to your EventListings.css file */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sort-controls select {
+  padding: 5px 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.analytics-summary {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #eee;
+}
+
+.analytics-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.analytics-icon {
+  color: #555;
+}
+
+.analytics-revenue {
+  font-weight: bold;
+  color: #28a745;
 }
 
 .events-grid {
@@ -104,6 +144,7 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    border-radius: 12px;
     background: linear-gradient(to bottom, #0d815a, #00acdd, #1c4f68);
     min-height: 100vh;
     margin: 0 auto 0 10px;
