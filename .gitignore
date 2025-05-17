@@ -9,6 +9,8 @@ lerna-debug.log*
 # Dependency directories
 node_modules/
 
+.env
+
 # Runtime data
 pids
 *.pid
@@ -57,6 +59,7 @@ node_modules/ # This is already listed above, but harmless to have twice.
 
 # dotenv environment variables file
 Server/.env
+AsyncAccess/src/.env
 #.env.test
 
 # IDEs and editors
