@@ -1,29 +1,34 @@
-// src/services/authService.js
 import axios from 'axios';
 
-const API_BASE_URL ='http://localhost:3000/api/v1';
+const BACKEND_STATIC_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-// This is the axios instance. It's already named apiClient internally.
 const apiClientInstance = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: BACKEND_STATIC_BASE_URL,
   withCredentials: true,
 });
 
 export const login = async (email, password) => {
-  console.log('login called with:', email); // Add this line
   try {
     const response = await apiClientInstance.post('/login', { email, password });
     return response.data;
   } catch (error) {
-    console.error('Login error:', error, error?.response?.data);
-    throw error.response ? error.response.data : new Error(error?.response);
+    throw error.response ? error.response.data : new Error('Login failed due to a network or server error.');
+  }
+};
+
+export const logout = async () => {
+  try {
+    const response = await apiClientInstance.post('/users/logout'); // Use POST for logout
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : new Error('Logout failed due to a network or server error.');
   }
 };
 
 export const requestPasswordReset = async (email) => {
   try {
     const response = await apiClientInstance.put('/forgetPassword', { email });
-    return response.data; 
+    return response.data;
   } catch (error) {
     throw error.response ? error.response.data : new Error('Password reset request failed due to a network or server error.');
   }
@@ -38,13 +43,29 @@ export const signup = async (name, email, password, role ) => {
   }
 }
 
-// Export the configured axios instance for direct use.
-// We'll export it with the name 'apiClient' so BookingListing.jsx can use it as such.
+
+export const updateUserProfilePicture = async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append('profilePictureFile', file); // 'profilePictureFile' is the field name backend (multer) will expect
+
+    const response = await apiClientInstance.put('/users/profile', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data; // Should return { user: updatedUser, msg: "..." }
+  } catch (error) {
+    throw error.response ? error.response.data : new Error('Profile picture upload failed due to a network or server error.');
+  }
+};
+
 export { apiClientInstance as apiClient };
 
-// You can add other auth-related API calls here, e.g., register, logout, resetPassword
 export default {
+  logout,
   login,
   requestPasswordReset,
-  signup, // Added for consistency
+  signup,
+  updateUserProfilePicture,
 };

@@ -1,28 +1,21 @@
 import * as React from 'react';
-import Box from '@mui/material/Box';
-import Copyright from '../internals/components/Copyright';
+//import Box from '@mui/material/Box';
+//import Copyright from '../internals/components/Copyright';
 
-import UserProfileDisplay from './UserProfileDisplay';
+//import UserProfileDisplay from './UserProfileDisplay';
 import {FaCalendarAlt, FaClock, FaMapMarkerAlt} from "react-icons/fa";
 import {Outlet} from "react-router-dom";
-import {useState} from "react"; // Import the new component
+import Footer from "../../components/Footer.jsx";
 
-export default function MainGrid() {
-    const [bookings, setBookings] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [notFound, setNotFound] = useState(false);
-    const user = JSON.parse(localStorage.getItem('user')) || {};
-    const userRole = user?.role ?? null;
-    const [currentUser, setCurrentUser] = useState(null);
+export default function MainGrid({bookings, loading, error, currentUser}) {
 
     return (
-        <div className="organizer-dashboard">
+        <div className="booking-dashboard">
             <h1>Bookings</h1>
             <div className="bookings-container">
                 <h2>All Bookings</h2>
                 {loading ? (
-                    <div className="loading-box">Loading bookings...</div>
+                    <div className="bookLoad">Loading bookings...</div>
                 ) : error ? (
                     <div className="error-box">
                         <h3>Error Loading Bookings</h3>
@@ -37,49 +30,38 @@ export default function MainGrid() {
                                 key={booking._id}
                                 className="booking-card"
                             >
-                                <div className="booking-header">
-                                    {booking.category && (
-                                        <span className="category-tag">{booking.category}</span>
-                                    )}
-                                </div>
-                                <h3 className="booking-title">{booking.title || 'Untitled Booking'}</h3>
+
+                                <h3 className="booking-title">{booking.event.title || 'Untitled Booking'}</h3>
                                 <span className={`status-badge ${booking.status?.toLowerCase()}`}>
-                  {booking.status}
-                </span>
+                                    {booking.status}
+                                </span>
                                 <div className="booking-info">
-                                    {booking.date && (
+                                    {booking.event.date && (
                                         <div className="info-item">
                                             <FaCalendarAlt className="info-icon" />
-                                            <span>{new Date(booking.date).toLocaleDateString()}</span>
-                                        </div>
-                                    )}
-                                    {booking.time && (
-                                        <div className="info-item">
-                                            <FaClock className="info-icon" />
-                                            <span>{booking.time}</span>
-                                        </div>
-                                    )}
-                                    {booking.location && (
-                                        <div className="info-item">
-                                            <FaMapMarkerAlt className="info-icon" />
-                                            <span>{booking.location}</span>
+                                            <span>{new Date(booking.event.date).toLocaleDateString()}</span>
                                         </div>
                                     )}
                                 </div>
+                                {booking.totalPrice && (
+                                    <div className="info-item">
+                                        <FaMapMarkerAlt className="info-icon" />
+                                        <span>Total Price paid: {booking.totalPrice} USD</span>
+                                    </div>
+                                )}
+                                {booking.numberOfTickets && (
+                                    <div className="info-item">
+                                        <FaMapMarkerAlt className="info-icon" />
+                                        <span>No. of tickets: {booking.numberOfTickets}</span>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
                 )}
             </div>
             <Outlet />
+            <Footer />
         </div>
     );
-    /*return (
-    <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
-      {/!* User Profile Section *!/}
-
-
-      <Copyright sx={{ my: 4 }} />
-    </Box>
-  );*/
 }

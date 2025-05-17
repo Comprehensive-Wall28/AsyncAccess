@@ -59,7 +59,7 @@ node_modules/ # This is already listed above, but harmless to have twice.
 
 # dotenv environment variables file
 /Server/.env
-/AsyncAccess/src/.env
+/AsyncAccess/.env
 #.env.test
 
 # IDEs and editors

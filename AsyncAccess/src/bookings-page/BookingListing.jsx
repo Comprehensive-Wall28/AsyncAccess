@@ -2,6 +2,7 @@ import './components/BookingListing.css';
 import React, { useState, useEffect } from 'react';
 import {Outlet} from 'react-router-dom';
 import NotFound from '../components/NotFoundComponent';
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 import {
   FaMapMarkerAlt,
   FaCalendarAlt,
@@ -34,8 +35,8 @@ const xThemeComponents = {
 };
 
 function BookingListing(props) {
-  const [setBookings] = useState([]);
-  const [setLoading] = useState(true);
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [notFound, setNotFound] = useState(false);
   const user = JSON.parse(localStorage.getItem('user')) || {};
@@ -54,7 +55,7 @@ function BookingListing(props) {
           return;
         }
 
-        const bookingsResponse = await fetch('http://localhost:3000/api/v1/users/bookings', {
+          const bookingsResponse = await fetch(`${apiBaseUrl}users/bookings`, {
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' }
         });
@@ -110,8 +111,7 @@ function BookingListing(props) {
             >
               <Header />
               {error && !currentUser && <Alert severity="error" sx={{ width: '100%', mt: 2 }}>{error}</Alert>}
-              <MainGrid currentUser={currentUser} isLoading={isLoading} />
-            </Stack>
+              <MainGrid bookings={bookings} loading={loading} error={error} currentUser={currentUser} />            </Stack>
           </Box>
         </Box>
       </AppTheme>

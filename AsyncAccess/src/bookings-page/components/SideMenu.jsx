@@ -8,8 +8,8 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import SelectContent from './SelectContent';
 import MenuContent from './MenuContent';
-import CardAlert from './CardAlert';
-import OptionsMenu from './OptionsMenu';
+import CardAlert from '../../components/CardAlert.jsx';
+import OptionsMenu from './OptionsMenu.jsx';
 
 const drawerWidth = 240;
 

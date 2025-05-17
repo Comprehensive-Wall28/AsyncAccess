@@ -63,7 +63,7 @@ export default function MenuContent() {
             <List dense>
                 {mainListItems.map((item, index) => (
                     <ListItem key={index} disablePadding sx={{ display: 'block' }}>
-                        <ListItemButton selected={index === 0} onClick={() => handleNavigation(item.route)}>
+                        <ListItemButton selected={index === 1} onClick={() => handleNavigation(item.route)}>
                             <ListItemIcon>{item.icon}</ListItemIcon>
                             <ListItemText primary={item.text} />
                         </ListItemButton>

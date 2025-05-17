@@ -29,7 +29,7 @@ function Footer() {
       </div>
 
       <div className="footer-bottom">
-        © 2024 AsyncAccess. All rights reserved.
+        © 2025 AsyncAccess. All rights reserved.
       </div>
     </div>
   );
