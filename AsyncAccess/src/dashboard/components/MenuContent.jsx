@@ -16,7 +16,7 @@ import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
 
 const mainListItems = [
     { text: 'Home', icon: <HomeRoundedIcon />, route: '/' },
-    { text: 'Events', icon: <AnalyticsRoundedIcon />, route: '/events' },
+    { text: 'Events', icon: <AnalyticsRoundedIcon />, route: '/events' }, //handle so that if you are a user it says Bookings and makes yoyu go to bookings
     { text: 'Clients', icon: <PeopleRoundedIcon />, route: '/clients' },
     { text: 'Tasks', icon: <AssignmentRoundedIcon />, route: '/tasks' },
 ];
@@ -32,6 +32,7 @@ export default function MenuContent() {
 
     const handleNavigation = (route) => {
         if (route) {
+            console.log()
             navigate(route);
         }
     };

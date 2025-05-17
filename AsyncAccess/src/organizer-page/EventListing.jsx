@@ -1,54 +1,61 @@
 import './components/EventListings.css';
 import React, { useState, useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import NotFound from '../components/NotFoundComponent';
-import {Navigate } from 'react-router-dom';
 import {
   FaMapMarkerAlt,
   FaCalendarAlt,
-  FaClock,
-  FaTicketAlt,
-  FaChartBar
+  FaClock
 } from 'react-icons/fa';
+import { apiClient } from "../services/authService.js";
 
 function EventListing() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [notFound, setNotFound] = useState(false);
   const user = JSON.parse(localStorage.getItem('user')) || {};
-  const userRole = user.role || 'User';
-  const navigate = useNavigate();
-
-  if (userRole === 'User') {
-    return <NotFound />;
-  }
+  const userRole = user?.role ?? null;
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    const fetchEvents = async () => {
+    const fetchData = async () => {
       try {
-        // Use the endpoint that was working in the original code
-        const response = await fetch('http://localhost:3000/api/v1/users/events', {
-          credentials: 'include', // Include credentials for auth
-          headers: {
-            'Content-Type': 'application/json',
-            // Add auth header if you have a token
-            // 'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
+        const response = await apiClient.get('/users/profile');
+        setCurrentUser(response.data);
+
+        if (response.data.role === 'User') {
+          setNotFound(true);
+          return;
+        }
+
+        const eventsResponse = await fetch('http://localhost:3000/api/v1/users/events', {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
         });
 
-        if (!response.ok) throw new Error(`Status ${response.status}`);
-        const data = await response.json();
+        if (!eventsResponse.ok) {
+          setError('Events not found');
+          setLoading(false);
+          return;
+        }
+
+        const data = await eventsResponse.json();
         setEvents(data);
       } catch (err) {
-        console.error("Error fetching events:", err);
+        console.error('Error fetching events:', err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchEvents();
-  }, []);
+    fetchData();
+  }, [user.role, userRole]);
+
+  if (notFound) {
+    return <NotFound />;
+  }
 
   return (
     <div className="organizer-dashboard">
