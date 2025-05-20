@@ -60,21 +60,6 @@ export default function AppAppBar() {
               <Button variant="text" color="info" size="small" component={Link} to="/events" sx={{ px: 1 }}>
                 Events
               </Button>
-              {/* <Button variant="text" color="info" size="small">
-                Testimonials
-              </Button> */}
-              <Button variant="text" color="info" size="small" sx={{ px: 1 }}>
-                Highlights
-              </Button>
-              {/* <Button variant="text" color="info" size="small">
-                Pricing
-              </Button> */}
-              {/* <Button variant="text" color="info" size="small" sx={{ minWidth: 0 }}>
-                FAQ
-              </Button> */}
-              {/* <Button variant="text" color="info" size="small" sx={{ minWidth: 0 }}>
-                Blog
-              </Button> */}
             </Box>
           </Box>
           <Box
@@ -124,9 +109,6 @@ export default function AppAppBar() {
                 <Button color="primary" variant="outlined" fullWidth component={Link} to="/dashboard">
                   Your Dashboard
                 </Button>
-                {/* <MenuItem>Pricing</MenuItem>
-                <MenuItem>FAQ</MenuItem>
-                <MenuItem>Blog</MenuItem> */}
                 <Divider sx={{ my: 2 }} /> {/* Adjusted margin slightly */}
                 <MenuItem>
                   <Button color="primary" variant="contained" fullWidth component={Link} to="/signup">
