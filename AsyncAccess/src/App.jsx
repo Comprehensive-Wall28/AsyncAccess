@@ -1,59 +1,54 @@
 import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 import MainLayout from './components/MainLayout';
 import Home from './home-page/Home';
 import SignIn from './sign-in/SignIn';
 import SignUp from './sign-up/SignUp';
 import Dashboard from './dashboard/Dashboard';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import OrganizerDashboard from './organizer-page/Dashboard';
-import Events from './events/Events'
+import EventsPage from './events/Events'; // Assuming 'Events.jsx' is the page wrapper
+import EventDetails from './events/components/EventDetails'; // Corrected import path
 
 function App() {
   return (
-    <Router>
-      <Routes>
+      <Router>
+        <Routes>
+          <
+            Route
+            path="/"
+            element={<Home />} />
+          <
+            Route
+            path="/login"
+            element={<SignIn />} />
+          <
+            Route
+            path="/signup"
+            element={<SignUp />} />
+          <
+            Route
+            path="/marketing"
+            element={<Home />} />
+          <
+            Route
+            path="/events"
+            element={<EventsPage />} />
+          <
+            Route
+            path="/events/:id"
+            element={<EventDetails />} />
 
-          <Route
-          path="/"
-          element={<Home />}
-        />
-          <Route
-          path="/login"
-          element={<SignIn />}
-        />
           <Route
           path="/dashboard"
-          element={<Dashboard />}
-        />
-          <Route
-          path="/signup"
-          element={<SignUp />}
-        />
-          <Route
-          path="/marketing"
-          element={<Home />}
-        />
-          <Route
-          path="/events"
-          element={<Events />}
-        />
+          element={<Dashboard />} />
 
           <Route
-          path="/dashboard"
-          element={
-            <MainLayout>
-              {/* Replace HomePageContent with your actual dashboard component later */}
-            </MainLayout>
-          }
-        />
-        
-
-          <Route path="/organizer-management" element={<OrganizerDashboard />} />
+          path="/organizer-management"
+          element={<OrganizerDashboard />} />
           {/* Add more routes for other pages here */}
-
-      </Routes>
-    </Router>
+        </Routes>
+      </Router>
   );
 }
 
