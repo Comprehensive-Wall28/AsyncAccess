@@ -7,6 +7,7 @@ import SignUp from './sign-up/SignUp';
 import Dashboard from './dashboard/Dashboard';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import OrganizerDashboard from './organizer-page/Dashboard';
+import Events from './events/Events'
 
 function App() {
   return (
@@ -33,6 +34,10 @@ function App() {
           path="/marketing"
           element={<Home />}
         />
+          <Route
+          path="/events"
+          element={<Events />}
+        />
 
           <Route
           path="/dashboard"
@@ -42,6 +47,7 @@ function App() {
             </MainLayout>
           }
         />
+        
 
           <Route path="/organizer-management" element={<OrganizerDashboard />} />
           {/* Add more routes for other pages here */}
