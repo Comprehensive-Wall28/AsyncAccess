@@ -69,12 +69,8 @@ export default function AppAppBar() {
               alignItems: 'center',
             }}
           > {/* Use Link component for navigation */}
-            <Button color="primary" variant="text" size="small" component={Link} to="/login">
-              Sign in
-            </Button>
-            <Button color="primary" variant="contained" size="small" component={Link} to="/signup"> {/* Assuming /signup for this button */}
-              Sign up
-            </Button>
+          
+        
             <ColorModeIconDropdown />
           </Box>
           <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 1 }}>
@@ -111,14 +107,10 @@ export default function AppAppBar() {
                 </Button>
                 <Divider sx={{ my: 2 }} /> {/* Adjusted margin slightly */}
                 <MenuItem>
-                  <Button color="primary" variant="contained" fullWidth component={Link} to="/signup">
-                    Sign up
-                  </Button>
+              
                 </MenuItem>
                 <MenuItem>
-                  <Button color="primary" variant="outlined" fullWidth component={Link} to="/login">
-                    Sign in
-                  </Button>
+              
                 </MenuItem>
               </Box>
             </Drawer>

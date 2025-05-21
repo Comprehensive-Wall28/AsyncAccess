@@ -2,11 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {Outlet} from 'react-router-dom';
 import NotFound from '../components/NotFoundComponent';
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-import {
-  FaMapMarkerAlt,
-  FaCalendarAlt,
-  FaClock
-} from 'react-icons/fa';
 
 import { apiClient } from "../services/authService.js";
 import AppTheme from "../shared-theme/AppTheme.jsx";

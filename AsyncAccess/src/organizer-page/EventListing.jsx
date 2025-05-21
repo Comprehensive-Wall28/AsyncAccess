@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import NotFound from '../components/NotFoundComponent';
-import { FaMapMarkerAlt, FaCalendarAlt, FaClock } from 'react-icons/fa';
 import { apiClient } from "../services/authService.js";
 import { Box, Stack, Typography, Alert, Paper, CssBaseline } from '@mui/material';
 

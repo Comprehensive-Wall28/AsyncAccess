@@ -3,7 +3,6 @@ import * as React from 'react';
 //import Copyright from '../internals/components/Copyright';
 
 //import UserProfileDisplay from './UserProfileDisplay';
-import {FaCalendarAlt, FaClock, FaMapMarkerAlt} from "react-icons/fa";
 import {Outlet} from "react-router-dom";
 import Footer from "../../components/Footer.jsx";
 
