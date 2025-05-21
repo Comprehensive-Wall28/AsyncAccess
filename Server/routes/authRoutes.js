@@ -13,6 +13,6 @@ router.put("/update-password", authenticationMiddleware, userController.updatePa
 //(Forgot Password Step 1)
 router.put("/forgetPassword", userController.requestPasswordReset);
 //(Forgot Password Step 2)
-router.put("/reset-password", userController.resetPassword);
+router.put("/reset-password", userController.resetPassword); // Fixed: Changed from POST to PUT for consistency
 
 module.exports = router;

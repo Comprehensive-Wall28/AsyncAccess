@@ -15,6 +15,7 @@ import Unauthenticated from './unauthenticated/Unauthenticated';
 import NotFound from './NotFound.jsx';
 import RoledLogin from './sign-in-role/SignIn.jsx'
 import RoledSignup from './sign-up-role/SignUp.jsx'
+import ForgotPassword from './forgot-password/ForgotPassword.jsx';
 
 function App() {
   return (
@@ -63,6 +64,7 @@ function App() {
           {/*<Route path="events/:id" element={<EventAnalytics />} />*/}
           <Route path="/login-roled" element={<RoledLogin />} />
           <Route path="/signup-roled" element={<RoledSignup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
           <Route
             path="/unauthorized"

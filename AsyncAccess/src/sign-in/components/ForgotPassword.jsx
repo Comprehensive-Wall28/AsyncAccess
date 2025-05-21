@@ -9,6 +9,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField'; 
 import { Alert, CircularProgress, Box } from '@mui/material'; 
 import authService from '../../services/authService'; 
+import { useNavigate } from 'react-router-dom';
 
 function ForgotPassword({ open, handleClose }) {
   const [email, setEmail] = React.useState('');
@@ -16,6 +17,7 @@ function ForgotPassword({ open, handleClose }) {
   const [message, setMessage] = React.useState('');
   const [error, setError] = React.useState('');
 
+  const navigate = useNavigate();
   React.useEffect(() => {
     if (open) {
       setEmail('');
@@ -24,7 +26,7 @@ function ForgotPassword({ open, handleClose }) {
     }
   }, [open]);
 
-  const handleSubmit = async (event) => {
+  const handleContinue = async (event) => {
     event.preventDefault();
     setMessage('');
     setError('');
@@ -33,8 +35,10 @@ function ForgotPassword({ open, handleClose }) {
     try {
       const response = await authService.requestPasswordReset(email);
       setMessage(response.message || 'Password reset instructions sent to your email.');
-      // Optionally close the dialog after a delay or on success
-      // setTimeout(handleClose, 3000);
+      navigate('/forgot-password', {
+        state: { email: email },
+        replace: true, // Use replace to avoid going back to the sign-in page on back navigation
+      });
     } catch (err) {
       setError(err.message || 'Failed to send password reset request.');
     } finally {
@@ -49,7 +53,7 @@ function ForgotPassword({ open, handleClose }) {
       slotProps={{
         paper: {
           component: 'form',
-          onSubmit: handleSubmit,
+          onSubmit: handleContinue,
         },
       }}
       sx={{ '& .MuiDialog-paper': { backgroundImage: 'none' } }} // Ensure sx is applied to Paper

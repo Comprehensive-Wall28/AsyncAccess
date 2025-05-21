@@ -44,6 +44,16 @@ export const signup = async (name, email, password, role ) => {
   }
 }
 
+export const resetPassword = async (email, code, newPassword) => {
+  try {
+    const response = await apiClientInstance.put('/reset-password', { email, code, newPassword });
+    return response.data;
+  } catch (error) {
+    // Improve error handling: Include status and message if available
+    const errorMessage = error.response?.data?.message || 'Password reset failed due to a network or server error.';
+    throw new Error(errorMessage);
+  }
+};
 
 export const updateUserProfilePicture = async (file) => {
   try {
@@ -83,6 +93,7 @@ export default {
   logout,
   login,
   requestPasswordReset,
+  resetPassword,
   signup,
   updateUserProfilePicture,
   useAuthRedirect
