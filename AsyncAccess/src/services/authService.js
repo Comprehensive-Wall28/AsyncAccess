@@ -28,7 +28,7 @@ export const logout = async () => {
 export const requestPasswordReset = async (email) => {
   try {
     const response = await apiClientInstance.put('/forgetPassword', { email });
-    return response.data; 
+    return response.data;
   } catch (error) {
     throw error.response ? error.response.data : new Error('Password reset request failed due to a network or server error.');
   }

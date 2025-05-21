@@ -5,13 +5,13 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const secretKey = process.env.SECRET_KEY;
 const bcrypt = require("bcrypt");
-const sendEmail = require("../utils/emailSender"); 
-const crypto = require("node:crypto"); 
+const sendEmail = require("../utils/emailSender");
+const crypto = require("node:crypto");
 const userController = {
   register: async (req, res) => {
     try {
       const { email, password, name, role, age } = req.body;
-      
+
       const roles = ['Admin', 'Organizer', 'User'];
       if (!roles.includes(role)) {
         return res.status(400).json({ message: "Invalid role provided. Inserts: Admin , User , Organizer" });
@@ -55,14 +55,14 @@ const userController = {
       if (!user) {
         return res.status(404).json({ message: "User not found!" });
       }
-      const isMatch = await user.comparePassword(password); 
+      const isMatch = await user.comparePassword(password);
 
       if (!isMatch) {
         return res.status(400).json({ message: "Incorrect password" });
       }
 
       const currentDateTime = new Date();
-      const expiresAt = new Date(+currentDateTime + 1800000); 
+      const expiresAt = new Date(+currentDateTime + 1800000);
 
       // Generate a JWT token
       const token = jwt.sign(
@@ -123,7 +123,7 @@ const userController = {
       console.error("Error fetching user by ID:", error);
       return res.status(500).json({ message: "Server error while fetching user" });
     }
-  }, 
+  },
 
   updateCurrentUserProfile: async (req, res) => {
     try {
@@ -190,7 +190,7 @@ const userController = {
       const userIdToUpdate = req.params.id;
       const { role } = req.body;
 
-      if (role === undefined) { 
+      if (role === undefined) {
         return res.status(400).json({ message: "Role is required in the request body to update." });
       }
 
@@ -224,7 +224,7 @@ const userController = {
   },
   updatePasswordLoggedIn: async (req, res) => {
     try {
-      const userId = req.user.userId; 
+      const userId = req.user.userId;
       const { oldPassword, newPassword } = req.body;
 
 
@@ -232,11 +232,11 @@ const userController = {
         return res.status(400).json({ message: "Old password and new password are required." });
       }
 
-      const user = await userModel.findById(userId).select('+password'); 
+      const user = await userModel.findById(userId).select('+password');
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      const isMatch = await user.comparePassword(oldPassword); 
+      const isMatch = await user.comparePassword(oldPassword);
 
       if (!isMatch) {
         return res.status(400).json({ message: "Incorrect old password" });
@@ -276,9 +276,9 @@ const userController = {
       // Hash the code before saving
       const hashedCode = crypto
 
-        .createHash("sha256")
-        .update(resetCode)
-        .digest("hex");
+          .createHash("sha256")
+          .update(resetCode)
+          .digest("hex");
 
       // Set hashed code and expiry (e.g., 10 minutes)
       user.resetPasswordToken = hashedCode;
@@ -298,10 +298,10 @@ const userController = {
       try {
         await sendEmail(
 
-          user.email,
-          "Your Password Reset Code", 
-          plainTextMessage,
-          message
+            user.email,
+            "Your Password Reset Code",
+            plainTextMessage,
+            message
         );
         console.log(`Password reset code sent to ${user.email}`);
         return res.status(200).json({ message: "If an account with that email exists, a password reset code has been sent." });
@@ -324,26 +324,26 @@ const userController = {
       const { email, code, newPassword } = req.body;
 
       if (!email || !code || !newPassword) {
-          return res.status(400).json({ message: "Email, reset code, and new password are required." });
+        return res.status(400).json({ message: "Email, reset code, and new password are required." });
       }
       // Hash the code received from the body to match the stored one
       const hashedCode = crypto
-        .createHash("sha256")
-        .update(code) 
-        .digest("hex");
+          .createHash("sha256")
+          .update(code)
+          .digest("hex");
 
       const user = await userModel.findOne({
         email: email, // Find by email
         resetPasswordToken: hashedCode, // Compare hashed code
         resetPasswordExpires: { $gt: Date.now() }, // Check if code is still valid
-      }).select('+password'); 
+      }).select('+password');
 
       if (!user) {
         const userExists = await userModel.findOne({ email });
         if (userExists) {
-            console.log(`Invalid or expired code attempt for email: ${email}`);
+          console.log(`Invalid or expired code attempt for email: ${email}`);
         } else {
-            console.log(`Password reset attempt for non-existent email: ${email}`);
+          console.log(`Password reset attempt for non-existent email: ${email}`);
         }
         return res.status(400).json({ message: "Password reset code is invalid or has expired." });
       }
@@ -366,9 +366,9 @@ const userController = {
   },
   deleteUser: async (req, res) => {
     try {
-      const user = await userModel.findById(req.params.id); 
+      const user = await userModel.findById(req.params.id);
       if (!user) {
-          return res.status(404).json({ message: "User not found" });
+        return res.status(404).json({ message: "User not found" });
       }
 
       const cascadeMessage = await userController.deleteUserData(user._id, user.role);
@@ -377,7 +377,7 @@ const userController = {
 
       return res.status(200).json({
         msg: `User deleted successfully. Cascade actions:\n${cascadeMessage}`,
-        user: { _id: user._id, email: user.email, role: user.role } 
+        user: { _id: user._id, email: user.email, role: user.role }
       });
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -402,7 +402,7 @@ const userController = {
     }
   },
   deleteUserData: async (userId, userRole) => {
-    let messages = []; 
+    let messages = [];
     try {
       if (userRole === 'Organizer') {
         const eventsToDelete = await eventModel.find({ organizer: userId }).select('_id');
@@ -428,35 +428,35 @@ const userController = {
 
       } else if (userRole === 'User') {
         const confirmedBookings = await bookingModel.find({
-            user: userId,
-            bookingStatus: 'Confirmed' 
-        }).select('event numberOfTickets'); 
+          user: userId,
+          bookingStatus: 'Confirmed'
+        }).select('event numberOfTickets');
 
         if (confirmedBookings.length > 0) {
-            let updatedEventCount = 0;
-            for (const booking of confirmedBookings) {
-                try {
-                  const updateResult = await eventModel.findOneAndUpdate(
-                    { _id: booking.event, status: 'approved' }, 
-                    { $inc: { bookedTickets: -booking.numberOfTickets } }, // Action: Decrement bookedTickets
-                    { new: true, runValidators: true } 
-                  );
-                    if (updateResult) {
-                        updatedEventCount++;
-                        console.log(`Returned ${booking.numberOfTickets} tickets to event ${booking.event}`);
-                    } else {
-                        console.warn(`Could not find event ${booking.event} to return tickets for booking ${booking._id}`);
-                    }
-                } catch (eventUpdateError) {
-                    console.error(`Error returning tickets for event ${booking.event} from booking ${booking._id}:`, eventUpdateError);
-                    messages.push(`Error updating event ${booking.event}: ${eventUpdateError.message}`);
-                }
+          let updatedEventCount = 0;
+          for (const booking of confirmedBookings) {
+            try {
+              const updateResult = await eventModel.findOneAndUpdate(
+                  { _id: booking.event, status: 'approved' },
+                  { $inc: { bookedTickets: -booking.numberOfTickets } }, // Action: Decrement bookedTickets
+                  { new: true, runValidators: true }
+              );
+              if (updateResult) {
+                updatedEventCount++;
+                console.log(`Returned ${booking.numberOfTickets} tickets to event ${booking.event}`);
+              } else {
+                console.warn(`Could not find event ${booking.event} to return tickets for booking ${booking._id}`);
+              }
+            } catch (eventUpdateError) {
+              console.error(`Error returning tickets for event ${booking.event} from booking ${booking._id}:`, eventUpdateError);
+              messages.push(`Error updating event ${booking.event}: ${eventUpdateError.message}`);
             }
-             if (updatedEventCount > 0) {
-                messages.push(`Returned tickets to ${updatedEventCount} events due to user deletion.`);
-             }
+          }
+          if (updatedEventCount > 0) {
+            messages.push(`Returned tickets to ${updatedEventCount} events due to user deletion.`);
+          }
         } else {
-             messages.push("No confirmed bookings found for this user to return tickets from.");
+          messages.push("No confirmed bookings found for this user to return tickets from.");
         }
 
         const bookingDeletionResult = await bookingModel.deleteMany({ user: userId });

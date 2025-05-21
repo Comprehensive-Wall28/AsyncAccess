@@ -8,6 +8,10 @@ import Dashboard from './dashboard/Dashboard';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import OrganizerDashboard from './organizer-page/Dashboard';
 import Events from './events/Events'
+import EventListing from './organizer-page/EventListing.jsx';
+import EventAnalytics from './organizer-page/Details/EventAnalytics.jsx';
+import BookingListing from "./bookings-page/BookingListing.jsx";
+
 
 function App() {
   return (
@@ -49,8 +53,13 @@ function App() {
         />
         
 
-          <Route path="/organizer-management" element={<OrganizerDashboard />} />
-          {/* Add more routes for other pages here */}
+
+          {/*<Route path="/organizer-management" element={<OrganizerDashboard />} />*/}
+          <Route path="/events" element={<EventListing />} />
+          <Route path="/bookings" element={<BookingListing />} />
+          {/*<Route path="events/:id" element={<EventAnalytics />} />*/}
+
+        {/* Add more routes for other pages here */}
 
       </Routes>
     </Router>
