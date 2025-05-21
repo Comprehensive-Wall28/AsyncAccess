@@ -8,7 +8,7 @@ import { apiClient } from './authService'; // Assuming apiClient is exported fro
  */
 export const getMyBookings = async () => {
   try {
-    const response = await apiClient.get('/users/bookings'); // Matches typical route for getMyBookings in controller
+    const response = await apiClient.get('/users/bookings');
     return response.data; // Axios automatically parses JSON
   } catch (error) {
     throw error.response || new Error('Fetching bookings failed due to a network or server error.');
@@ -17,8 +17,7 @@ export const getMyBookings = async () => {
 
 export const cancelBookingById = async (bookingId) => {
   try {
-    // The backend route is PATCH /api/v1/bookings/:id
-    const response = await apiClientInstance.delete(`/bookings/${bookingId}`);
+    const response = await apiClient.delete(`/bookings/${bookingId}`);
     return response.data; // Expected: { message: '...', booking: updatedBooking }
   } catch (error) {
     throw error.response ? { data: error.response.data, status: error.response.status } : new Error('Booking cancellation failed.');

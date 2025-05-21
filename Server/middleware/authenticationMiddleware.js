@@ -6,12 +6,12 @@ module.exports = function authenticationMiddleware(req, res, next) {
   const cookie = req.cookies;
 
   if (!cookie) {
-    return res.status(401).json({ message: "Logged in users only! Please, Log in first" });
+    return res.status(401).json({ message: "Authentication required" }); // More generic message
   }
   const token = cookie.token;
   if (!token) {
-    return res.status(401).json({ message: "No token provided! Please, login first" });
-  }
+    return res.status(401).json({ message: "Authentication required" }); // More generic message
+   }
 
   jwt.verify(token, secretKey, (error, decoded) => {
     if (error) {
@@ -21,4 +21,4 @@ module.exports = function authenticationMiddleware(req, res, next) {
     req.user = decoded.user;
     next();
   });
-};
+}

@@ -22,7 +22,7 @@ import { useNavigate } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography'; // Added import for Typography
 import { apiClient } from '../services/authService'; // Import the NAMED export
-
+import authService from '../services/authService';
 const xThemeComponents = {
   ...chartsCustomizations,
   ...dataGridCustomizations,
@@ -35,13 +35,14 @@ export default function Dashboard(props) {
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState('');
   const [currentView, setCurrentView] = React.useState('home'); // State for current view
+  const handleAuthError = authService.useAuthRedirect();
   const navigate = useNavigate();
 
   const handleMenuItemClick = (action) => {
     setCurrentView(action);
     // Potentially close mobile drawer if open, if applicable
   };
-  
+
   React.useEffect(() => {
     const fetchUserProfile = async () => {
       setIsLoading(true);
@@ -49,24 +50,11 @@ export default function Dashboard(props) {
       try {
         const response = await apiClient.get('/users/profile');
         // Axios automatically parses JSON and throws for non-2xx status codes
-        setCurrentUser(response.data);
+        setCurrentUser(response.data); // Assuming the response returns the user data directly
 
-      } catch (err) {
-        console.error("Failed to fetch user profile:", err);
-        if (err.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          if (err.response.status === 401 || err.response.status === 403) {
-            setError('Authentication required. Redirecting to sign-in...');
-            localStorage.removeItem('currentUser');
-            setTimeout(() => navigate('/login', { state: { from: 'dashboard_auth_error' } }), 2000);
-            // No return here, allow finally to run. Component might unmount after navigate.
-          } else {
-            setError(err.response.data?.message || `Server error: ${err.response.status}`);
-          }
-        } else if (err.request) {
-          // The request was made but no response was received
-          setError('Network error. Please check your connection.');
+      } catch (error) {
+        handleAuthError(error);
+        if(error.response){
         } else {
           // Something else happened in setting up the request that triggered an Error
           setError(err.message || 'An unexpected error occurred.');

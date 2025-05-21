@@ -147,8 +147,7 @@ export default function SignIn(props) {
         localStorage.removeItem('currentUser'); // Clear if not "Remember me" or no currentUser
       }
 
-      // Redirect to dashboard
-      navigate('/dashboard', { replace: true }); // replace: true prevents going back to login
+      navigate('/dashboard', { replace: true });
 
     } catch (error) {
       // The error from authService.js might be an object with a message property

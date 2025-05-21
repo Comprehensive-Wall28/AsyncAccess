@@ -10,7 +10,9 @@ import Events from './events/Events'
 import EventListing from './organizer-page/EventListing.jsx';
 import EventAnalytics from './organizer-page/Details/EventAnalytics.jsx';
 import BookingListing from "./bookings-page/BookingListing.jsx";
-
+import Unauthorized from './unauthorized/Unauthorized';
+import Unauthenticated from './unauthenticated/Unauthenticated';
+import NotFound from './NotFound.jsx';
 
 function App() {
   return (
@@ -58,7 +60,17 @@ function App() {
           <Route path="/bookings" element={<BookingListing />} />
           {/*<Route path="events/:id" element={<EventAnalytics />} />*/}
 
-        {/* Add more routes for other pages here */}
+          <Route
+            path="/unauthorized"
+            element={<Unauthorized />}
+          />
+          <Route
+            path="/unauthenticated"
+            element={<Unauthenticated />}
+          />
+
+        {/* DONT PLACE BELOW HERE!*/}
+         <Route path="*" element={<NotFound />} /> {/* Catch-all route */}
 
       </Routes>
     </Router>

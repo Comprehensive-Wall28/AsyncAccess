@@ -1,5 +1,6 @@
 import axios from 'axios';
-
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import React from 'react';
 const BACKEND_STATIC_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const apiClientInstance = axios.create({
@@ -49,7 +50,7 @@ export const updateUserProfilePicture = async (file) => {
     const formData = new FormData();
     formData.append('profilePictureFile', file); // 'profilePictureFile' is the field name backend (multer) will expect
 
-    const response = await apiClientInstance.put('/users/profile', formData, {
+    const response = await apiClient.put('/users/profile', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -60,12 +61,29 @@ export const updateUserProfilePicture = async (file) => {
   }
 };
 
+
+const useAuthRedirect = () => {
+    const navigate = useNavigate();
+    return (error) => {
+      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+        const redirectPath = error.response.status === 401 ? '/unauthenticated' : '/unauthorized';
+        console.warn(`Received ${error.response.status} from API. Redirecting to ${redirectPath}`);
+        navigate(redirectPath, { replace: true });
+        // We need to throw an error here so the components know that the request failed
+        throw new Error(`Redirecting to ${redirectPath}`);
+      }
+      // Re-throw other errors for component-level handling if necessary.
+      throw error;
+    };
+};
+
 export { apiClientInstance as apiClient };
 
 export default {
   logout,
   login,
   requestPasswordReset,
-  signup, 
+  signup,
   updateUserProfilePicture,
+  useAuthRedirect
 };
