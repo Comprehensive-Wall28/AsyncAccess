@@ -60,14 +60,21 @@ export const updateUserProfilePicture = async (file) => {
     const formData = new FormData();
     formData.append('profilePictureFile', file); // 'profilePictureFile' is the field name backend (multer) will expect
 
-    const response = await apiClient.put('/users/profile', formData, {
+    const response = await apiClientInstance.put('/users/profile', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
     return response.data; // Should return { user: updatedUser, msg: "..." }
   } catch (error) {
-    throw error.response ? error.response.data : new Error('Profile picture upload failed due to a network or server error.');
+    let errorMessage = 'Profile picture upload failed due to a network or server error.';
+    if (error.response) {
+      // Use a more specific message from the server if available, otherwise, include the status code.
+      errorMessage = error.response.data?.message || `Profile picture upload failed with status ${error.response.status}`;
+    }
+    // Re-throw the error with a more informative message.  This will be caught in the component.
+    console.error("Profile picture upload error:", error); // Log the full error for debugging
+    throw new Error(errorMessage);
   }
 };
 
