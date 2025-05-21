@@ -13,7 +13,7 @@ export default function Home(props) {
             <CssBaseline enableColorScheme />
             <AppAppBar />
             <Hero />
-            {/* Render the events list after the Hero section */}
+            
             <AllEventsDisplay />
             <div>
                 <Divider sx={{ mt: {xs: 4, sm: 8} }}/>

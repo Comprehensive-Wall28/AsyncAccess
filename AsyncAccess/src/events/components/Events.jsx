@@ -40,8 +40,7 @@ export default function Events() {
                 setError(null); // Reset error state at the beginning
                 const response = await apiClientInstance.get('/events/');
 
-                // Ensure response.data is an array before using array methods
-                // The backend getAllEvents controller is expected to return an array directly.
+        
                 const eventsData = Array.isArray(response.data) ? response.data : [];
                 setEvents(eventsData);
 
@@ -59,8 +58,7 @@ export default function Events() {
                     }, []);
                     setCategories(['All Categories', ...allCategories.sort()]);
                 } else {
-                    // If eventsData is empty (either from API or because response.data wasn't an array)
-                    // set default categories.
+                  
                     setCategories(['All Categories']);
                     if (!Array.isArray(response.data) && response.data != null) {
                         // Log if response.data was received but wasn't an array
@@ -80,7 +78,7 @@ export default function Events() {
         };
 
         fetchEvents();
-    }, []); // Empty dependency array ensures this runs once on mount
+    }, []);
 
     const filteredEvents = useMemo(() => {
         return events.filter(event => {

@@ -19,10 +19,6 @@ import EventIcon from '@mui/icons-material/Event';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CategoryIcon from '@mui/icons-material/Category';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
-import BusinessIcon from '@mui/icons-material/Business'; // For Organizer
-// import StyleIcon from '@mui/icons-material/Style'; // For Tags - Replaced by CategoryIcon for multiple categories
-import PeopleIcon from '@mui/icons-material/People'; // For Capacity/Total Tickets
-import BookOnlineIcon from '@mui/icons-material/BookOnline'; // For Booked Tickets
 
 // Imports for the overall page structure
 import CssBaseline from '@mui/material/CssBaseline';
@@ -180,10 +176,20 @@ const EventDetails = (props) => {
                         <Divider sx={{ my: 3 }} />
 
                         <Grid container spacing={3} justifyContent="center">
-                            <Grid item xs={12} md={7}>
-                                <Stack spacing={2}>
+                            <Grid item xs={12} md={7} sx={{ display: 'flex', flexDirection: 'column' }}>
+                                <Stack spacing={2} sx={{ flexGrow: 1 }}>
                                     {/* Date & Time */}
-                                    <Paper elevation={1} sx={{ p: 2, borderRadius: 2 }}> {/* Changed p:1 to p:2 */}
+                                    <Paper
+                                        elevation={2}
+                                        sx={{
+                                            p: 2,
+                                            borderRadius: 2,
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            justifyContent: 'center',
+                                            flexGrow: 1,
+                                        }}
+                                    >
                                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                             <EventIcon color="action" sx={{ mr: 1.5 }} />
                                             <Box sx={{ textAlign: 'left' }}>
@@ -204,12 +210,22 @@ const EventDetails = (props) => {
                                     </Paper>
 
                                     {/* Location */}
-                                    <Paper elevation={1} sx={{ p: 2, borderRadius: 2 }}> {/* Changed p:1 to p:2 */}
+                                    <Paper
+                                        elevation={2}
+                                        sx={{
+                                            p: 2,
+                                            borderRadius: 2,
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            justifyContent: 'center',
+                                            flexGrow: 1,
+                                        }}
+                                    >
                                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                             <LocationOnIcon color="action" sx={{ mr: 1.5 }} />
                                             <Box sx={{ textAlign: 'left' }}>
                                                 <Typography variant="overline" color="text.secondary" display="block">
-                                                    LOCATION
+                                                    Location
                                                 </Typography>
                                                 <Typography variant="h6" component="p">
                                                     {event.location}
@@ -220,7 +236,17 @@ const EventDetails = (props) => {
 
                                     {/* Categories */}
                                     {event.category && event.category.length > 0 && (
-                                        <Paper elevation={1} sx={{ p: 2, borderRadius: 2 }}> {/* Changed p:1 to p:2 */}
+                                        <Paper
+                                            elevation={2}
+                                            sx={{
+                                                p: 2,
+                                                borderRadius: 2,
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                justifyContent: 'center',
+                                                flexGrow: 1,
+                                            }}
+                                        >
                                             <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                                                 <CategoryIcon color="action" sx={{ mr: 1.5, mt: 0.5 }} />
                                                 <Box sx={{ textAlign: 'left' }}>
@@ -236,30 +262,24 @@ const EventDetails = (props) => {
                                             </Box>
                                         </Paper>
                                     )}
-
-                                    {/* Organizer */}
-                                    {event.organizer && (
-                                        <Paper elevation={2} sx={{ p: 2, borderRadius: 2 }}> {/* Changed p:1 to p:2 */}
-                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                <BusinessIcon color="action" sx={{ mr: 1.5 }} />
-                                                <Box sx={{ textAlign: 'left' }}>
-                                                    <Typography variant="overline" color="text.secondary" display="block">
-                                                        ORGANIZER
-                                                    </Typography>
-                                                    <Typography variant="body1" component="p">
-                                                        {typeof event.organizer === 'object' ? event.organizer.name || 'N/A' : event.organizer}
-                                                    </Typography>
-                                                </Box>
-                                            </Box>
-                                        </Paper>
-                                    )}
                                 </Stack>
                             </Grid>
 
-                            <Grid item xs={12} md={5}>
-                                <Stack spacing={2}>
+                            <Grid item xs={12} md={5} sx={{ display: 'flex', flexDirection: 'column' }}>
+                                <Stack spacing={2} sx={{ flexGrow: 1 }}>
                                     {/* Ticket Price */}
-                                    <Paper elevation={2} sx={{ p: 2, borderRadius: 2, textAlign: 'center' }}> {/* Changed p:1 to p:2 */}
+                                    <Paper
+                                        elevation={2}
+                                        sx={{
+                                            p: 2,
+                                            borderRadius: 2,
+                                            textAlign: 'center',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            justifyContent: 'center',
+                                            flexGrow: 1,
+                                        }}
+                                    >
                                         <Box>
                                             <Typography variant="overline" color="text.secondary">
                                                 TICKET PRICE
@@ -270,32 +290,19 @@ const EventDetails = (props) => {
                                         </Box>
                                     </Paper>
 
-                                    {/* Total Tickets */}
-                                    <Paper elevation={2} sx={{ p: 2, borderRadius: 2, textAlign: 'center' }}> {/* Changed p:1 to p:2 */}
-                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <PeopleIcon color="action" sx={{ mr: 1 }} />
-                                            <Box>
-                                                <Typography variant="overline" color="text.secondary">
-                                                    TOTAL TICKETS: {event.totalTickets}
-                                                </Typography>
-                                            </Box>
-                                        </Box>
-                                    </Paper>
-
-                                    {/* Booked Tickets */}
-                                    <Paper elevation={2} sx={{ p: 2, borderRadius: 2, textAlign: 'center' }}> {/* Kept p:2 */}
-                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <BookOnlineIcon color="action" sx={{ mr: 1 }} />
-                                            <Box>
-                                                <Typography variant="overline" color="text.secondary">
-                                                    BOOKED TICKETS: {event.bookedTickets}
-                                                </Typography>
-                                            </Box>
-                                        </Box>
-                                    </Paper>
-
                                     {/* Available Tickets */}
-                                    <Paper elevation={2} sx={{ p: 2, borderRadius: 2, textAlign: 'center' }}> {/* Kept p:2 */}
+                                    <Paper
+                                        elevation={2}
+                                        sx={{
+                                            p: 2,
+                                            borderRadius: 2,
+                                            textAlign: 'center',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            justifyContent: 'center',
+                                            flexGrow: 1,
+                                        }}
+                                    >
                                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                             <ConfirmationNumberIcon color="action" sx={{ mr: 1 }} />
                                             <Box>
@@ -306,24 +313,26 @@ const EventDetails = (props) => {
                                         </Box>
                                     </Paper>
 
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        size="large"
-                                        startIcon={<ConfirmationNumberIcon />}
-                                        sx={{
-                                            py: 1.5,
-                                            px: 4,
-                                            fontSize: '1.1rem',
-                                            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                                            mt: 2,
-                                            alignSelf: 'center' // Center the button
-                                        }}
-                                        onClick={() => alert('Booking functionality to be implemented!')}
-                                        disabled={availableTickets <= 0}
-                                    >
-                                        {availableTickets > 0 ? 'Book Now' : 'Sold Out'}
-                                    </Button>
+                                    <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            size="large"
+                                            startIcon={<ConfirmationNumberIcon />}
+                                            sx={{
+                                                py: 1.5,
+                                                px: 4,
+                                                fontSize: '1.1rem',
+                                                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                                                // mt: 2, // Removed, Stack spacing handles it
+                                                // alignSelf: 'center' // Removed, Box wrapper handles centering
+                                            }}
+                                            onClick={() => alert('Booking functionality to be implemented!')}
+                                            disabled={availableTickets <= 0}
+                                        >
+                                            {availableTickets > 0 ? 'Book Now' : 'Sold Out'}
+                                        </Button>
+                                    </Box>
                                 </Stack>
                             </Grid>
                         </Grid>

@@ -50,7 +50,7 @@ export default function UserBookingsDisplay({ currentUser }) {
   const [bookings, setBookings] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState('');
-  const [showCancelled, setShowCancelled] = React.useState(true);
+  const [showCancelled, setShowCancelled] = React.useState(false); // Changed from true to false
   const [expandedBookings, setExpandedBookings] = React.useState({}); // State to manage expanded cards
   const [openCancelDialog, setOpenCancelDialog] = React.useState(false);
   const [bookingToCancel, setBookingToCancel] = React.useState(null);
@@ -162,7 +162,16 @@ export default function UserBookingsDisplay({ currentUser }) {
   return (
     <Card sx={{ mt: 4, p: 2, width: '100%' }}>
       <CardContent>
-        <Title>Your Bookings</Title>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Title>Your Bookings</Title>
+          <Button
+            variant="outlined"
+            onClick={() => setShowCancelled(!showCancelled)}
+            size="small"
+          >
+            {showCancelled ? "Hide Cancelled" : "Show Cancelled"}
+          </Button>
+        </Box>
 
         {isLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100px' }}>
@@ -273,26 +282,7 @@ export default function UserBookingsDisplay({ currentUser }) {
           </Stack>
         )}
       </CardContent>
-      <Stack direction="row" justifyContent="flex-end" sx={{ mt: 2, p: 2 }}>
-        <Button sx={{mx:"auto"}}
-          variant="outlined"
-          onClick={() => setShowCancelled(!showCancelled)}
-          size="small" // Add this line to make the button smaller
-        >
-          {showCancelled ? "Hide Cancelled Bookings" : "Show Cancelled Bookings"}
-        </Button>
-      </Stack>
-
-
-
-
-
-
-
-
-
-
-
+      {/* The Stack and Button previously here have been moved up */}
       {bookingToCancel && (
         <Dialog
           open={openCancelDialog}
