@@ -16,7 +16,6 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import CancelIcon from '@mui/icons-material/Cancel'; // Optional: for the button icon
 import IconButton from '@mui/material/IconButton'; // Import IconButton
 import Menu from '@mui/material/Menu'; // Import Menu
 import MenuItem from '@mui/material/MenuItem'; // Import MenuItem
@@ -28,7 +27,7 @@ import * as bookingsService from '../../services/bookingsService';
 
 // Title component (similar to one in UserProfileDisplay or Title.tsx.preview)
 const Title = (props) => (
-  <Typography component="h2" variant="h6" color="primary" gutterBottom>
+  <Typography component="h2" variant="h6" color="inherit" gutterBottom>
     {props.children}
   </Typography>
 );
@@ -51,6 +50,7 @@ export default function UserBookingsDisplay({ currentUser }) {
   const [bookings, setBookings] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState('');
+  const [showCancelled, setShowCancelled] = React.useState(true);
   const [expandedBookings, setExpandedBookings] = React.useState({}); // State to manage expanded cards
   const [openCancelDialog, setOpenCancelDialog] = React.useState(false);
   const [bookingToCancel, setBookingToCancel] = React.useState(null);
@@ -147,10 +147,6 @@ export default function UserBookingsDisplay({ currentUser }) {
   }, [currentUser]);
 
   if (!currentUser && !isLoading) {
-    // Optionally, you could show a login prompt if you prefer,
-    // but MainGrid might already handle overall auth state.
-    // For now, it will just be an empty card if no currentUser.
-    // Or, let's add a specific message for clarity:
      return (
         <Card sx={{ mt: 4, p: 2, width: '100%' }}>
             <CardContent>
@@ -167,6 +163,7 @@ export default function UserBookingsDisplay({ currentUser }) {
     <Card sx={{ mt: 4, p: 2, width: '100%' }}>
       <CardContent>
         <Title>Your Bookings</Title>
+
         {isLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100px' }}>
             <CircularProgress />
@@ -181,7 +178,11 @@ export default function UserBookingsDisplay({ currentUser }) {
           </Box>
         ) : (
           <Stack spacing={2} sx={{ mt: 2 }}>
-            {bookings.map((booking) => (
+            {bookings
+              .filter(booking => showCancelled || booking.bookingStatus !== 'Cancelled')
+              .map((booking) => (
+
+
               <Card key={booking._id}>
                 <Stack direction="row" alignItems="center" spacing={3} p={2} useFlexGap>
                   <Stack direction="column" spacing={0.5} useFlexGap sx={{ flexGrow: 1 }}>
@@ -272,6 +273,26 @@ export default function UserBookingsDisplay({ currentUser }) {
           </Stack>
         )}
       </CardContent>
+      <Stack direction="row" justifyContent="flex-end" sx={{ mt: 2, p: 2 }}>
+        <Button sx={{mx:"auto"}}
+          variant="outlined"
+          onClick={() => setShowCancelled(!showCancelled)}
+          size="small" // Add this line to make the button smaller
+        >
+          {showCancelled ? "Hide Cancelled Bookings" : "Show Cancelled Bookings"}
+        </Button>
+      </Stack>
+
+
+
+
+
+
+
+
+
+
+
       {bookingToCancel && (
         <Dialog
           open={openCancelDialog}
