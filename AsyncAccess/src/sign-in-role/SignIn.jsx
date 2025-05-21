@@ -15,13 +15,13 @@ import { styled } from '@mui/material/styles';
 import Alert from '@mui/material/Alert';
 import CircularProgress from '@mui/material/CircularProgress';
 import FormControl from '@mui/material/FormControl';
-import ForgotPassword from './components/ForgotPassword';
-import AppTheme from '../shared-theme/AppTheme';
-import ColorModeSelect from '../shared-theme/ColorModeSelect';
+import ForgotPassword from './components/ForgotPassword.jsx';
+import AppTheme from '../shared-theme/AppTheme.jsx';
+import ColorModeSelect from '../shared-theme/ColorModeSelect.jsx';
 import AsyncAccessIcon  from '../home-page/components/AsyncAccessIcon.jsx';
 import { useLocation } from 'react-router-dom'; // Import useLocation
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import authService from '../services/authService'; // Import authService
+import authService from '../services/authService.js'; // Import authService
 import { AsyncIcon } from '../sign-up/components/CustomIcons.jsx';
 import { Link as route } from 'react-router-dom';
 
@@ -242,12 +242,10 @@ export default function SignIn(props) {
               fullWidth
               variant="outlined"
               startIcon={<AsyncIcon />}
-              component={route} to="/signup"
+              component={route} to="/signup-roled"
             >
               Not registered? Get started now!
             </Button>
-            
-          
             <Link
               component="button"
               type="button"
@@ -256,14 +254,6 @@ export default function SignIn(props) {
               sx={{ alignSelf: 'center' }}
             >
               Forgot your password?
-            </Link>
-               <Link
-              type="button"
-              component={route} to="/login-roled"
-              variant="body2"
-              sx={{ alignSelf: 'center' }}
-            >
-              Login as Organizer / Admin
             </Link>
           </Box>
           {loginError && <Alert severity="error" sx={{ mt: 2 }}>{loginError}</Alert>}

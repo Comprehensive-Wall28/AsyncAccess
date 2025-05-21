@@ -1,13 +1,12 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
 import CssBaseline from '@mui/material/CssBaseline';
 import Divider from '@mui/material/Divider';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import FormLabel from '@mui/material/FormLabel';
 import FormControl from '@mui/material/FormControl';
 import Link from '@mui/material/Link';
+import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -15,14 +14,15 @@ import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import Alert from '@mui/material/Alert'; // Import Alert for displaying errors
 import CircularProgress from '@mui/material/CircularProgress'; // Import CircularProgress for loading
-import AppTheme from '../shared-theme/AppTheme';
+import MenuItem from '@mui/material/MenuItem';
+import AppTheme from '../shared-theme/AppTheme.jsx';
 import { useNavigate, Link as RouterLink } from 'react-router-dom'; // Import useNavigate and Link from react-router-dom
 import { useLocation } from 'react-router-dom'; // Import useLocation
-import ColorModeSelect from '../shared-theme/ColorModeSelect';
-import { AsyncIcon } from './components/CustomIcons';
-import AsyncAccessIcon  from '../home-page/components/AsyncAccessIcon.jsx';
+import ColorModeSelect from '../shared-theme/ColorModeSelect.jsx';
+import { AsyncIcon } from './components/CustomIcons.jsx';
+import AsyncAccessIcon from '../home-page/components/AsyncAccessIcon.jsx';
 import { Link as route } from 'react-router-dom';
-import { signup } from '../services/authService'; // Import the signup function
+import { signup } from '../services/authService.js'; // Import the signup function
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -75,6 +75,7 @@ export default function SignUp(props) {
   const [name, setName] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [role, setRole] = React.useState('');
 
   // State for validation errors
   const [emailError, setEmailError] = React.useState(false);
@@ -124,6 +125,14 @@ export default function SignUp(props) {
       setEmailErrorMessage('');
     }
 
+    // Validate Role
+    if (!role) {
+      // Assuming you want to handle role validation as well
+      // You might not need an error state for the dropdown, but handle it as needed
+      setRegistrationError('Please select a role.');
+      isValid = false;
+    }
+
     return isValid;
   };
 
@@ -139,7 +148,7 @@ export default function SignUp(props) {
     try {
       // Call the signup service
       // Assuming role is 'user' for standard signups, adjust if needed
-      const userData = await signup(name, email, password, 'User');
+      const userData = await signup(name, email, password, role);
       console.log('Registration successful:', userData);
       // TODO: Handle successful registration (e.g., show success message, redirect to login)
       navigate('/login?registered=true'); // Redirect to login page after success
@@ -218,6 +227,27 @@ export default function SignUp(props) {
                 onChange={(e) => setPassword(e.target.value)} // Update state
               />
             </FormControl>
+            <FormControl>
+              <FormLabel htmlFor="role">Role</FormLabel>
+              <Select
+                required
+                fullWidth
+                id="role"
+                name="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                variant="outlined"
+                displayEmpty
+              >
+                <MenuItem value="" disabled>
+                  Select Role
+                </MenuItem>
+                <MenuItem value="Organizer">Organizer</MenuItem>
+                <MenuItem value="Admin">Admin</MenuItem>
+              </Select>
+            </FormControl>
+
+
             <Button
               type="submit"
               fullWidth
@@ -235,16 +265,16 @@ export default function SignUp(props) {
               fullWidth
               variant="outlined"
               startIcon={<AsyncIcon />}
-              component={route} to="/signup-roled"
+              component={route} to="/signup"
             >
-              Register as Organizer Or Admin
+              Register as a User
             </Button>
             {registrationError && <Alert severity="error" sx={{ mt: 2 }}>{registrationError}</Alert>} {/* Display API error */}
             <Typography sx={{ textAlign: 'center' }}>
               Already have an account?{' '}
               <Link
                 component={RouterLink} // Use RouterLink for client-side navigation
-                to="/login"
+                to="/login-roled"
                 variant="body2"
                 sx={{ alignSelf: 'center' }}
               >
