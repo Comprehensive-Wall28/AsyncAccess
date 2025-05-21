@@ -12,6 +12,8 @@ import SideMenu from './components/SideMenu';
 import AppTheme from '../shared-theme/AppTheme';
 
 import UserProfile from './components/UserProfile'; // Import the new UserProfile component
+import UsersList from './components/UsersList';
+import { getAllUsers } from '../services/userService';
 import {
   chartsCustomizations,
   dataGridCustomizations,
@@ -35,6 +37,9 @@ function Dashboard(props) {
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState('');
   const [currentView, setCurrentView] = React.useState('home'); // State for current view
+  const [users, setUsers] = React.useState([]);
+  const [usersLoading, setUsersLoading] = React.useState(false);
+  const [usersError, setUsersError] = React.useState('');
   const handleAuthError = authService.useAuthRedirect();
   const navigate = useNavigate();
 
@@ -67,6 +72,17 @@ function Dashboard(props) {
     fetchUserProfile();
   }, [navigate]);
 
+  React.useEffect(() => {
+    if (currentView === 'users') {
+      setUsersLoading(true);
+      setUsersError('');
+      getAllUsers()
+        .then(res => setUsers(res.data))
+        .catch(err => setUsersError(err.message || 'Failed to load users'))
+        .finally(() => setUsersLoading(false));
+    }
+  }, [currentView]);
+
   let mainContent;
   if (isLoading && !currentUser && currentView !== 'user-profile') { // Show loading for home view if user not yet loaded
     mainContent = <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 120px)'}}><CircularProgress /></Box>;
@@ -82,6 +98,13 @@ function Dashboard(props) {
         break;
       case 'about':
         mainContent = <Typography variant="h4" sx={{mt: 2}}>About Page Placeholder</Typography>; // Placeholder for About
+        break;
+      case 'users':
+        mainContent = usersLoading
+          ? <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300}}><CircularProgress /></Box>
+          : usersError
+            ? <Alert severity="error">{usersError}</Alert>
+            : <UsersList users={users} />;
         break;
       default:
         mainContent = <MainGrid currentUser={currentUser} isLoading={isLoading && !currentUser} setCurrentUser={setCurrentUser} />;

@@ -43,3 +43,5 @@ export const updateUserProfile = async (profileData) => {
   const response = await apiClient.put('/users/profile', formData); // Content-Type will be set to multipart/form-data by browser with FormData
   return response.data;
 };
+
+export const getAllUsers = () => apiClient.get('/users');

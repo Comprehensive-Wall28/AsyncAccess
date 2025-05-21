@@ -11,6 +11,7 @@ import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import SideMenuMobile from './SideMenuMobile';
 import MenuButton from './MenuButton';
 import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
+import Button from '@mui/material/Button';
 
 const Toolbar = styled(MuiToolbar)({
   width: '100%',
@@ -28,7 +29,7 @@ const Toolbar = styled(MuiToolbar)({
   },
 });
 
-export default function AppNavbar({ currentUser }) {
+export default function AppNavbar({ currentUser, onMenuItemClick, selectedItem }) {
   const [open, setOpen] = React.useState(false);
 
   const toggleDrawer = (newOpen) => () => {
@@ -68,11 +69,20 @@ export default function AppNavbar({ currentUser }) {
               Dashboard
             </Typography>
           </Stack>
+          {/* Add Users button here */}
+          <Button
+            color={selectedItem === 'users' ? 'primary' : 'inherit'}
+            variant={selectedItem === 'users' ? 'contained' : 'text'}
+            onClick={() => onMenuItemClick && onMenuItemClick('users')}
+            sx={{ display: { xs: 'inline-flex', md: 'none' } }}
+          >
+            Users
+          </Button>
           <ColorModeIconDropdown />
           <MenuButton aria-label="menu" onClick={toggleDrawer(true)}>
             <MenuRoundedIcon />
           </MenuButton>
-          <SideMenuMobile open={open} toggleDrawer={toggleDrawer} currentUser={currentUser} />
+          <SideMenuMobile open={open} toggleDrawer={toggleDrawer} currentUser={currentUser} onMenuItemClick={onMenuItemClick} selectedItem={selectedItem} />
         </Stack>
       </Toolbar>
     </AppBar>

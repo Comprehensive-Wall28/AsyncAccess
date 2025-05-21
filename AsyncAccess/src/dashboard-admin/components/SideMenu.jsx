@@ -10,6 +10,8 @@ import MenuContent from './MenuContent';
 import OptionsMenu from './OptionsMenu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AsyncAccessLogo from '../../home-page/components/AsyncAccessIcon';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
 
 // Same as in UserProfileDisplay.jsx - ensure this is consistent or use a shared config
 // Use the root URL of your backend server where static files are hosted.
@@ -77,6 +79,13 @@ export default function SideMenu({ currentUser, onMenuItemClick, selectedItem })
         }}
       >
         <MenuContent onMenuItemClick={onMenuItemClick} selectedItem={selectedItem} />
+        <ListItem
+          button
+          selected={selectedItem === 'users'}
+          onClick={() => onMenuItemClick('users')}
+        >
+          <ListItemText primary="Users" />
+        </ListItem>
       </Box>
       <Stack
         direction="row"
