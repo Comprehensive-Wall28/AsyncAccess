@@ -480,7 +480,7 @@ const userController = {
   logout: async (req, res) => {
     try {
       // Clear the token cookie
-      res.clearCookie('token');
+      res.clearCookie('token', { httpOnly: true, sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', secure: process.env.NODE_ENV === 'production' });
       res.status(200).json({ message: 'Logged out successfully' });
     } catch (error) {
       console.error("Error logging out:", error);
