@@ -27,10 +27,15 @@ import BookOnlineIcon from '@mui/icons-material/BookOnline'; // For Booked Ticke
 // Imports for the overall page structure
 import CssBaseline from '@mui/material/CssBaseline';
 import AppTheme from '../../shared-theme/AppTheme';
-import AppAppBar from './AppAppBar';
-import Footer from './Footer';
+import AppAppBar from '../../home-page/components/AppAppBar';
+import Footer from '../../home-page/components/Footer';
 
-const API_URL = '/api/v1/events';
+const BACKEND_STATIC_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+const apiClientInstance = axios.create({
+  baseURL: BACKEND_STATIC_BASE_URL,
+  withCredentials: true,
+});
 
 const EventDetails = (props) => {
     const { id } = useParams();
@@ -40,24 +45,52 @@ const EventDetails = (props) => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        if (!id) {
+            setLoading(false);
+            // event and error are already null from initialState or previous resets.
+            // The redirect useEffect (added below) will handle navigation.
+            return;
+        }
+
         const fetchEvent = async () => {
             setLoading(true);
+            setError(null); // Reset error state
+            setEvent(null); // Reset event state
             try {
-                // Ensure your API populates the organizer field if you want to display its details
-                const response = await axios.get(`${API_URL}/${id}`);
-                setEvent(response.data);
-                setError(null);
-            } catch (err) { // Corrected line: Removed "MuiInputLabel-shrink" and added opening brace
+                const response = await apiClientInstance.get(`/events/${id}`);
+                // Check if response.data is truthy and not an empty object
+                if (response.data && Object.keys(response.data).length > 0) {
+                    setEvent(response.data);
+                } else {
+                    // API returned 200 but no/empty data, treat as not found.
+                    // Event remains null, error remains null. setLoading(false) in finally.
+                    // The redirect useEffect will handle this.
+                }
+            } catch (err) {
                 console.error("Error fetching event:", err);
-                setError(err.response?.data?.error || err.message || "Failed to fetch event details.");
-                setEvent(null);
-            } finally { // Added closing brace for catch block
+                if (err.response && err.response.status === 404) {
+                    // For 404, treat as "not found".
+                    // Event remains null, error remains null. setLoading(false) in finally.
+                    // The redirect useEffect will handle this.
+                } else {
+                    // For other errors, set an error message.
+                    setError(err.response?.data?.error || err.message || "Failed to fetch event details.");
+                }
+            } finally {
                 setLoading(false);
             }
         };
 
         fetchEvent();
     }, [id]);
+
+    // useEffect for handling navigation when event is not found
+    useEffect(() => {
+        // Condition: loading is finished, no error occurred, and no event data.
+        if (!loading && !event && !error) {
+            navigate('/notfound', { replace: true });
+        }
+    }, [loading, event, error, navigate]);
 
     const renderPageContent = () => {
         if (loading) {
@@ -84,21 +117,12 @@ const EventDetails = (props) => {
         }
 
         if (!event) {
+            // If loading is false, error is null, and event is null,
+            // the useEffect above should trigger navigation to /notfound.
+            // Show a loader briefly.
             return (
-                <Container sx={{ py: 5, textAlign: 'center', minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                    <Typography variant="h5" gutterBottom>
-                        Event Not Found
-                    </Typography>
-                    <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                        The event you are looking for does not exist or may have been removed.
-                    </Typography>
-                    <Button
-                        variant="outlined"
-                        startIcon={<ArrowBackIcon />}
-                        onClick={() => navigate('/events')}
-                    >
-                        Back to Events
-                    </Button>
+                <Container sx={{ py: 8, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+                    <CircularProgress size={60} />
                 </Container>
             );
         }
