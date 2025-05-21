@@ -16,6 +16,7 @@ import NotFound from './NotFound.jsx';
 import RoledLogin from './sign-in-role/SignIn.jsx'
 import RoledSignup from './sign-up-role/SignUp.jsx'
 import ForgotPassword from './forgot-password/ForgotPassword.jsx';
+import DashboardAdmin from './dashboard-admin/Dashboard.jsx'
 
 function App() {
   return (
@@ -65,6 +66,7 @@ function App() {
           <Route path="/login-roled" element={<RoledLogin />} />
           <Route path="/signup-roled" element={<RoledSignup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/dashboard-admin" element={<DashboardAdmin />} />
 
           <Route
             path="/unauthorized"

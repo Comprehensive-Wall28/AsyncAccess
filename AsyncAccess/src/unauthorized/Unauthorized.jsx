@@ -26,7 +26,7 @@ function Unauthorized() {
         <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
           <AsyncAccessIcon sx={{ fontSize: 60, mb: 2, color: 'primary.main' }} />
           <Typography variant="h4" component="h1" gutterBottom color="text.primary">
-            Unauthorized
+            Unauthorized Access
           </Typography>
           <Typography variant="body1" paragraph color="text.secondary">
             You do not have the necessary permissions to access this page. Please check your role or contact support if you believe this is an error.

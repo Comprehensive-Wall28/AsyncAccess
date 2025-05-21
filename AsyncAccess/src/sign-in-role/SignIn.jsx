@@ -23,6 +23,8 @@ import { useLocation } from 'react-router-dom'; // Import useLocation
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import authService from '../services/authService.js'; // Import authService
 import { AsyncIcon } from '../sign-up/components/CustomIcons.jsx';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 import { Link as route } from 'react-router-dom';
 
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -79,6 +81,7 @@ export default function SignIn(props) {
   const [loading, setLoading] = React.useState(false);
   const [showForgotPassword, setShowForgotPassword] = React.useState(false);
   const [rememberMe, setRememberMe] = React.useState(false); // State for "Remember me"
+  const [selectedRole, setSelectedRole] = React.useState('Organizer'); // Default role
   const navigate = useNavigate(); // Hook for navigation
 
   React.useEffect(() => {
@@ -147,7 +150,13 @@ export default function SignIn(props) {
         localStorage.removeItem('currentUser'); // Clear if not "Remember me" or no currentUser
       }
 
-      navigate('/dashboard', { replace: true });
+      // Redirect based on selected role
+      if (selectedRole === 'Organizer') {
+        navigate('/dashboard-organizer', { replace: true });
+      } else if (selectedRole === 'Admin') {
+        navigate('/dashboard-admin', { replace: true });
+      }
+
 
     } catch (error) {
       // The error from authService.js might be an object with a message property
@@ -225,6 +234,23 @@ export default function SignIn(props) {
                   color="primary" />}
               label="Remember me"
             />
+               <Divider>
+              <Typography sx={{ color: 'text.secondary' }}></Typography>
+          </Divider>
+             <FormControl fullWidth variant="outlined">
+                <FormLabel id="role-select-label">Role</FormLabel>
+                <Select
+                    labelId="role-select-label"
+                    id="role-select"
+                    value={selectedRole}
+                    label="Role"
+                    onChange={(e) => setSelectedRole(e.target.value)}
+                >
+                    <MenuItem value="Organizer">Organizer</MenuItem>
+                    <MenuItem value="Admin">Admin</MenuItem>
+                </Select>
+            </FormControl>
+            
             <ForgotPassword open={showForgotPassword} handleClose={handleClose} />
             <Button
               type="submit"

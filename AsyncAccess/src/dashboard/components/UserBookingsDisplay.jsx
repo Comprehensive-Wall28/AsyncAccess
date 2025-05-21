@@ -16,15 +16,18 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import CancelIcon from '@mui/icons-material/Cancel'; // Optional: for the button icon
-import IconButton from '@mui/material/IconButton'; // For the arrow button
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'; // Arrow icon
+import IconButton from '@mui/material/IconButton'; // Import IconButton
+import Menu from '@mui/material/Menu'; // Import Menu
+import MenuItem from '@mui/material/MenuItem'; // Import MenuItem
+import MoreVertIcon from '@mui/icons-material/MoreVert'; // Import MoreVertIcon (three dots)
+
+
 
 import * as bookingsService from '../../services/bookingsService';
 
 // Title component (similar to one in UserProfileDisplay or Title.tsx.preview)
 const Title = (props) => (
-  <Typography component="h2" variant="h6" color="primary" gutterBottom>
+  <Typography component="h2" variant="h6" color="inherit" gutterBottom>
     {props.children}
   </Typography>
 );
@@ -47,11 +50,13 @@ export default function UserBookingsDisplay({ currentUser }) {
   const [bookings, setBookings] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState('');
+  const [showCancelled, setShowCancelled] = React.useState(true);
   const [expandedBookings, setExpandedBookings] = React.useState({}); // State to manage expanded cards
   const [openCancelDialog, setOpenCancelDialog] = React.useState(false);
   const [bookingToCancel, setBookingToCancel] = React.useState(null);
   const [cancelInProgress, setCancelInProgress] = React.useState(false);
   const [cancelError, setCancelError] = React.useState('');
+  const [anchorEl, setAnchorEl] = React.useState(null); // Anchor for the menu
 
   const handleToggleExpand = (bookingId) => {
     // Correctly toggle the boolean state
@@ -64,6 +69,20 @@ export default function UserBookingsDisplay({ currentUser }) {
     setCancelError(''); // Clear previous errors
   };
 
+  const handleMenuOpen = (event, booking) => {
+    setBookingToCancel(booking); // Set the booking to cancel when menu opens
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setBookingToCancel(null); // Clear the booking when menu closes
+  };
+
+  const handleCancelFromMenu = () => {
+    handleOpenCancelDialog(bookingToCancel); // Open the dialog using the existing function
+  };
+  
   const handleCloseCancelDialog = () => {
     if (cancelInProgress) return; // Prevent closing while an operation is in progress
     setOpenCancelDialog(false);
@@ -128,10 +147,6 @@ export default function UserBookingsDisplay({ currentUser }) {
   }, [currentUser]);
 
   if (!currentUser && !isLoading) {
-    // Optionally, you could show a login prompt if you prefer,
-    // but MainGrid might already handle overall auth state.
-    // For now, it will just be an empty card if no currentUser.
-    // Or, let's add a specific message for clarity:
      return (
         <Card sx={{ mt: 4, p: 2, width: '100%' }}>
             <CardContent>
@@ -148,6 +163,7 @@ export default function UserBookingsDisplay({ currentUser }) {
     <Card sx={{ mt: 4, p: 2, width: '100%' }}>
       <CardContent>
         <Title>Your Bookings</Title>
+
         {isLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100px' }}>
             <CircularProgress />
@@ -162,67 +178,69 @@ export default function UserBookingsDisplay({ currentUser }) {
           </Box>
         ) : (
           <Stack spacing={2} sx={{ mt: 2 }}>
-            {bookings.map((booking) => (
-              <Paper
-                key={booking._id}
-                elevation={expandedBookings[booking._id] ? 4 : 1} 
-                sx={{ 
-                  p: 2, 
-                  borderRadius: 2, 
-                  transition: (theme) => theme.transitions.create('box-shadow')
-                }}
-              >
-                <Stack 
-                  direction="row" 
-                  justifyContent="space-between" 
-                  alignItems="center" 
-                  sx={{ mb: expandedBookings[booking._id] ? 1 : 0, cursor: 'pointer' }} // Add margin bottom and cursor
-                  onClick={() => handleToggleExpand(booking._id)} // Make the whole stack clickable
-                >
-                  {/* Make the Typography and Chip clickable to toggle */}
-                  <Typography variant="h6" component="div" noWrap sx={{ flexGrow: 1, pr: 1 }}>
-                    {booking.event 
-                      ? (booking.event.title || '[No Title Provided]') 
-                      : 'Event Data Not Available'}
-                  </Typography>
-                  <Chip 
-                    label={booking.bookingStatus || 'N/A'} 
-                    color={getStatusColor(booking.bookingStatus)} 
-                    size="small" 
-                    sx={{ borderRadius: '8px', flexShrink: 0 }} 
-                  />
-                  <IconButton
-                    // onClick is now handled by the parent Stack
-                    aria-expanded={expandedBookings[booking._id]}
-                    aria-label="show more"
-                    size="small"
-                    sx={{
-                        ml: 1, // Margin left for spacing
-                        transform: expandedBookings[booking._id] ? 'rotate(180deg)' : 'rotate(0deg)',
-                        transition: (theme) => theme.transitions.create('transform', {
-                            duration: theme.transitions.duration.short,
-                        }),
-                    }}
-                    disableRipple // Remove ripple effect from the icon button itself
-                  >
-                    <KeyboardArrowDownIcon />
-                  </IconButton>
-                </Stack>
-                <Collapse in={expandedBookings[booking._id]} timeout="auto" unmountOnExit>
-                  <Box sx={{ pt: 2, borderTop: (theme) => `1px dashed ${theme.palette.divider}`, mt:1 }}> {/* Add padding top for the collapsed section */}
-                    <Grid container spacing={1}>
+            {bookings
+              .filter(booking => showCancelled || booking.bookingStatus !== 'Cancelled')
+              .map((booking) => (
+
+
+              <Card key={booking._id}>
+                <Stack direction="row" alignItems="center" spacing={3} p={2} useFlexGap>
+                  <Stack direction="column" spacing={0.5} useFlexGap sx={{ flexGrow: 1 }}>
+                    <Typography variant="h6" component="div">
+                      {booking.event ? (booking.event.title || '[No Title Provided]') : 'Event Data Not Available'}
+                    </Typography>
+                    <Stack direction="row" spacing={1} useFlexGap>
+                      <Chip
+                        size="small"
+                        label={booking.bookingStatus || 'N/A'}
+                        color={getStatusColor(booking.bookingStatus)}
+                      />
+                      {/* You can add a rating component here if you have one, or remove this line */}
+                    </Stack>                    
+                  </Stack>                  
+                  <div>
+                    <IconButton
+                      aria-label="more"
+                      aria-controls={`booking-menu-${booking._id}`}
+                      aria-haspopup="true"
+                      onClick={(event) => handleMenuOpen(event, booking)}
+                    >
+                      {/* Use a smaller size for the MoreVertIcon */}
+                      <MoreVertIcon fontSize="small" />
+                    </IconButton>
+                    <Menu
+                      id={`booking-menu-${booking._id}`}
+                      anchorEl={anchorEl}
+                      open={Boolean(anchorEl) && bookingToCancel?._id === booking._id}
+                      onClose={handleMenuClose}
+                    >
+                    <MenuItem
+                      onClick={handleCancelFromMenu}
+                      disabled={cancelInProgress}
+                    >
+                      {cancelInProgress && bookingToCancel?._id === booking._id ? (
+                        <CircularProgress size={24} color="inherit" />
+                      ) : (
+                        "Cancel Booking"
+                      )}
+                      </MenuItem>
+                      </Menu>
+                    </div>
+                  </Stack>
+                <CardContent>
+                  <Grid container spacing={2}>
                       {/* Tickets */}
-                      <Grid item xs={4} sm={3}>
+                      <Grid  xs={6}>
                         <Typography variant="body2" fontWeight="medium" color="text.secondary">Tickets:</Typography>
                       </Grid>
-                      <Grid item xs={8} sm={9}>
+                      <Grid  xs={6}>
                         <Typography variant="body2">{booking.numberOfTickets}</Typography>
                       </Grid>
 
                       {/* Event Date */}
                       {booking.event && booking.event.date && (
                         <>
-                          <Grid item xs={4} sm={3}>
+                          <Grid item xs={6}>
                             <Typography variant="body2" fontWeight="medium" color="text.secondary">Event Date:</Typography>
                           </Grid>
                           <Grid item xs={8} sm={9}>
@@ -232,10 +250,10 @@ export default function UserBookingsDisplay({ currentUser }) {
                       )}
 
                       {/* Booking Date */}
-                      <Grid item xs={4} sm={3}>
+                      <Grid item xs={6}>
                         <Typography variant="body2" fontWeight="medium" color="text.secondary">Booking Date:</Typography>
                       </Grid>
-                      <Grid item xs={8} sm={9}>
+                      <Grid item xs={6}>
                         <Typography variant="body2">
                           {(() => {
                             if (booking.createdDate) {
@@ -248,38 +266,33 @@ export default function UserBookingsDisplay({ currentUser }) {
                           })()}
                         </Typography>
                       </Grid>
-
-                      {/* Total Price */}
-                      <Grid item xs={4} sm={3}>
-                        <Typography variant="body2" fontWeight="medium" color="text.secondary">Total Price:</Typography>
-                      </Grid>
-                      <Grid item xs={8} sm={9}>
-                        <Typography variant="body2">${booking.totalPrice ? booking.totalPrice.toFixed(2) : 'N/A'}</Typography>
-                      </Grid>
-
-                      {/* Cancel Button - only if booking is not already cancelled */}
-                      {booking.bookingStatus && booking.bookingStatus.toLowerCase() !== 'cancelled' && (
-                        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-                          {/* <Button
-                            variant="contained"
-                            color="error"
-                            size="small"
-                            startIcon={<CancelIcon />}
-                            onClick={() => handleOpenCancelDialog(booking)}
-                            sx={{ borderRadius: '16px', textTransform: 'none' }}
-                          >
-                            Cancel Booking
-                          </Button> */}
-                        </Grid>
-                      )}
-                    </Grid>
-                  </Box>
-                </Collapse>
-              </Paper>
+                  </Grid>
+                </CardContent>
+              </Card>
             ))}
           </Stack>
         )}
       </CardContent>
+      <Stack direction="row" justifyContent="flex-end" sx={{ mt: 2, p: 2 }}>
+        <Button sx={{mx:"auto"}}
+          variant="outlined"
+          onClick={() => setShowCancelled(!showCancelled)}
+          size="small" // Add this line to make the button smaller
+        >
+          {showCancelled ? "Hide Cancelled Bookings" : "Show Cancelled Bookings"}
+        </Button>
+      </Stack>
+
+
+
+
+
+
+
+
+
+
+
       {bookingToCancel && (
         <Dialog
           open={openCancelDialog}
