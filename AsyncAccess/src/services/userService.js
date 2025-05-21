@@ -45,3 +45,10 @@ export const updateUserProfile = async (profileData) => {
 };
 
 export const getAllUsers = () => apiClient.get('/users');
+
+/**
+ * Deletes a user by ID.
+ * @param {string} userId - The ID of the user to delete.
+ * @returns {Promise<Object>} The server's response.
+ */
+export const deleteUserById = (userId) => apiClient.delete(`/users/${userId}`);

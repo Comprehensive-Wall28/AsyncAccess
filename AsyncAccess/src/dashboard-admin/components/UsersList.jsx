@@ -9,10 +9,18 @@ import Paper from '@mui/material/Paper';
 import TablePagination from '@mui/material/TablePagination';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import { apiClient } from '../../services/authService'; // Adjust path if needed
+import { deleteUserById } from '../../services/userService'; // <-- Add this import
 
-function UsersList({ users }) {
+function UsersList({ users, onUserDeleted, onRoleChanged }) {
   const [search, setSearch] = React.useState('');
   const [page, setPage] = React.useState(0);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [selectedUserId, setSelectedUserId] = React.useState(null);
 
   const usersPerPage = 10;
 
@@ -23,6 +31,31 @@ function UsersList({ users }) {
   );
 
   const paginatedUsers = filteredUsers.slice(page * usersPerPage, page * usersPerPage + usersPerPage);
+
+  const handleMenuOpen = (event, userId) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedUserId(userId);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedUserId(null);
+  };
+
+  const handleDeleteUser = async () => {
+    try {
+      await deleteUserById(selectedUserId); // <-- Use the service function
+      if (onUserDeleted) onUserDeleted(selectedUserId);
+    } catch (err) {
+      alert('Failed to delete user');
+    }
+    handleMenuClose();
+  };
+
+  const handleChangeRole = () => {
+    if (onRoleChanged) onRoleChanged(selectedUserId);
+    handleMenuClose();
+  };
 
   return (
     <React.Fragment>
@@ -45,6 +78,7 @@ function UsersList({ users }) {
               <TableCell>Name</TableCell>
               <TableCell>Email</TableCell>
               <TableCell>Role</TableCell>
+              <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -58,17 +92,33 @@ function UsersList({ users }) {
                 </TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.role}</TableCell>
+                <TableCell align="right">
+                  <IconButton
+                    aria-label="more"
+                    onClick={e => handleMenuOpen(e, user.id || user._id)}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
+                </TableCell>
               </TableRow>
             ))}
             {paginatedUsers.length === 0 && (
               <TableRow>
-                <TableCell colSpan={3} align="center">
+                <TableCell colSpan={4} align="center">
                   No users found.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+        >
+          <MenuItem onClick={handleDeleteUser}>Delete User</MenuItem>
+          <MenuItem onClick={handleChangeRole}>Change Role</MenuItem>
+        </Menu>
       </TableContainer>
       <TablePagination
         component="div"
