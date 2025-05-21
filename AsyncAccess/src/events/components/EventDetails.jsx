@@ -225,7 +225,7 @@ const EventDetails = (props) => {
                                             <LocationOnIcon color="action" sx={{ mr: 1.5 }} />
                                             <Box sx={{ textAlign: 'left' }}>
                                                 <Typography variant="overline" color="text.secondary" display="block">
-                                                    LOCATION
+                                                    Location
                                                 </Typography>
                                                 <Typography variant="h6" component="p">
                                                     {event.location}
