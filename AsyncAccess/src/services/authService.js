@@ -71,20 +71,18 @@ export const updateUserProfilePicture = async (file) => {
   }
 };
 
-
 const useAuthRedirect = () => {
-    const navigate = useNavigate();
-    return (error) => {
-      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-        const redirectPath = error.response.status === 401 ? '/unauthenticated' : '/unauthorized';
-        console.warn(`Received ${error.response.status} from API. Redirecting to ${redirectPath}`);
-        navigate(redirectPath, { replace: true });
-        // We need to throw an error here so the components know that the request failed
-        throw new Error(`Redirecting to ${redirectPath}`);
-      }
-      // Re-throw other errors for component-level handling if necessary.
-      throw error;
-    };
+  const navigate = useNavigate();
+  return (error) => {
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      const redirectPath = error.response.status === 401 ? '/unauthenticated' : '/unauthorized';
+      console.warn(`Received ${error.response.status} from API. Redirecting to ${redirectPath}`);
+      navigate(redirectPath, { replace: true });
+      return; // Stop further execution after redirect
+    }
+    // Re-throw other errors for component-level handling if necessary.
+    throw error;
+  };
 };
 
 export { apiClientInstance as apiClient };

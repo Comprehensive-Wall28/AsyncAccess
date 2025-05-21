@@ -10,6 +10,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import { getCurrentUserProfile, updateUserProfile } from '../../services/userService';
+import authService from '../../services/authService';  // Import authService
 
 const VITE_BACKEND_SERVER_URL = import.meta.env.VITE_BACKEND_SERVER_URL;
 
@@ -25,6 +26,7 @@ export default function UserProfile() {
   const [profilePictureFile, setProfilePictureFile] = useState(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState(null);
   const fileInputRef = useRef(null);
+  const handleAuthError = authService.useAuthRedirect(); // Use the hook here
 
   const fetchUser = async () => {
     setIsLoading(true);
@@ -34,7 +36,7 @@ export default function UserProfile() {
       setError('');
     } catch (err) {
       setError(err.message || 'Failed to fetch user data.');
-      console.error(err);
+      handleAuthError(err); // Call the hook to handle potential auth errors
     } finally {
       setIsLoading(false);
     }
@@ -68,7 +70,7 @@ export default function UserProfile() {
       setEditingField(null);
     } catch (err) {
       setError(err.message || `Failed to update ${field}.`);
-      console.error(err);
+      handleAuthError(err);
     } finally {
       setIsLoading(false);
     }
@@ -96,7 +98,7 @@ export default function UserProfile() {
       setProfilePictureFile(null);
       setProfilePicturePreview(null);
     } catch (err) {
-      setError(err.message || 'Failed to upload profile picture.');
+      setError(err.message || 'Failed to upload profile picture.');      handleAuthError(err);
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -114,7 +116,7 @@ export default function UserProfile() {
       setProfilePictureFile(null);
       setProfilePicturePreview(null);
     } catch (err) {
-      setError(err.message || 'Failed to remove profile picture.');
+      setError(err.message || 'Failed to remove profile picture.');      handleAuthError(err);
       console.error(err);
     } finally {
       setIsLoading(false);
