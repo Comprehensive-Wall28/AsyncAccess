@@ -27,10 +27,15 @@ import BookOnlineIcon from '@mui/icons-material/BookOnline'; // For Booked Ticke
 // Imports for the overall page structure
 import CssBaseline from '@mui/material/CssBaseline';
 import AppTheme from '../../shared-theme/AppTheme';
-import AppAppBar from './AppAppBar';
-import Footer from './Footer';
+import AppAppBar from '../../home-page/components/AppAppBar';
+import Footer from '../../home-page/components/Footer';
 
-const API_URL = '/api/v1/events';
+const BACKEND_STATIC_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+const apiClientInstance = axios.create({
+  baseURL: BACKEND_STATIC_BASE_URL,
+  withCredentials: true,
+});
 
 const EventDetails = (props) => {
     const { id } = useParams();
@@ -44,7 +49,7 @@ const EventDetails = (props) => {
             setLoading(true);
             try {
                 // Ensure your API populates the organizer field if you want to display its details
-                const response = await axios.get(`${API_URL}/${id}`);
+                const response = await apiClientInstance.get(`/events/${id}`);
                 setEvent(response.data);
                 setError(null);
             } catch (err) { // Corrected line: Removed "MuiInputLabel-shrink" and added opening brace
