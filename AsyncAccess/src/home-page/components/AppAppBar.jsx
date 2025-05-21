@@ -13,6 +13,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
 import Sitemark from './AsyncAccessIcon';
+import Menu from '@mui/material/Menu';
 import { Link } from 'react-router-dom'; // Import Link
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
@@ -34,19 +35,39 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
 export default function AppAppBar() {
   const [open, setOpen] = React.useState(false);
 
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
   };
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const menuId = 'dashboard-menu';
 
   return (
     <AppBar
       position="fixed"
       enableColorOnDark
       sx={{
-        boxShadow: 0,
-        bgcolor: 'transparent',
-        backgroundImage: 'none',
-        mt: 'calc(var(--template-frame-height, 0px) + 28px)',
+        boxShadow: (theme) => (theme.palette.mode === 'light' ? 0 : theme.shadows[2]),
+        bgcolor: (theme) =>
+          theme.palette.mode === 'light' ? 'transparent' : theme.palette.background.default,
+        backgroundImage: (theme) =>
+          theme.palette.mode === 'light' ? 'none' : `linear-gradient(to bottom, ${theme.palette.background.paper}, ${theme.palette.background.default})`,
+        mt: (theme) =>
+          theme.palette.mode === 'light'
+            ? 'calc(var(--template-frame-height, 0px) + 28px)'
+            : 'calc(var(--template-frame-height, 0px))', // Adjust margin for dark mode
+        transition: 'box-shadow 0.3s ease-in-out, background-color 0.3s ease-in-out',
+        backdropFilter: (theme) =>
+          theme.palette.mode === 'light' ? 'blur(8px)' : 'none',
       }}
     >
       <Container maxWidth="lg">
@@ -54,9 +75,50 @@ export default function AppAppBar() {
           <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', px: 0 }}>
             <Sitemark />
             <Box sx={{ display: { xs: 'none', md: 'flex' }, ml: 2 }}> {/* Added ml: 2 here */}
-              <Button variant="text" color="info" size="small" component={Link} to="/dashboard" sx={{ px: 1 }}>
-                Your Dashboard
+              <Button
+                variant="text"
+                color="info"
+                size="small"
+                sx={{ px: 1 }}
+                aria-controls={menuId}
+                aria-haspopup="true"
+                onClick={handleMenuOpen}
+              >
+                Dashboards
               </Button>
+              <Menu
+                id={menuId}
+                anchorEl={anchorEl}
+                keepMounted
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+                MenuListProps={{ dense: true }}
+                PaperProps={{
+                  sx: {
+                    display: 'flex',
+                    minWidth: 200,
+                    mt: 1,
+                    '& .MuiMenuItem-root': {
+                      px: 2,
+                      py: 1,
+                      borderRadius: 1,
+                      '&:hover': {
+                        backgroundColor: 'action.hover',
+                      },
+                    },
+                  },
+                }}
+              >
+                <MenuItem onClick={handleMenuClose} component={Link} to="/dashboard">
+                  User Dashboard
+                </MenuItem>
+                <MenuItem onClick={handleMenuClose} component={Link} to="/dashboard-admin">
+                  Admin Dashboard
+                </MenuItem>
+                <MenuItem onClick={handleMenuClose} component={Link} to="/dashboard-organizer">
+                  Organizer Dashboard
+                </MenuItem>
+              </Menu>
               <Button variant="text" color="info" size="small" component={Link} to="/events" sx={{ px: 1 }}>
                 Events
               </Button>
