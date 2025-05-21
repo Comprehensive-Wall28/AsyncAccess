@@ -23,14 +23,14 @@ import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography'; // Added import for Typography
 import { apiClient } from '../services/authService'; // Import the NAMED export
 import authService from '../services/authService';
-const xThemeComponents = {
+const xThemeComponents  = {
   ...chartsCustomizations,
   ...dataGridCustomizations,
   ...datePickersCustomizations,
   ...treeViewCustomizations,
 };
 
-export default function Dashboard(props) {
+function Dashboard(props) {
   const [currentUser, setCurrentUser] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState('');
@@ -40,7 +40,6 @@ export default function Dashboard(props) {
 
   const handleMenuItemClick = (action) => {
     setCurrentView(action);
-    // Potentially close mobile drawer if open, if applicable
   };
 
   React.useEffect(() => {
@@ -50,17 +49,15 @@ export default function Dashboard(props) {
       try {
         const response = await apiClient.get('/users/profile');
         // Axios automatically parses JSON and throws for non-2xx status codes
-        setCurrentUser(response.data); 
-        if (response.data?.role !== 'User') {
+        setCurrentUser(response.data); // Assuming the response returns the user data directly
+        if (response.data?.role !== 'Admin') {
           navigate('/unauthorized', { replace: true }); // Redirect if not Admin
         }
       } catch (error) {
         handleAuthError(error);
-        if(error.response){
-        } else {
-          // Something else happened in setting up the request that triggered an Error
-          setError(err.message || 'An unexpected error occurred.');
-        }
+          // Generic error for any other issues
+          setError(error.message || 'An unexpected error occurred.');
+
         setCurrentUser(null); // Ensure currentUser is null on error
       } finally {
         setIsLoading(false);
@@ -124,3 +121,5 @@ export default function Dashboard(props) {
     </AppTheme>
   );
 }
+
+export default Dashboard;
