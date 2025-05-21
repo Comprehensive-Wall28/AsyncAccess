@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { FaCalendarAlt, FaClock, FaMapMarkerAlt } from 'react-icons/fa';
-import './style.css';
 
 function EventAnalytics() {
     const { id } = useParams();
