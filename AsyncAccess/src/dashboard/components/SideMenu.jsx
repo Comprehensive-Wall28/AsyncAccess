@@ -6,10 +6,14 @@ import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import SelectContent from './SelectContent';
 import MenuContent from './MenuContent';
-import CardAlert from './CardAlert';
 import OptionsMenu from './OptionsMenu';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import AsyncAccessLogo from '../../home-page/components/AsyncAccessIcon';
+
+// Same as in UserProfileDisplay.jsx - ensure this is consistent or use a shared config
+// Use the root URL of your backend server where static files are hosted.
+const BACKEND_STATIC_BASE_URL = import.meta.env.VITE_BACKEND_SERVER_URL;
 
 const drawerWidth = 240;
 
@@ -24,7 +28,24 @@ const Drawer = styled(MuiDrawer)({
   },
 });
 
-export default function SideMenu({ currentUser }) {
+const getFirstAndLastName = (fullName) => {
+  if (!fullName) return "";
+  const nameParts = fullName.trim().split(/\s+/);
+  if (nameParts.length === 1) {
+    return nameParts[0]; // Only one name part (e.g., "Cher")
+  }
+  if (nameParts.length > 1) {
+    return `${nameParts[0]} ${nameParts[nameParts.length - 1]}`; // First and Last name
+  }
+  return fullName; // Fallback to full name if an edge case occurs
+};
+
+export default function SideMenu({ currentUser, onMenuItemClick, selectedItem }) {
+  const profilePictureSrc = currentUser?.profilePicture
+    ? (currentUser.profilePicture.startsWith('http') ? currentUser.profilePicture : `${BACKEND_STATIC_BASE_URL}${currentUser.profilePicture}`)
+    : null;
+  const displayName = currentUser ? getFirstAndLastName(currentUser.name) : "Loading...";
+
   return (
     <Drawer
       variant="permanent"
@@ -38,11 +59,13 @@ export default function SideMenu({ currentUser }) {
       <Box
         sx={{
           display: 'flex',
+          alignItems: 'center', // Added for vertical centering
+          justifyContent: 'center', // Added for horizontal centering
           mt: 'calc(var(--template-frame-height, 0px) + 4px)',
           p: 1.5,
         }}
       >
-        <SelectContent />
+        <AsyncAccessLogo />
       </Box>
       <Divider />
       <Box
@@ -53,8 +76,7 @@ export default function SideMenu({ currentUser }) {
           flexDirection: 'column',
         }}
       >
-        <MenuContent />
-        <CardAlert />
+        <MenuContent onMenuItemClick={onMenuItemClick} selectedItem={selectedItem} />
       </Box>
       <Stack
         direction="row"
@@ -68,17 +90,19 @@ export default function SideMenu({ currentUser }) {
       >
         <Avatar
           sizes="small"
-          alt={currentUser ? currentUser.name : "User"}
-          src="/static/images/avatar/7.jpg"
+          alt={currentUser?.name || "User"}
+          src={profilePictureSrc}
           sx={{ width: 36, height: 36 }}
-        />
+        >
+          {!profilePictureSrc && <AccountCircleIcon />}
+        </Avatar>
         <Box sx={{ mr: 'auto' }}>
           <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: '16px' }}>
-            {currentUser ? currentUser.name : "Loading..."}
+            {displayName}
           </Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          {/* <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             {currentUser ? currentUser.email : "Loading..."}
-          </Typography>
+          </Typography> */}
         </Box>
         <OptionsMenu />
       </Stack>

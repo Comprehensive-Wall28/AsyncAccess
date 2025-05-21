@@ -66,6 +66,6 @@ export default {
   logout,
   login,
   requestPasswordReset,
-  signup,
+  signup, 
   updateUserProfilePicture,
 };

@@ -21,28 +21,28 @@ const profileUploadDir = 'public/uploads/profile-pictures/';
 fs.mkdirSync(profileUploadDir, { recursive: true });
 
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, profileUploadDir);
-    },
-    filename: function (req, file, cb) {
-        // Use user ID to make filename unique and prevent overwriting by other users
-        cb(null, req.user.userId + '-' + Date.now() + path.extname(file.originalname));
-    }
+  destination: function (req, file, cb) {
+    cb(null, profileUploadDir);
+  },
+  filename: function (req, file, cb) {
+    // Use user ID to make filename unique and prevent overwriting by other users
+    cb(null, req.user.userId + '-' + Date.now() + path.extname(file.originalname));
+  }
 });
 
 const fileFilter = (req, file, cb) => {
-    // Accept images only
-    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)) {
-        req.fileValidationError = 'Only image files (jpg, jpeg, png, gif) are allowed!';
-        return cb(new Error('Only image files are allowed!'), false);
-    }
-    cb(null, true);
+  // Accept images only
+  if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)) {
+    req.fileValidationError = 'Only image files (jpg, jpeg, png, gif) are allowed!';
+    return cb(new Error('Only image files are allowed!'), false);
+  }
+  cb(null, true);
 };
 
 const upload = multer({
-    storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file size limit
-    fileFilter: fileFilter
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file size limit
+  fileFilter: fileFilter
 });
 
 router.use(authenticationMiddleware)

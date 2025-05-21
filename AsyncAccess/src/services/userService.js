@@ -1,4 +1,5 @@
-import { apiClient } from './authService.js'; // Assuming apiClient is exported from authService.js
+import { apiClient } from './authService'; // Assuming apiClient is exported from authService.js
+
 
 /**
  * Fetches the current logged-in user's profile information.

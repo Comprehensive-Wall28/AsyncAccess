@@ -36,9 +36,9 @@ app.use(cors({
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use("/api/v1", authRouter);
-app.use("/api/v1/users", userRouter);
-app.use("/api/v1/bookings", bookingRouter);
+app.use("/api/v1", authRouter); 
+app.use("/api/v1/users", userRouter); 
+app.use("/api/v1/bookings", bookingRouter); 
 app.use("/api/v1/events", eventRouter);
 
 const startServer = async () => {

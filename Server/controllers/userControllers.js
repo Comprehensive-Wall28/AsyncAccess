@@ -79,18 +79,18 @@ const userController = {
         email: user.email,
         role: user.role,
         age: user.age
-      };
-      const isProduction = process.env.NODE_ENV === 'production';
+     };
+     const isProduction = process.env.NODE_ENV === 'production';
 
       return res
-          .cookie("token", token, { // Set the token cookie
-            expires: expiresAt,
-            httpOnly: true,
-            secure: isProduction, // Set to true in production (HTTPS)
-            sameSite: isProduction ? "none" : "lax", // "none" for cross-site requests in production
-          })
-          .status(200)
-          .json({ message: "Logged in successfully", currentUser });
+        .cookie("token", token, { // Set the token cookie
+          expires: expiresAt,
+          httpOnly: true,
+          secure: isProduction, // Set to true in production (HTTPS)
+          sameSite: isProduction ? "none" : "lax", // "none" for cross-site requests in production
+        })
+        .status(200)
+        .json({ message: "Logged in successfully", currentUser });
 
     } catch (error) {
       console.error("Error logging in:", error);
@@ -160,12 +160,12 @@ const userController = {
       }
 
       const updatedUser = await userModel.findByIdAndUpdate(
-          userId,
-          { $set: updateData }, // Use $set to only update provided fields
-          {
-            new: true,
-            runValidators: true
-          }
+        userId,
+        { $set: updateData }, // Use $set to only update provided fields
+        {
+          new: true, 
+          runValidators: true 
+        }
       ).select('-password'); // Exclude password from the user object
 
       if (!updatedUser) {
@@ -176,12 +176,12 @@ const userController = {
 
     } catch (error) {
       console.error("Error updating current user profile:", error);
-      if (error instanceof multer.MulterError) {
+       if (error instanceof multer.MulterError) {
         return res.status(400).json({ message: `Multer error: ${error.message}` });
-      }
-      if (error.name === 'ValidationError') { // Mongoose validation error
-        return res.status(400).json({ message: "Validation failed", errors: error.errors });
-      }
+       }
+       if (error.name === 'ValidationError') { // Mongoose validation error
+           return res.status(400).json({ message: "Validation failed", errors: error.errors });
+       }
       return res.status(500).json({ message: "Server error while updating profile." });
     }
   },

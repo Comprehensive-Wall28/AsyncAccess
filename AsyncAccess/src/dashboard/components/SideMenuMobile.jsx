@@ -10,10 +10,17 @@ import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 import MenuButton from './MenuButton';
 import MenuContent from './MenuContent';
-import CardAlert from './CardAlert';
+import { logout } from '../../services/authService'; 
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
-function SideMenuMobile({ open, toggleDrawer, currentUser }) {
+const BACKEND_STATIC_BASE_URL = import.meta.env.VITE_BACKEND_SERVER_URL;
+
+function SideMenuMobile({ open, toggleDrawer, currentUser, onMenuItemClick, selectedItem }) {
+  const profilePictureSrc = currentUser?.profilePicture
+    ? (currentUser.profilePicture.startsWith('http') ? currentUser.profilePicture : `${BACKEND_STATIC_BASE_URL}${currentUser.profilePicture}`)
+    : null;
   return (
+    // ... (Drawer and Stack wrappers)
     <Drawer
       anchor="right"
       open={open}
@@ -26,6 +33,7 @@ function SideMenuMobile({ open, toggleDrawer, currentUser }) {
         },
       }}
     >
+      {/* ... (Inner Stack for content) */}
       <Stack
         sx={{
           maxWidth: '70dvw',
@@ -39,10 +47,12 @@ function SideMenuMobile({ open, toggleDrawer, currentUser }) {
           >
             <Avatar
               sizes="small"
-              alt={currentUser ? currentUser.name : "User"}
-              src="/static/images/avatar/7.jpg"
+              alt={currentUser?.name || "User"}
+              src={profilePictureSrc}
               sx={{ width: 24, height: 24 }}
-            />
+            >
+              {!profilePictureSrc && <AccountCircleIcon />}
+            </Avatar>
             <Typography component="p" variant="h6">
               {currentUser ? currentUser.name : "Loading..."}
             </Typography>
@@ -53,12 +63,25 @@ function SideMenuMobile({ open, toggleDrawer, currentUser }) {
         </Stack>
         <Divider />
         <Stack sx={{ flexGrow: 1 }}>
-          <MenuContent />
+          {/* ... (MenuContent) */}
+          <MenuContent onMenuItemClick={onMenuItemClick} selectedItem={selectedItem} />
           <Divider />
         </Stack>
-        <CardAlert />
         <Stack sx={{ p: 2 }}>
-          <Button variant="outlined" fullWidth startIcon={<LogoutRoundedIcon />}>
+          <Button
+            variant="outlined"
+            fullWidth
+            startIcon={<LogoutRoundedIcon />}
+            onClick={async () => {
+              try {
+                await logout();
+                console.log('Logged out successfully');
+                window.location.href = '/login';
+              } catch (error) {
+                console.error('Logout failed:', error);
+              }
+            }}
+          >
             Logout
           </Button>
         </Stack>
@@ -70,6 +93,8 @@ function SideMenuMobile({ open, toggleDrawer, currentUser }) {
 SideMenuMobile.propTypes = {
   open: PropTypes.bool,
   currentUser: PropTypes.object,
+  onMenuItemClick: PropTypes.func,
+  selectedItem: PropTypes.string,
   toggleDrawer: PropTypes.func.isRequired,
 };
 
