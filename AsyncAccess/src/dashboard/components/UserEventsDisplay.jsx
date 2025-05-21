@@ -20,7 +20,7 @@ import CancelIcon from '@mui/icons-material/Cancel'; // Optional: for the button
 import IconButton from '@mui/material/IconButton'; // For the arrow button
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'; // Arrow icon
 
-import * as bookingsService from '../../services/bookingsService';
+import * as eventsService from '../../services/eventService';
 
 // Title component (similar to one in UserProfileDisplay or Title.tsx.preview)
 const Title = (props) => (
@@ -44,22 +44,22 @@ const getStatusColor = (status) => {
 };
 
 export default function UserBookingsDisplay({ currentUser }) {
-  const [bookings, setBookings] = React.useState([]);
+  const [events, setBookings] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState('');
   const [expandedBookings, setExpandedBookings] = React.useState({}); // State to manage expanded cards
   const [openCancelDialog, setOpenCancelDialog] = React.useState(false);
-  const [bookingToCancel, setBookingToCancel] = React.useState(null);
+  const [eventToCancel, setBookingToCancel] = React.useState(null);
   const [cancelInProgress, setCancelInProgress] = React.useState(false);
   const [cancelError, setCancelError] = React.useState('');
 
-  const handleToggleExpand = (bookingId) => {
+  const handleToggleExpand = (eventId) => {
     // Correctly toggle the boolean state
-    setExpandedBookings(prev => ({ ...prev, [bookingId]: !prev[bookingId] }));
+    setExpandedBookings(prev => ({ ...prev, [eventId]: !prev[eventId] }));
   };
 
-  const handleOpenCancelDialog = (booking) => {
-    setBookingToCancel(booking);
+  const handleOpenCancelDialog = (event) => {
+    setBookingToCancel(event);
     setOpenCancelDialog(true);
     setCancelError(''); // Clear previous errors
   };
@@ -72,19 +72,19 @@ export default function UserBookingsDisplay({ currentUser }) {
   };
 
   const handleConfirmCancel = async () => {
-    if (!bookingToCancel) return;
+    if (!eventToCancel) return;
     setCancelInProgress(true);
     setCancelError('');
     try {
-      const result = await bookingsService.cancelBookingById(bookingToCancel._id);
-      // Update the specific booking in the local state
+      const result = await eventsService.cancelBookingById(eventToCancel._id);
+      // Update the specific event in the local state
       setBookings(prevBookings =>
-          prevBookings.map(b => b._id === bookingToCancel._id ? result.booking : b)
+          prevBookings.map(b => b._id === eventToCancel._id ? result.event : b)
       );
       handleCloseCancelDialog();
       // Optionally: show a success snackbar/message
     } catch (err) {
-      setCancelError(err.data?.error || err.message || 'Failed to cancel booking.');
+      setCancelError(err.data?.error || err.message || 'Failed to cancel event.');
       // Keep dialog open to show error, or close and show snackbar
     } finally {
       setCancelInProgress(false);
@@ -103,11 +103,11 @@ export default function UserBookingsDisplay({ currentUser }) {
       setIsLoading(true);
       setError('');
       try {
-        const data = await bookingsService.getMyBookings();
+        const data = await eventsService.getMyEvents();
         setBookings(data);
       } catch (err) {
-        // The backend returns 404 with a specific error message for no bookings
-        if (err && err.status === 404 && err.data && err.data.error === "No bookings found for this user") {
+        // The backend returns 404 with a specific error message for no events
+        if (err && err.status === 404 && err.data && err.data.error === "No events found for this user") {
           setBookings([]); // This is an expected "empty" state
         } else if (err && err.data && err.data.error) { // Other errors from our backend
           setError(err.data.error);
@@ -116,7 +116,7 @@ export default function UserBookingsDisplay({ currentUser }) {
           setError(err.message);
           setBookings([]);
         } else {
-          setError('An unexpected error occurred while fetching bookings.');
+          setError('An unexpected error occurred while fetching events.');
           setBookings([]);
         }
       } finally {
@@ -137,7 +137,7 @@ export default function UserBookingsDisplay({ currentUser }) {
           <CardContent>
             <Title>Your Bookings</Title>
             <Typography variant="subtitle1" color="text.secondary" textAlign="center" sx={{ py: 3 }}>
-              Please log in to view your bookings.
+              Please log in to view your events.
             </Typography>
           </CardContent>
         </Card>
@@ -147,25 +147,25 @@ export default function UserBookingsDisplay({ currentUser }) {
   return (
       <Card sx={{ mt: 4, p: 2, width: '100%' }}>
         <CardContent>
-          <Title>Your Bookings</Title>
+          <Title>Your Events</Title>
           {isLoading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100px' }}>
                 <CircularProgress />
               </Box>
           ) : error ? (
               <Alert severity="error">{error}</Alert>
-          ) : bookings.length === 0 ? (
+          ) : events.length === 0 ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100px' }}>
                 <Typography variant="subtitle1" color="text.secondary">
-                  You have no current bookings.
+                  You have no current events.
                 </Typography>
               </Box>
           ) : (
               <Stack spacing={2} sx={{ mt: 2 }}>
-                {bookings.map((booking) => (
+                {events.map((event) => (
                     <Paper
-                        key={booking._id}
-                        elevation={expandedBookings[booking._id] ? 4 : 1}
+                        key={event._id}
+                        elevation={expandedBookings[event._id] ? 4 : 1}
                         sx={{
                           p: 2,
                           borderRadius: 2,
@@ -176,29 +176,29 @@ export default function UserBookingsDisplay({ currentUser }) {
                           direction="row"
                           justifyContent="space-between"
                           alignItems="center"
-                          sx={{ mb: expandedBookings[booking._id] ? 1 : 0, cursor: 'pointer' }} // Add margin bottom and cursor
-                          onClick={() => handleToggleExpand(booking._id)} // Make the whole stack clickable
+                          sx={{ mb: expandedBookings[event._id] ? 1 : 0, cursor: 'pointer' }} // Add margin bottom and cursor
+                          onClick={() => handleToggleExpand(event._id)} // Make the whole stack clickable
                       >
                         {/* Make the Typography and Chip clickable to toggle */}
                         <Typography variant="h6" component="div" noWrap sx={{ flexGrow: 1, pr: 1 }}>
-                          {booking.event
-                              ? (booking.event.title || '[No Title Provided]')
+                          {event.title
+                              ? (event.title || '[No Title Provided]')
                               : 'Event Data Not Available'}
                         </Typography>
                         <Chip
-                            label={booking.bookingStatus || 'N/A'}
-                            color={getStatusColor(booking.bookingStatus)}
+                            label={event.status || 'N/A'}
+                            color={getStatusColor(event.status)}
                             size="small"
                             sx={{ borderRadius: '8px', flexShrink: 0 }}
                         />
                         <IconButton
                             // onClick is now handled by the parent Stack
-                            aria-expanded={expandedBookings[booking._id]}
+                            aria-expanded={expandedBookings[event._id]}
                             aria-label="show more"
                             size="small"
                             sx={{
                               ml: 1, // Margin left for spacing
-                              transform: expandedBookings[booking._id] ? 'rotate(180deg)' : 'rotate(0deg)',
+                              transform: expandedBookings[event._id] ? 'rotate(180deg)' : 'rotate(0deg)',
                               transition: (theme) => theme.transitions.create('transform', {
                                 duration: theme.transitions.duration.short,
                               }),
@@ -208,7 +208,7 @@ export default function UserBookingsDisplay({ currentUser }) {
                           <KeyboardArrowDownIcon />
                         </IconButton>
                       </Stack>
-                      <Collapse in={expandedBookings[booking._id]} timeout="auto" unmountOnExit>
+                      <Collapse in={expandedBookings[event._id]} timeout="auto" unmountOnExit>
                         <Box sx={{ pt: 2, borderTop: (theme) => `1px dashed ${theme.palette.divider}`, mt:1 }}> {/* Add padding top for the collapsed section */}
                           <Grid container spacing={1}>
                             {/* Tickets */}
@@ -216,30 +216,18 @@ export default function UserBookingsDisplay({ currentUser }) {
                               <Typography variant="body2" fontWeight="medium" color="text.secondary">Tickets:</Typography>
                             </Grid>
                             <Grid item xs={8} sm={9}>
-                              <Typography variant="body2">{booking.numberOfTickets}</Typography>
+                              <Typography variant="body2">{event.bookedTickets}</Typography>
                             </Grid>
 
                             {/* Event Date */}
-                            {booking.event && booking.event.date && (
-                                <>
-                                  <Grid item xs={4} sm={3}>
-                                    <Typography variant="body2" fontWeight="medium" color="text.secondary">Event Date:</Typography>
-                                  </Grid>
-                                  <Grid item xs={8} sm={9}>
-                                    <Typography variant="body2">{new Date(booking.event.date).toLocaleDateString()}</Typography>
-                                  </Grid>
-                                </>
-                            )}
-
-                            {/* Booking Date */}
                             <Grid item xs={4} sm={3}>
-                              <Typography variant="body2" fontWeight="medium" color="text.secondary">Booking Date:</Typography>
+                              <Typography variant="body2" fontWeight="medium" color="text.secondary">Event Date:</Typography>
                             </Grid>
                             <Grid item xs={8} sm={9}>
                               <Typography variant="body2">
                                 {(() => {
-                                  if (booking.createdDate) {
-                                    const date = new Date(booking.createdDate);
+                                  if (event.date) {
+                                    const date = new Date(event.date);
                                     if (!isNaN(date.valueOf())) { // Check if the date is valid
                                       return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
                                     }
@@ -249,26 +237,25 @@ export default function UserBookingsDisplay({ currentUser }) {
                               </Typography>
                             </Grid>
 
-                            {/* Total Price */}
                             <Grid item xs={4} sm={3}>
-                              <Typography variant="body2" fontWeight="medium" color="text.secondary">Total Price:</Typography>
+                              <Typography variant="body2" fontWeight="medium" color="text.secondary">Ticket Price:</Typography>
                             </Grid>
                             <Grid item xs={8} sm={9}>
-                              <Typography variant="body2">${booking.totalPrice ? booking.totalPrice.toFixed(2) : 'N/A'}</Typography>
+                              <Typography variant="body2">${event.ticketPrice ? event.ticketPrice.toFixed(2) : 'N/A'}</Typography>
                             </Grid>
 
-                            {/* Cancel Button - only if booking is not already cancelled */}
-                            {booking.bookingStatus && booking.bookingStatus.toLowerCase() !== 'cancelled' && (
+                            {/* Cancel Button - only if event is not already cancelled */}
+                            {event.eventStatus && event.eventStatus.toLowerCase() !== 'cancelled' && (
                                 <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
                                   {/* <Button
                             variant="contained"
                             color="error"
                             size="small"
                             startIcon={<CancelIcon />}
-                            onClick={() => handleOpenCancelDialog(booking)}
+                            onClick={() => handleOpenCancelDialog(event)}
                             sx={{ borderRadius: '16px', textTransform: 'none' }}
                           >
-                            Cancel Booking
+                            Cancel Event
                           </Button> */}
                                 </Grid>
                             )}
@@ -280,17 +267,17 @@ export default function UserBookingsDisplay({ currentUser }) {
               </Stack>
           )}
         </CardContent>
-        {bookingToCancel && (
+        {eventToCancel && (
             <Dialog
                 open={openCancelDialog}
                 onClose={handleCloseCancelDialog}
-                aria-labelledby="cancel-booking-dialog-title"
-                aria-describedby="cancel-booking-dialog-description"
+                aria-labelledby="cancel-event-dialog-title"
+                aria-describedby="cancel-event-dialog-description"
             >
-              <DialogTitle id="cancel-booking-dialog-title">Confirm Cancellation</DialogTitle>
+              <DialogTitle id="cancel-event-dialog-title">Confirm Cancellation</DialogTitle>
               <DialogContent>
-                <DialogContentText id="cancel-booking-dialog-description">
-                  Are you sure you want to cancel your booking for "{bookingToCancel.event?.title || 'this event'}"?
+                <DialogContentText id="cancel-event-dialog-description">
+                  Are you sure you want to cancel your event for "{eventToCancel.event?.title || 'this event'}"?
                   This action cannot be undone.
                 </DialogContentText>
                 {cancelError && <Alert severity="error" sx={{ mt: 2 }}>{cancelError}</Alert>}

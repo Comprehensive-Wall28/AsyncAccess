@@ -6,10 +6,7 @@ import SignIn from './sign-in/SignIn';
 import SignUp from './sign-up/SignUp';
 import Dashboard from './dashboard/Dashboard';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import OrganizerDashboard from './organizer-page/Dashboard';
 import Events from './events/Events'
-import EventListing from './organizer-page/EventListing.jsx';
-import EventAnalytics from './organizer-page/Details/EventAnalytics.jsx';
 import BookingListing from "./bookings-page/BookingListing.jsx";
 
 
@@ -51,13 +48,8 @@ function App() {
             </MainLayout>
           }
         />
-        
 
-
-          {/*<Route path="/organizer-management" element={<OrganizerDashboard />} />*/}
-          <Route path="/events" element={<EventListing />} />
-          <Route path="/bookings" element={<BookingListing />} />
-          {/*<Route path="events/:id" element={<EventAnalytics />} />*/}
+          <Route path="/users/bookings" element={<BookingListing />} />
 
         {/* Add more routes for other pages here */}
 
