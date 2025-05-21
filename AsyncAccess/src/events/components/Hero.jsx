@@ -100,7 +100,6 @@ export default function Hero() {
             Events
             </Typography>
           </Typography>
-       
         </Stack>
       </Container>
     </Box>

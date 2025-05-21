@@ -12,7 +12,7 @@ import Drawer from '@mui/material/Drawer';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
-import Sitemark from './AsyncAccessIcon';
+import AsyncIcon from './AsyncAccessIcon';
 import Menu from '@mui/material/Menu';
 import { Link, useNavigate } from 'react-router-dom'; // Import Link and useNavigate
 import Avatar from '@mui/material/Avatar'; // Import Avatar
@@ -117,7 +117,7 @@ export default function AppAppBar() {
       <Container maxWidth="lg">
         <StyledToolbar variant="dense" disableGutters>
           <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', px: 0 }}>
-            <Sitemark />
+            <AsyncIcon />
             <Box sx={{ display: { xs: 'none', md: 'flex' }, ml: 2 }}> {/* Added ml: 2 here */}
               <Button
                 variant="text"
@@ -166,21 +166,6 @@ export default function AppAppBar() {
               <Button variant="text" color="info" size="small" component={Link} to="/events" sx={{ px: 1 }}>
                 Events
               </Button>
-              {/* <Button variant="text" color="info" size="small">
-                Testimonials
-              </Button> */}
-              <Button variant="text" color="info" size="small" sx={{ px: 1 }}>
-                Highlights
-              </Button>
-              {/* <Button variant="text" color="info" size="small">
-                Pricing
-              </Button> */}
-              {/* <Button variant="text" color="info" size="small" sx={{ minWidth: 0 }}>
-                FAQ
-              </Button> */}
-              {/* <Button variant="text" color="info" size="small" sx={{ minWidth: 0 }}>
-                Blog
-              </Button> */}
             </Box>
           </Box>
           <Box

@@ -12,23 +12,12 @@ import SideMenu from './components/SideMenu';
 import AppTheme from '../shared-theme/AppTheme';
 
 import UserProfile from './components/UserProfile'; // Import the new UserProfile component
-import {
-  chartsCustomizations,
-  dataGridCustomizations,
-  datePickersCustomizations,
-  treeViewCustomizations,
-} from './theme/customizations';
+
 import { useNavigate } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography'; // Added import for Typography
 import { apiClient } from '../services/authService'; // Import the NAMED export
 import authService from '../services/authService';
-const xThemeComponents = {
-  ...chartsCustomizations,
-  ...dataGridCustomizations,
-  ...datePickersCustomizations,
-  ...treeViewCustomizations,
-};
 
 export default function Dashboard(props) {
   const [currentUser, setCurrentUser] = React.useState(null);
@@ -91,7 +80,7 @@ export default function Dashboard(props) {
     }
   }
   return (
-    <AppTheme {...props} themeComponents={xThemeComponents}>
+    <AppTheme {...props} >
       <CssBaseline enableColorScheme />
       <Box sx={{ display: 'flex' }}>
         <SideMenu currentUser={currentUser} onMenuItemClick={handleMenuItemClick} selectedItem={currentView} />

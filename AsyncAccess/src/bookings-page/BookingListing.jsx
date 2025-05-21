@@ -15,18 +15,6 @@ import Header from "./components/Header.jsx";
 import Alert from "@mui/material/Alert";
 import MainGrid from "./components/MainGrid.jsx";
 
-import {
-  chartsCustomizations,
-  dataGridCustomizations,
-  datePickersCustomizations, treeViewCustomizations
-} from "../dashboard/theme/customizations/index.jsx";
-
-const xThemeComponents = {
-  ...chartsCustomizations,
-  ...dataGridCustomizations,
-  ...datePickersCustomizations,
-  ...treeViewCustomizations,
-};
 
 function BookingListing(props) {
   const [bookings, setBookings] = useState([]);
