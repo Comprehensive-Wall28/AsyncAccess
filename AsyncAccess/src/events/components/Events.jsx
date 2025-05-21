@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'; // Added useMemo
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { Link as RouterLink } from 'react-router-dom';
 import Container from '@mui/material/Container';
@@ -9,9 +9,14 @@ import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
-import TextField from '@mui/material/TextField'; // Added TextField for search
-import SearchIcon from '@mui/icons-material/Search'; // Added SearchIcon
-import InputAdornment from '@mui/material/InputAdornment'; // Added InputAdornment
+import TextField from '@mui/material/TextField';
+import SearchIcon from '@mui/icons-material/Search';
+import InputAdornment from '@mui/material/InputAdornment';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel'; // Keep InputLabel
+import Stack from '@mui/material/Stack';
 
 const API_URL = '/api/v1/events';
 
@@ -19,7 +24,9 @@ export default function Events() {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [searchTerm, setSearchTerm] = useState(''); // State for the search term
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [categories, setCategories] = useState([]);
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -27,11 +34,25 @@ export default function Events() {
                 setLoading(true);
                 const response = await axios.get(API_URL);
                 setEvents(response.data);
+
+                const allCategories = response.data.reduce((acc, event) => {
+                    if (event.category && Array.isArray(event.category)) {
+                        event.category.forEach(cat => {
+                            if (cat && !acc.includes(cat)) {
+                                acc.push(cat);
+                            }
+                        });
+                    }
+                    return acc;
+                }, []);
+                setCategories(['All Categories', ...allCategories.sort()]);
+
                 setError(null);
             } catch (err) {
                 console.error("Error fetching events:", err);
                 setError(err.response?.data?.error || err.message || "Failed to fetch events. Please try again later.");
                 setEvents([]);
+                setCategories(['All Categories']);
             } finally {
                 setLoading(false);
             }
@@ -40,16 +61,15 @@ export default function Events() {
         fetchEvents();
     }, []);
 
-    // Memoize the filtered events to avoid re-filtering on every render
-    // unless events or searchTerm changes.
     const filteredEvents = useMemo(() => {
-        if (!searchTerm) {
-            return events;
-        }
-        return events.filter(event =>
-            event.title.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    }, [events, searchTerm]);
+        return events.filter(event => {
+            const titleMatch = event.title.toLowerCase().includes(searchTerm.toLowerCase());
+            const categoryMatch = selectedCategory === '' || selectedCategory === 'All Categories'
+                ? true
+                : event.category && event.category.includes(selectedCategory);
+            return titleMatch && categoryMatch;
+        });
+    }, [events, searchTerm, selectedCategory]);
 
     if (loading) {
         return (
@@ -69,12 +89,15 @@ export default function Events() {
 
     return (
         <Container sx={{ py: { xs: 1, sm: 4 } }} id="approved-events">
-            {/* Search Bar */}
-            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
+            {/* Search and Filter Controls */}
+            <Stack
+                direction={{ xs: 'column', sm: 'row' }}
+                spacing={2}
+                sx={{ mb: 4, justifyContent: 'center', alignItems: 'center' }}
+            >
                 <TextField
-                    fullWidth
                     variant="outlined"
-                    placeholder="Enter event title..."
+                    placeholder="Search by title..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     InputProps={{
@@ -84,14 +107,49 @@ export default function Events() {
                             </InputAdornment>
                         ),
                     }}
-                    sx={{ maxWidth: '600px' }} // Constrain the width of the search bar
+                    sx={{ width: { xs: '100%', sm: 'auto' }, minWidth: { sm: '300px' }, flexGrow: { sm: 1 }, maxWidth: {sm: '500px'} }}
                 />
-            </Box>
+                <FormControl variant="outlined" sx={{ width: { xs: '100%', sm: 'auto' }, minWidth: { sm: '200px' } }}>
+                    {/* MODIFIED InputLabel below */}
+                    <InputLabel
+                        id="category-filter-label"
+                        // Add sx prop to the InputLabel
+                        sx={{
+                            // Style for the default (not shrunken) state
+                            // Adjust the second value (vertical translation) to move it up/down inside the box
+                            // Default is often around 16px for standard size. Decrease to move up.
+                            transform: 'translate(69px, 10px) scale(1)', // Example: moved up from default 16px to 14px
+
+                            // Style for the shrunken (floated above) state (from previous request)
+                            '&.MuiInputLabel-shrink': {
+                                transform: 'translate(5px, -18px) scale(0.75)',
+                            },
+                        }}
+                    >
+                        Category
+                    </InputLabel>
+                    <Select
+                        labelId="category-filter-label"
+                        id="category-filter"
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        label="Category" // This is important for the InputLabel to work correctly
+                    >
+                        {categories.map((category) => (
+                            <MenuItem key={category} value={category === 'All Categories' ? '' : category}>
+                                {category}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+            </Stack>
 
             {filteredEvents.length === 0 && !loading && (
                 <Container sx={{ py: 5 }}>
                     <Typography variant="h6" align="center">
-                        {searchTerm ? `No events found matching "${searchTerm}".` : "No approved events found at the moment. Please check back later!"}
+                        {searchTerm || (selectedCategory && selectedCategory !== 'All Categories')
+                            ? `No events found matching your criteria.`
+                            : "No approved events found at the moment. Please check back later!"}
                     </Typography>
                 </Container>
             )}
