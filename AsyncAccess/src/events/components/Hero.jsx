@@ -67,6 +67,7 @@ export default function Hero() {
           alignItems: 'center',
           pt: { xs: 14, sm: 20 },
           pb: { xs: 8, sm: 12 },
+
         }}
       >
         <Stack
@@ -83,7 +84,8 @@ export default function Hero() {
               fontSize: 'clamp(2.2rem, 8vw, 3.5rem)',
             }}
           >
-            Check our 
+            Check our {'‎ '}
+
             <Typography
               component="span"
               variant="h1"

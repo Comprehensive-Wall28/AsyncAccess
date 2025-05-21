@@ -61,14 +61,28 @@ const getEventAnalytics = async (req, res) => {
     }
 };
 
-const getAllEventsAdmin = async (req, res) => {
-    const events = await Event.find().sort({createdAt: -1});
-    res.status(200).json(events);
+const getAllEvents = async (req, res) => {
+    try {
+        const events = await Event.find({status: 'approved'})
+            .select('title description date location category image ticketPrice') // Optionally select fields
+            .sort({createdAt: -1});
+        res.status(200).json(events);
+    } catch (error) {
+        console.error("Error fetching approved events:", error.message);
+        // Send a JSON error response
+        res.status(500).json({ error: "Internal Server Error while fetching approved events" });
+    }
 };
 
-const getAllEvents = async (req, res) => {
-    const events = await Event.find({status: 'approved'}).sort({createdAt: -1});
-    res.status(200).json(events);
+const getAllEventsAdmin = async (req, res) => {
+    try {
+        const events = await Event.find().sort({createdAt: -1});
+        res.status(200).json(events);
+    } catch (error) {
+        console.error("Error fetching all admin events:", error.message);
+        // Send a JSON error response
+        res.status(500).json({ error: "Internal Server Error while fetching all admin events" });
+    }
 };
 
 const getEvent = async (req, res) => {
