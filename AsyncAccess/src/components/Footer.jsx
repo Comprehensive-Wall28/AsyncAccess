@@ -1,6 +1,5 @@
 // src/components/Footer.jsx
 import React from 'react';
-import './style.css'; //HARD CODED PATH
 
 function Footer() {
   return (

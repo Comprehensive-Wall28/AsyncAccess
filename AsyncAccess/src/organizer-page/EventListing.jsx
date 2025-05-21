@@ -1,13 +1,9 @@
-import './components/EventListings.css';
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import NotFound from '../components/NotFoundComponent';
-import {
-  FaMapMarkerAlt,
-  FaCalendarAlt,
-  FaClock
-} from 'react-icons/fa';
+import { FaMapMarkerAlt, FaCalendarAlt, FaClock } from 'react-icons/fa';
 import { apiClient } from "../services/authService.js";
+import { Box, Stack, Typography, Alert, Paper, CssBaseline } from '@mui/material';
 
 function EventListing() {
   const [events, setEvents] = useState([]);
@@ -43,7 +39,6 @@ function EventListing() {
         const data = await eventsResponse.json();
         setEvents(data);
       } catch (err) {
-        console.error('Error fetching events:', err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -58,62 +53,54 @@ function EventListing() {
   }
 
   return (
-    <div className="organizer-dashboard">
-      <h1>Organizer Dashboard</h1>
-      <div className="events-container">
-        <h2>All Events</h2>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', p: 3 }}>
+      <CssBaseline enableColorScheme />
+      <Typography variant="h3" align="center" sx={{ mb: 4 }}>
+        Organizer Dashboard
+      </Typography>
+      <Box>
+        <Typography variant="h5" gutterBottom>
+          All Events
+        </Typography>
         {loading ? (
-          <div className="loading-box">Loading events...</div>
+          <Alert severity="info">Loading events...</Alert>
         ) : error ? (
-          <div className="error-box">
-            <h3>Error Loading Events</h3>
-            <p>{error}</p>
-          </div>
+          <Alert severity="error">{error}</Alert>
         ) : events.length === 0 ? (
-          <div className="empty-box">No events available</div>
+          <Alert severity="warning">No events available</Alert>
         ) : (
-          <div className="events-grid">
+          <Stack spacing={2}>
             {events.map((event) => (
-              <div
-                key={event._id}
-                className="event-card"
-              >
-                <div className="event-header">
+              <Paper key={event._id} sx={{ p: 2 }}>
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Typography variant="h6">{event.title || 'Untitled Event'}</Typography>
+                  <Typography variant="caption" color="primary" sx={{ ml: 1 }}>
+                    {event.status}
+                  </Typography>
                   {event.category && (
-                    <span className="category-tag">{event.category}</span>
+                    <Typography variant="body2" color="text.secondary" sx={{ ml: 2 }}>
+                      {event.category}
+                    </Typography>
                   )}
-                </div>
-                <h3 className="event-title">{event.title || 'Untitled Event'}</h3>
-                <span className={`status-badge ${event.status?.toLowerCase()}`}>
-                  {event.status}
-                </span>
-                <div className="event-info">
+                </Stack>
+                <Stack direction="row" spacing={3} mt={1}>
                   {event.date && (
-                    <div className="info-item">
-                      <FaCalendarAlt className="info-icon" />
-                      <span>{new Date(event.date).toLocaleDateString()}</span>
-                    </div>
+                    <span><FaCalendarAlt /> {new Date(event.date).toLocaleDateString()}</span>
                   )}
                   {event.time && (
-                    <div className="info-item">
-                      <FaClock className="info-icon" />
-                      <span>{event.time}</span>
-                    </div>
+                    <span><FaClock /> {event.time}</span>
                   )}
                   {event.location && (
-                    <div className="info-item">
-                      <FaMapMarkerAlt className="info-icon" />
-                      <span>{event.location}</span>
-                    </div>
+                    <span><FaMapMarkerAlt /> {event.location}</span>
                   )}
-                </div>
-              </div>
+                </Stack>
+              </Paper>
             ))}
-          </div>
+          </Stack>
         )}
-      </div>
+      </Box>
       <Outlet />
-    </div>
+    </Box>
   );
 }
 
