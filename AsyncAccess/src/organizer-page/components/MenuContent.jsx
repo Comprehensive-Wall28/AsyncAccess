@@ -1,4 +1,6 @@
-import * as React from 'react';
+// AsyncAccess/src/organizer-page/components/MenuContent.jsx
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -14,41 +16,44 @@ import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
 import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
 
 const mainListItems = [
-  { text: 'Home', icon: <HomeRoundedIcon /> },
-  { text: 'Analytics', icon: <AnalyticsRoundedIcon /> },
-  { text: 'Clients', icon: <PeopleRoundedIcon /> },
-  { text: 'Tasks', icon: <AssignmentRoundedIcon /> },
+    { text: 'Home', icon: <HomeRoundedIcon />, route: '/' },
+    { text: 'Bookings', icon: <AnalyticsRoundedIcon />, route: '/organizer-management/bookings' },
+    { text: 'Clients', icon: <PeopleRoundedIcon />, route: '/clients' },
+    { text: 'Tasks', icon: <AssignmentRoundedIcon />, route: '/tasks' },
 ];
 
 const secondaryListItems = [
-  { text: 'Settings', icon: <SettingsRoundedIcon /> },
-  { text: 'About', icon: <InfoRoundedIcon /> },
-  { text: 'Feedback', icon: <HelpRoundedIcon /> },
+    { text: 'Settings', icon: <SettingsRoundedIcon />, route: '/settings' },
+    { text: 'About', icon: <InfoRoundedIcon />, route: '/about' },
+    { text: 'Feedback', icon: <HelpRoundedIcon />, route: '/feedback' },
 ];
 
 export default function MenuContent() {
-  return (
-    <Stack sx={{ flexGrow: 1, p: 1, justifyContent: 'space-between' }}>
-      <List dense>
-        {mainListItems.map((item, index) => (
-          <ListItem key={index} disablePadding sx={{ display: 'block' }}>
-            <ListItemButton selected={index === 0}>
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-      <List dense>
-        {secondaryListItems.map((item, index) => (
-          <ListItem key={index} disablePadding sx={{ display: 'block' }}>
-            <ListItemButton>
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </Stack>
-  );
+    const navigate = useNavigate();
+    const handleNavigation = (route) => route && navigate(route);
+
+    return (
+        <Stack sx={{ flexGrow: 1, p: 1, justifyContent: 'space-between' }}>
+            <List dense>
+                {mainListItems.map((item, index) => (
+                    <ListItem key={index} disablePadding sx={{ display: 'block' }}>
+                        <ListItemButton selected={index === 0} onClick={() => handleNavigation(item.route)}>
+                            <ListItemIcon>{item.icon}</ListItemIcon>
+                            <ListItemText primary={item.text} />
+                        </ListItemButton>
+                    </ListItem>
+                ))}
+            </List>
+            <List dense>
+                {secondaryListItems.map((item, index) => (
+                    <ListItem key={index} disablePadding sx={{ display: 'block' }}>
+                        <ListItemButton onClick={() => handleNavigation(item.route)}>
+                            <ListItemIcon>{item.icon}</ListItemIcon>
+                            <ListItemText primary={item.text} />
+                        </ListItemButton>
+                    </ListItem>
+                ))}
+            </List>
+        </Stack>
+    );
 }

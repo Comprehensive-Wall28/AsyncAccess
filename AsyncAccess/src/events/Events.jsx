@@ -5,6 +5,22 @@ import AppTheme from '../shared-theme/AppTheme';
 import AppAppBar from './components/AppAppBar';
 import Hero from './components/Hero';
 import Footer from './components/Footer';
+
+
+export default function Home(props) {
+  return (
+    <AppTheme {...props}>
+      <CssBaseline enableColorScheme />
+      <AppAppBar />
+      <Hero />
+      <div>
+        <Divider />
+        <Footer />
+      </div>
+    </AppTheme>
+  );
+}
+
 import AllEventsDisplay from './components/Events'; // Import the modified component
 
 // The file exports 'Home', you might consider renaming it to 'EventsPage' for clarity,

@@ -105,6 +105,10 @@ export default function AppAppBar() {
                 </Button>
                 <Divider sx={{ my: 2 }} /> {/* Adjusted margin slightly */}
                 <MenuItem>
+              
+                </MenuItem>
+                <MenuItem>
+              
                   <Button color="primary" variant="contained" fullWidth component={Link} to="/signup">
                     Sign up
                   </Button>

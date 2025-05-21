@@ -147,8 +147,7 @@ export default function SignIn(props) {
         localStorage.removeItem('currentUser'); // Clear if not "Remember me" or no currentUser
       }
 
-      // Redirect to dashboard
-      navigate('/dashboard', { replace: true }); // replace: true prevents going back to login
+      navigate('/dashboard', { replace: true });
 
     } catch (error) {
       // The error from authService.js might be an object with a message property
@@ -168,7 +167,7 @@ export default function SignIn(props) {
           <Typography
             component="h1"
             variant="h4"
-            sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
+            sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)', textAlign: 'center' }}
           >
             Sign In
           </Typography>
@@ -236,7 +235,7 @@ export default function SignIn(props) {
               {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign in'}
             </Button>
             <Divider>
-            <Typography sx={{ color: 'text.secondary' }}>or</Typography>
+              <Typography sx={{ color: 'text.secondary' }}>or</Typography>
           </Divider>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Button
@@ -247,6 +246,8 @@ export default function SignIn(props) {
             >
               Not registered? Get started now!
             </Button>
+            
+          
             <Link
               component="button"
               type="button"
@@ -255,6 +256,14 @@ export default function SignIn(props) {
               sx={{ alignSelf: 'center' }}
             >
               Forgot your password?
+            </Link>
+               <Link
+              type="button"
+              component={route} to="/login-roled"
+              variant="body2"
+              sx={{ alignSelf: 'center' }}
+            >
+              Login as Organizer / Admin
             </Link>
           </Box>
           {loginError && <Alert severity="error" sx={{ mt: 2 }}>{loginError}</Alert>}

@@ -20,10 +20,6 @@ const Title = (props) => (
   </Typography>
 );
 
-// Define your backend URL here. If your API and static files are served from the same base URL,
-// and API_BASE_URL in authService.js is, e.g., 'http://localhost:5000/api/v1',
-// then BACKEND_STATIC_BASE_URL would be 'http://localhost:5000'.
-// Use the root URL of your backend server where static files are hosted.
 const BACKEND_STATIC_BASE_URL = import.meta.env.VITE_BACKEND_SERVER_URL;
 
 export default function UserProfileDisplay({ currentUser, isLoading, setCurrentUser }) {
