@@ -1,31 +1,25 @@
 import * as React from 'react';
-
 import { alpha } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import AppNavbar from './components/AppNavbar';
 import CircularProgress from '@mui/material/CircularProgress'; // Added import
 import Header from './components/Header';
 import MainGrid from './components/MainGrid';
 import SideMenu from './components/SideMenu';
 import AppTheme from '../shared-theme/AppTheme';
-
 import UserProfile from './components/UserProfile'; // Import the new UserProfile component
-import AdminEventsDisplay from './components/AdminEventsDisplay'; // Import the new AdminEventsDisplay component
+import CreateEventForm from './components/CreateEventForm'; // Import the new CreateEventForm component
 import { useNavigate } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography'; // Added import for Typography
 import { apiClient } from '../services/authService'; // Import the NAMED export
-import authService from '../services/authService';
 
-
-function Dashboard(props) {
+export default function Dashboard(props) {
   const [currentUser, setCurrentUser] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState('');
   const [currentView, setCurrentView] = React.useState('home'); // State for current view
-  const handleAuthError = authService.useAuthRedirect();
   const navigate = useNavigate();
 
   const handleMenuItemClick = (action) => {
@@ -38,17 +32,26 @@ function Dashboard(props) {
       setError('');
       try {
         const response = await apiClient.get('/users/profile');
-        // Axios automatically parses JSON and throws for non-2xx status codes
-        setCurrentUser(response.data); // Assuming the response returns the user data directly
-        if (response.data?.role !== 'Admin') {
-          navigate('/unauthorized', { replace: true }); // Redirect if not Admin
+        if(response.data?.role !== 'Organizer') {
+          navigate('/unauthorized', { replace: true }); // Redirect if not Organizer
         }
-      } catch (error) {
-        handleAuthError(error);
-          // Generic error for any other issues
-          setError(error.message || 'An unexpected error occurred.');
+        setCurrentUser(response.data);
 
-        setCurrentUser(null); // Ensure currentUser is null on error
+      } catch (err) {
+        console.error("Failed to fetch user profile:", err);
+        if (err.response) {
+          if (err.response.status === 401 || err.response.status === 403) {
+            navigate('/unauthenticated', { replace: true });
+            localStorage.removeItem('currentUser');
+          } else {
+            setError(err.response.data?.message || `Server error: ${err.response.status}`);
+          }
+        } else if (err.request) {
+          setError('Network error. Please check your connection.');
+        } else {
+          setError(err.message || 'An unexpected error occurred.');
+        }
+        setCurrentUser(null);
       } finally {
         setIsLoading(false);
       }
@@ -70,8 +73,8 @@ function Dashboard(props) {
       case 'user-profile':
         mainContent = <UserProfile />; // Render UserProfile component
         break;
-      case 'about': // This will now render AdminEventsDisplay
-        mainContent = <AdminEventsDisplay />; 
+      case 'about': // This 'about' action now maps to Create Event
+        mainContent = <CreateEventForm />; 
         break;
       default:
         mainContent = <MainGrid currentUser={currentUser} isLoading={isLoading && !currentUser} setCurrentUser={setCurrentUser} />;
@@ -82,7 +85,7 @@ function Dashboard(props) {
       <CssBaseline enableColorScheme />
       <Box sx={{ display: 'flex' }}>
         <SideMenu currentUser={currentUser} onMenuItemClick={handleMenuItemClick} selectedItem={currentView} />
-        <AppNavbar currentUser={currentUser} onMenuItemClick={handleMenuItemClick} selectedItem={currentView} /> 
+        {/*<AppNavbar currentUser={currentUser} onMenuItemClick={handleMenuItemClick} selectedItem={currentView} /> */}
         {/* Main content */}
         <Box
           component="main"
@@ -111,5 +114,3 @@ function Dashboard(props) {
     </AppTheme>
   );
 }
-
-export default Dashboard;

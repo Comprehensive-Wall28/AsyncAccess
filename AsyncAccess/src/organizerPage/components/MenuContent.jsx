@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -9,11 +8,12 @@ import Stack from '@mui/material/Stack';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'; // Icon for Create Event
 
 const mainListItems = [
   { text: 'Home', icon: <HomeRoundedIcon />, action: 'home' },
-  { text: 'Information', icon: <SettingsRoundedIcon />, action: 'user-profile' }, // Renamed and added action
-  { text: 'Event Management', icon: <InfoRoundedIcon />, action: 'about' },
+  { text: 'Information', icon: <SettingsRoundedIcon />, action: 'user-profile' }, 
+  { text: 'Create Event', icon: <AddCircleOutlineIcon />, action: 'about' }, // Changed text and icon, action 'about' is used by Dashboard
 ];
 
 const secondaryListItems = [
