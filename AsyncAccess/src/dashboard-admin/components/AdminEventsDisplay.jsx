@@ -33,32 +33,29 @@ const Title = (props) => (
 
 const EventCard = ({ event, onOpenMenu }) => (
   <Card variant="outlined" sx={{ mb: 2 }}>
-    <CardContent sx={{ pb: onOpenMenu ? '8px !important' : undefined }}> {/* Adjust padding if menu is present */}
-      <Grid container spacing={2} alignItems="center">
-        <Grid item xs={onOpenMenu ? 10 : 12} sm={onOpenMenu ? 11 : 12}>
-          <Typography variant="h6" component="div">
-            {event.title || '[No Title Provided]'}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {event.location || 'Location not specified'}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Date: {event.date ? new Date(event.date).toLocaleDateString() : 'N/A'}
-          </Typography>
-        </Grid>
-        {onOpenMenu && (
-          <Grid item xs={2} sm={1} sx={{ textAlign: 'right' }}>
-            <IconButton
-              aria-label="event actions"
-              onClick={(e) => onOpenMenu(e, event)}
-              size="small"
-            >
-              <MoreVertIcon />
-            </IconButton>
-          </Grid>
-        )}
-      </Grid>
-      {/* Removed Approve button section, actions are now in menu */}
+    <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 1.5, px: 2 }}>
+      <Box sx={{ flexGrow: 1, mr: 1 }}> {/* Text content takes available space, with a small margin before the icon */}
+        <Typography variant="h6" component="div">
+          {event.title || '[No Title Provided]'}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {event.location || 'Location not specified'}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Date: {event.date ? new Date(event.date).toLocaleDateString() : 'N/A'}
+        </Typography>
+      </Box>
+      {onOpenMenu && (
+        <Box> {/* Wrapper for the icon button */}
+          <IconButton
+            aria-label="event actions"
+            onClick={(e) => onOpenMenu(e, event)}
+            size="small"
+          >
+            <MoreVertIcon />
+          </IconButton>
+        </Box>
+      )}
     </CardContent>
   </Card>
 );
@@ -336,7 +333,6 @@ export default function AdminEventsDisplay() {
                   id: 'status-select',
                 }}
               >
-                <option value="pending">Pending</option>
                 <option value="approved">Approved</option>
                 <option value="rejected">Rejected</option>
                 {/* Removed cancelled from here as it's usually a separate action, but admin can still set it if backend allows */}
