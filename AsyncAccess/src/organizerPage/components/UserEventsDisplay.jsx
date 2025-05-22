@@ -18,6 +18,7 @@ import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import TextField from '@mui/material/TextField'; // Added TextField
 
 import * as eventsService from '../../services/eventService';
 
@@ -75,6 +76,17 @@ export default function UserEventsDisplay({ currentUser }) {
   const [eventToDelete, setEventToDelete] = React.useState(null);
   const [deleteInProgress, setDeleteInProgress] = React.useState(false);
   const [deleteError, setDeleteError] = React.useState('');
+
+  // State for Edit Dialog
+  const [openEditDialog, setOpenEditDialog] = React.useState(false);
+  const [eventToEdit, setEventToEdit] = React.useState(null);
+  const [editFormData, setEditFormData] = React.useState({
+    location: '',
+    totalTickets: '',
+    date: '',
+  });
+  const [editInProgress, setEditInProgress] = React.useState(false);
+  const [editError, setEditError] = React.useState('');
 
 
   const handleMenuOpen = (event, eventData) => { // Added
@@ -147,6 +159,74 @@ export default function UserEventsDisplay({ currentUser }) {
       setDeleteInProgress(false);
     }
   };
+
+  // Handlers for Edit Dialog
+  const handleOpenEditDialog = (eventData) => {
+    setEventToEdit(eventData);
+    // Format date for datetime-local input: YYYY-MM-DDTHH:mm
+    const localDateTime = eventData.date ? new Date(new Date(eventData.date).getTime() - (new Date(eventData.date).getTimezoneOffset() * 60000)).toISOString().slice(0, 16) : '';
+    setEditFormData({
+      location: eventData.location || '',
+      totalTickets: eventData.totalTickets !== undefined ? String(eventData.totalTickets) : '',
+      date: localDateTime,
+    });
+    setOpenEditDialog(true);
+    setEditError('');
+    handleMenuClose();
+  };
+
+  const handleCloseEditDialog = () => {
+    if (editInProgress) return;
+    setOpenEditDialog(false);
+    setEventToEdit(null);
+    setEditError('');
+  };
+
+  const handleEditFormChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleConfirmEdit = async () => {
+    if (!eventToEdit) return;
+    setEditInProgress(true);
+    setEditError('');
+
+    const dataToUpdate = {
+      location: editFormData.location,
+      // Ensure totalTickets is a number or undefined if empty, not NaN
+      totalTickets: editFormData.totalTickets === '' ? undefined : parseInt(editFormData.totalTickets, 10),
+      date: editFormData.date ? new Date(editFormData.date).toISOString() : undefined,
+    };
+
+    // Filter out undefined or NaN fields
+    Object.keys(dataToUpdate).forEach(key => {
+      if (dataToUpdate[key] === undefined || (key === 'totalTickets' && isNaN(dataToUpdate[key]))) {
+        // If totalTickets was explicitly set to empty string, it became undefined.
+        // If it was non-numeric, it became NaN. In these cases, don't send the field.
+        // However, allow 0 for totalTickets.
+        if (key === 'totalTickets' && dataToUpdate[key] !== 0) {
+            delete dataToUpdate[key];
+        } else if (key !== 'totalTickets') {
+            delete dataToUpdate[key];
+        }
+      }
+    });
+
+
+    try {
+      const result = await eventsService.updateEventById(eventToEdit._id, dataToUpdate);
+      setEvents(prevEvents =>
+        prevEvents.map(e => (e._id === eventToEdit._id ? { ...e, ...result.data.event } : e))
+      );
+      handleCloseEditDialog();
+    } catch (err) {
+      setEditError(err.data?.error || err.data?.message || err.message || 'Failed to update event.');
+    } finally {
+      setEditInProgress(false);
+    }
+  };
+
 
   React.useEffect(() => {
     if (!currentUser) {
@@ -264,6 +344,12 @@ export default function UserEventsDisplay({ currentUser }) {
                             >
                               {/* Add other menu items like "Edit Event", "View Details" here if needed */}
                               <MenuItem
+                                onClick={() => handleOpenEditDialog(eventActionTarget)}
+                                // disabled={eventActionTarget?.status && eventActionTarget.status.toLowerCase() === 'cancelled'} // Or other conditions
+                              >
+                                Edit Event
+                              </MenuItem>
+                              <MenuItem
                                 onClick={() => handleOpenCancelDialog(eventActionTarget)}
                                 disabled={cancelInProgress || (eventActionTarget?.status && eventActionTarget.status.toLowerCase() === 'cancelled')}
                               >
@@ -370,6 +456,69 @@ export default function UserEventsDisplay({ currentUser }) {
                 </Button>
               </DialogActions>
             </Dialog>
+        )}
+        {/* Edit Event Dialog */}
+        {eventToEdit && (
+          <Dialog
+            open={openEditDialog}
+            onClose={handleCloseEditDialog}
+            aria-labelledby="edit-event-dialog-title"
+          >
+            <DialogTitle id="edit-event-dialog-title">Edit Event: {eventToEdit.title}</DialogTitle>
+            <DialogContent>
+              <DialogContentText sx={{mb: 2}}>
+                Modify the details for your event. Only location, total tickets, and date can be updated.
+              </DialogContentText>
+              <TextField
+                autoFocus
+                margin="dense"
+                id="location"
+                name="location"
+                placeholder="Location"
+                type="text"
+                fullWidth
+                variant="outlined"
+                value={editFormData.location}
+                onChange={handleEditFormChange}
+                disabled={editInProgress}
+              />
+              <TextField
+                margin="dense"
+                id="totalTickets"
+                name="totalTickets"
+                placeholder="Total Tickets"
+                type="number"
+                fullWidth
+                variant="outlined"
+                value={editFormData.totalTickets}
+                onChange={handleEditFormChange}
+                disabled={editInProgress}
+                inputProps={{ min: 0 }}
+              />
+              <TextField
+                margin="dense"
+                id="date"
+                name="date"
+                placeholder="Date and Time"
+                type="datetime-local"
+                fullWidth
+                variant="outlined"
+                value={editFormData.date}
+                onChange={handleEditFormChange}
+                InputLabelProps={{
+                  shrink: true, // Keep shrink true if a label-like text is needed for date
+                }}
+                disabled={editInProgress}
+              />
+              {editError && <Alert severity="error" sx={{ mt: 2 }}>{editError}</Alert>}
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseEditDialog} disabled={editInProgress}>Back</Button>
+              <Button onClick={handleConfirmEdit} color="primary" autoFocus disabled={editInProgress}>
+                {editInProgress ? <CircularProgress size={24} color="inherit" /> : "Save Changes"}
+              </Button>
+            </DialogActions>
+          </Dialog>
         )}
       </Card>
   );
