@@ -10,7 +10,7 @@ import Dashboard from './dashboard/Dashboard';
 import Events from './events/Events'
 import EventListing from './organizer-page/EventListing.jsx';
 import EventAnalytics from './organizer-page/Details/EventAnalytics.jsx';
-import BookingListing from "./bookings-page/BookingListing.jsx";
+import BookingListing from "./booking-page/Checkout.jsx";
 import Unauthorized from './unauthorized/Unauthorized';
 import Unauthenticated from './unauthenticated/Unauthenticated';
 import NotFound from './NotFound.jsx';
