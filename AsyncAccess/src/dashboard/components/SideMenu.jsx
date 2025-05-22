@@ -10,6 +10,8 @@ import MenuContent from './MenuContent';
 import OptionsMenu from './OptionsMenu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AsyncAccessLogo from '../../home-page/components/AsyncAccessIcon';
+import StatCard from './StatCard'; // Import StatCard
+import { Link as RouterLink } from 'react-router-dom'; // Import Link
 
 // Same as in UserProfileDisplay.jsx - ensure this is consistent or use a shared config
 // Use the root URL of your backend server where static files are hosted.
@@ -78,6 +80,16 @@ export default function SideMenu({ currentUser, onMenuItemClick, selectedItem })
       >
         <MenuContent onMenuItemClick={onMenuItemClick} selectedItem={selectedItem} />
       </Box>
+      {/* StatCard added here, above the user profile section */}
+      <Box sx={{ p: 1, mt: 'auto', textDecoration: 'none' }} component={RouterLink} to="/events">
+        <StatCard
+          title="Explore Events"
+          value="New!"
+          interval="Check out upcoming events"
+          trend="up"
+        />
+      </Box>
+      <Divider sx={{ mt: 1 }} /> 
       <Stack
         direction="row"
         sx={{

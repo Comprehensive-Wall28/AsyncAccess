@@ -13,7 +13,14 @@ export default function AsyncAccessIcon() {
   const accessPart = "Access";
 
   const textColor = "#4876EE"; // Blue color for "Access"
-  const asyncColor = theme.palette.mode === 'light' ? "#FFFFFF" : "#000000"; // White for dark, Black for light
+  const asyncColor = theme.palette.mode === 'light' ? theme.palette.primary.light : theme.palette.primary.main;
+  // theme.applyStyles('dark', {
+  //   color: 'primary.light',
+  // }),
+  // color: 'primary.main',
+  // ...theme.applyStyles('dark', {
+  //   color: 'primary.light',
+  // }),
 
   const newViewBoxWidth = 115;
   const svgInternalWidth = newViewBoxWidth;
