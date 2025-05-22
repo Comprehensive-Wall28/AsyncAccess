@@ -115,19 +115,17 @@ export default function CreateEventForm() {
                 />
               </FormControl>
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} sm={6}>
               <FormControl fullWidth required>
                 <FormLabel htmlFor="description" sx={{ mb: 0.5, fontWeight: 'medium' }}>Event Description</FormLabel>
                 <TextField
                   id="description"
                   name="description"
-                  multiline
-                  rows={4}
                   value={formData.description}
                   onChange={handleChange}
                   disabled={isLoading}
                   variant="outlined"
-                  placeholder=""
+                  placeholder="Enter event description"
                 />
               </FormControl>
             </Grid>
