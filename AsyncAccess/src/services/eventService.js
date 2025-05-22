@@ -31,6 +31,23 @@ export const createEvent = async (eventData) => {
 };
 
 /**
+ * Updates an existing event.
+ * @param {string} eventId - The ID of the event to update.
+ * @param {Object} eventData - The data to update the event with (e.g., { location, totalTickets, date }).
+ * @returns {Promise<Object>} A promise that resolves to the updated event object.
+ * @throws Will throw an error if the request fails.
+ */
+export const updateEventById = async (eventId, eventData) => {
+    try {
+        // The backend expects fields like location, totalTickets, date for organizer updates.
+        const response = await apiClient.put(`/events/${eventId}`, eventData);
+        return response.data; // Assuming backend returns { status: 'success', data: { event: updatedEvent } }
+    } catch (error) {
+        throw error.response || new Error('Event update failed due to a network or server error.');
+    }
+};
+
+/**
  * Cancels an event (e.g., updates its status to 'Cancelled').
  * @param {string} eventId - The ID of the event to cancel.
  * @returns {Promise<Object>} A promise that resolves to the server's response (e.g., the updated event).

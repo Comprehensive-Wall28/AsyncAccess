@@ -6,6 +6,7 @@ import Home from './home-page/Home';
 import SignIn from './sign-in/SignIn';
 import SignUp from './sign-up/SignUp';
 import Dashboard from './dashboard/Dashboard';
+//import EventAnalytics from './organizerPage/Analytics/EventAnalytics'
 
 import EventAnalytics from './event-analytics/Details/EventAnalytics.jsx';
 //import BookingListing from "./bookings-page/BookingListing.jsx";
@@ -60,7 +61,7 @@ function App() {
         <Route path="/signup-roled" element={<RoledSignup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/dashboard-admin" element={<DashboardAdmin />} />
-        <Route path="/dashboard-organizer/event-listing" element={<OrganizerDashboard />} />
+        <Route path="/dashboard-organizer/:id" element={<EventAnalytics />} />
 
 
           <Route
