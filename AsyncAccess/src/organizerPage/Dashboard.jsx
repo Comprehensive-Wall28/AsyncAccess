@@ -4,31 +4,16 @@ import { alpha } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-//import AppNavbar from './components/AppNavbar';
 import CircularProgress from '@mui/material/CircularProgress'; // Added import
 import Header from './components/Header';
 import MainGrid from './components/MainGrid';
 import SideMenu from './components/SideMenu';
 import AppTheme from '../shared-theme/AppTheme';
-
 import UserProfile from './components/UserProfile'; // Import the new UserProfile component
-import {
-  chartsCustomizations,
-  dataGridCustomizations,
-  datePickersCustomizations,
-  treeViewCustomizations,
-} from './theme/customizations';
 import { useNavigate } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography'; // Added import for Typography
 import { apiClient } from '../services/authService'; // Import the NAMED export
-
-const xThemeComponents = {
-  ...chartsCustomizations,
-  ...dataGridCustomizations,
-  ...datePickersCustomizations,
-  ...treeViewCustomizations,
-};
 
 export default function Dashboard(props) {
   const [currentUser, setCurrentUser] = React.useState(null);
@@ -39,7 +24,6 @@ export default function Dashboard(props) {
 
   const handleMenuItemClick = (action) => {
     setCurrentView(action);
-    // Potentially close mobile drawer if open, if applicable
   };
 
   React.useEffect(() => {
@@ -48,15 +32,17 @@ export default function Dashboard(props) {
       setError('');
       try {
         const response = await apiClient.get('/users/profile');
+        if(response.data?.role !== 'Organizer') {
+          navigate('/unauthorized', { replace: true }); // Redirect if not Organizer
+        }
         setCurrentUser(response.data);
 
       } catch (err) {
         console.error("Failed to fetch user profile:", err);
         if (err.response) {
           if (err.response.status === 401 || err.response.status === 403) {
-            setError('Authentication required. Redirecting to sign-in...');
+            navigate('/unauthenticated', { replace: true });
             localStorage.removeItem('currentUser');
-            setTimeout(() => navigate('/login', { state: { from: 'dashboard_auth_error' } }), 2000);
           } else {
             setError(err.response.data?.message || `Server error: ${err.response.status}`);
           }
@@ -95,7 +81,7 @@ export default function Dashboard(props) {
     }
   }
   return (
-    <AppTheme {...props} themeComponents={xThemeComponents}>
+    <AppTheme {...props}>
       <CssBaseline enableColorScheme />
       <Box sx={{ display: 'flex' }}>
         <SideMenu currentUser={currentUser} onMenuItemClick={handleMenuItemClick} selectedItem={currentView} />

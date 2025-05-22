@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';

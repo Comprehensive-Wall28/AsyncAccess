@@ -1,8 +1,7 @@
 import Box from '@mui/material/Box';
 import Copyright from '../internals/components/Copyright';
 import UserProfileDisplay from './UserProfileDisplay'; 
-import UserBookingsDisplay from './UserBookingsDisplay';
-import UserEventsDisplay from './UserEventsDisplay'
+import UserBookingsDisplay from './UserBookingsDisplay'; 
 
 export default function MainGrid({ currentUser, isLoading, setCurrentUser }) {
   return (
@@ -12,7 +11,6 @@ export default function MainGrid({ currentUser, isLoading, setCurrentUser }) {
 
       {/* User Bookings Section */}
       <UserBookingsDisplay currentUser={currentUser} />
-        <UserEventsDisplay currentUser={currentUser} />
 
  
       <Copyright sx={{ my: 4 }} />

@@ -10,7 +10,7 @@ export default function MainGrid({ currentUser, isLoading, setCurrentUser }) {
       <UserProfileDisplay currentUser={currentUser} isLoading={isLoading} setCurrentUser={setCurrentUser} />
 
       {/* User Bookings Section */}
-        <UserEventsDisplay currentUser={currentUser} />
+      <UserEventsDisplay currentUser={currentUser} />
 
  
       <Copyright sx={{ my: 4 }} />

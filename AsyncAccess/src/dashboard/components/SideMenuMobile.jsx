@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from 'react'; // Added React import
 import PropTypes from 'prop-types';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
@@ -7,11 +7,12 @@ import Drawer, { drawerClasses } from '@mui/material/Drawer';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
-import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
-import MenuButton from './MenuButton';
 import MenuContent from './MenuContent';
 import { logout } from '../../services/authService'; 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import StatCard from './StatCard'; // Import StatCard
+import { Link as RouterLink } from 'react-router-dom'; // Import Link
+import Box from '@mui/material/Box'; // Import Box
 
 const BACKEND_STATIC_BASE_URL = import.meta.env.VITE_BACKEND_SERVER_URL;
 
@@ -38,6 +39,8 @@ function SideMenuMobile({ open, toggleDrawer, currentUser, onMenuItemClick, sele
         sx={{
           maxWidth: '70dvw',
           height: '100%',
+          display: 'flex', // Ensure Stack is a flex container
+          flexDirection: 'column', // Arrange children vertically
         }}
       >
         <Stack direction="row" sx={{ p: 2, pb: 0, gap: 1 }}>
@@ -57,16 +60,23 @@ function SideMenuMobile({ open, toggleDrawer, currentUser, onMenuItemClick, sele
               {currentUser ? currentUser.name : "Loading..."}
             </Typography>
           </Stack>
-          <MenuButton showBadge>
-            <NotificationsRoundedIcon />
-          </MenuButton>
+      
         </Stack>
         <Divider />
         <Stack sx={{ flexGrow: 1 }}>
-          {/* ... (MenuContent) */}
           <MenuContent onMenuItemClick={onMenuItemClick} selectedItem={selectedItem} />
-          <Divider />
         </Stack>
+        
+        <Box sx={{ p: 1, mt: 'auto', textDecoration: 'none' }} component={RouterLink} to="/events" onClick={toggleDrawer(false)}>
+          <StatCard
+            title="Explore Events"
+            value="New!"
+            interval="Check out upcoming events"
+            trend="up"
+          />
+        </Box>
+        <Divider sx={{ mt: 1 }} /> 
+
         <Stack sx={{ p: 2 }}>
           <Button
             variant="outlined"

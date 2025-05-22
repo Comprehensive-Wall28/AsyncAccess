@@ -1,6 +1,5 @@
 import { apiClient } from './authService'; // Assuming apiClient is exported from authService.js
 
-
 /**
  * Fetches the current logged-in user's profile information.
  * @returns {Promise<Object>} A promise that resolves to the user object.
@@ -10,7 +9,8 @@ export const getCurrentUserProfile = async () => {
     const response = await apiClient.get('/users/profile');
     return response.data;
   } catch (error) {
-    throw error.response ? error.response.data : new Error('Fetching user profile failed.');
+    // We don't handle the redirect here anymore; it will be handled in the component.
+    throw error;
   }
 };
 

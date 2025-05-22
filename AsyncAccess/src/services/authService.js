@@ -1,5 +1,6 @@
 import axios from 'axios';
-
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import React from 'react';
 const BACKEND_STATIC_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const apiClientInstance = axios.create({
@@ -43,6 +44,16 @@ export const signup = async (name, email, password, role ) => {
   }
 }
 
+export const resetPassword = async (email, code, newPassword) => {
+  try {
+    const response = await apiClientInstance.put('/reset-password', { email, code, newPassword });
+    return response.data;
+  } catch (error) {
+    // Improve error handling: Include status and message if available
+    const errorMessage = error.response?.data?.message || 'Password reset failed due to a network or server error.';
+    throw new Error(errorMessage);
+  }
+};
 
 export const updateUserProfilePicture = async (file) => {
   try {
@@ -56,8 +67,29 @@ export const updateUserProfilePicture = async (file) => {
     });
     return response.data; // Should return { user: updatedUser, msg: "..." }
   } catch (error) {
-    throw error.response ? error.response.data : new Error('Profile picture upload failed due to a network or server error.');
+    let errorMessage = 'Profile picture upload failed due to a network or server error.';
+    if (error.response) {
+      // Use a more specific message from the server if available, otherwise, include the status code.
+      errorMessage = error.response.data?.message || `Profile picture upload failed with status ${error.response.status}`;
+    }
+    // Re-throw the error with a more informative message.  This will be caught in the component.
+    console.error("Profile picture upload error:", error); // Log the full error for debugging
+    throw new Error(errorMessage);
   }
+};
+
+const useAuthRedirect = () => {
+  const navigate = useNavigate();
+  return (error) => {
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      const redirectPath = error.response.status === 401 ? '/unauthenticated' : '/unauthorized';
+      console.warn(`Received ${error.response.status} from API. Redirecting to ${redirectPath}`);
+      navigate(redirectPath, { replace: true });
+      return; // Stop further execution after redirect
+    }
+    // Re-throw other errors for component-level handling if necessary.
+    throw error;
+  };
 };
 
 export { apiClientInstance as apiClient };
@@ -66,6 +98,8 @@ export default {
   logout,
   login,
   requestPasswordReset,
-  signup, 
+  resetPassword,
+  signup,
   updateUserProfilePicture,
+  useAuthRedirect
 };
