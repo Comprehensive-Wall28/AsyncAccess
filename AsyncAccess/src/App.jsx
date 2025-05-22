@@ -85,6 +85,7 @@ function App() {
 
           {/*<Route path="/organizer-management" element={<OrganizerDashboard />} />*/}
           <Route path="/events" element={<EventListing />} />
+            <Route path="/bookings" element={<BookingListing />} />
           <Route path="/bookings" element={<BookingCheckout />} />
           {/*<Route path="events/:id" element={<EventAnalytics />} />*/}
           <Route path="/login-roled" element={<RoledLogin />} />
