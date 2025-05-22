@@ -48,6 +48,15 @@ const getStatusColor = (status) => {
   }
 };
 
+const formatStatusDisplay = (status) => {
+  if (!status) return 'N/A';
+  return status
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
 export default function UserEventsDisplay({ currentUser }) {
   const [events, setEvents] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -219,15 +228,15 @@ export default function UserEventsDisplay({ currentUser }) {
           ) : (
               <Stack spacing={2} sx={{ mt: 2 }}>
                 {filteredEvents.map((event) => (
-                    <Card key={event._id} elevation={2}>
-                      <Stack direction="row" alignItems="center" spacing={1} p={2} useFlexGap>
+                    <Card key={event._id}> {/* Removed elevation={2} */}
+                      <Stack direction="row" alignItems="center" spacing={3} p={2} useFlexGap> {/* Changed spacing to 3 */}
                         <Stack direction="column" spacing={0.5} useFlexGap sx={{ flexGrow: 1 }}>
                           <Typography variant="h6" component="div" noWrap>
                             {event.title || '[No Title Provided]'}
                           </Typography>
                           <Stack direction="row" spacing={1} useFlexGap alignItems="center">
                             <Chip
-                                label={event.status || 'N/A'}
+                                label={formatStatusDisplay(event.status)} // Used formatStatusDisplay
                                 color={getStatusColor(event.status)}
                                 size="small"
                             />
@@ -237,46 +246,48 @@ export default function UserEventsDisplay({ currentUser }) {
                           </Stack>
                         </Stack>
                         {event.status && event.status.toLowerCase() !== 'cancelled' && (
-                          <IconButton
-                            aria-label="event actions"
-                            aria-controls={`event-menu-${event._id}`}
-                            aria-haspopup="true"
-                            onClick={(e) => handleMenuOpen(e, event)}
-                            size="small"
-                          >
-                            <MoreVertIcon fontSize="small" />
-                          </IconButton>
+                          <div> {/* Wrapped IconButton and Menu in a div */}
+                            <IconButton
+                              aria-label="event actions"
+                              aria-controls={`event-menu-${event._id}`}
+                              aria-haspopup="true"
+                              onClick={(e) => handleMenuOpen(e, event)}
+                              size="small"
+                            >
+                              <MoreVertIcon fontSize="small" />
+                            </IconButton>
+                            <Menu
+                              id={`event-menu-${event._id}`}
+                              anchorEl={anchorEl}
+                              open={Boolean(anchorEl) && eventActionTarget?._id === event._id}
+                              onClose={handleMenuClose}
+                            >
+                              {/* Add other menu items like "Edit Event", "View Details" here if needed */}
+                              <MenuItem
+                                onClick={() => handleOpenCancelDialog(eventActionTarget)}
+                                disabled={cancelInProgress || (eventActionTarget?.status && eventActionTarget.status.toLowerCase() === 'cancelled')}
+                              >
+                                {cancelInProgress && eventToCancel?._id === eventActionTarget?._id ? (
+                                  <CircularProgress size={20} color="inherit" sx={{mr:1}} />
+                                ) : null}
+                                Cancel Event
+                              </MenuItem>
+                              <MenuItem
+                                onClick={() => handleOpenDeleteDialog(eventActionTarget)}
+                                disabled={deleteInProgress} // Potentially add other conditions e.g. event status
+                                sx={{ color: 'error.main' }}
+                              >
+                                {deleteInProgress && eventToDelete?._id === eventActionTarget?._id ? (
+                                  <CircularProgress size={20} color="inherit" sx={{mr:1}} />
+                                ) : null}
+                                Delete Event
+                              </MenuItem>
+                            </Menu>
+                          </div>
                         )}
-                        <Menu
-                          id={`event-menu-${event._id}`}
-                          anchorEl={anchorEl}
-                          open={Boolean(anchorEl) && eventActionTarget?._id === event._id}
-                          onClose={handleMenuClose}
-                        >
-                          {/* Add other menu items like "Edit Event", "View Details" here if needed */}
-                          <MenuItem
-                            onClick={() => handleOpenCancelDialog(eventActionTarget)}
-                            disabled={cancelInProgress || (eventActionTarget?.status && eventActionTarget.status.toLowerCase() === 'cancelled')}
-                          >
-                            {cancelInProgress && eventToCancel?._id === eventActionTarget?._id ? (
-                              <CircularProgress size={20} color="inherit" sx={{mr:1}} />
-                            ) : null}
-                            Cancel Event
-                          </MenuItem>
-                          <MenuItem
-                            onClick={() => handleOpenDeleteDialog(eventActionTarget)}
-                            disabled={deleteInProgress} // Potentially add other conditions e.g. event status
-                            sx={{ color: 'error.main' }}
-                          >
-                            {deleteInProgress && eventToDelete?._id === eventActionTarget?._id ? (
-                              <CircularProgress size={20} color="inherit" sx={{mr:1}} />
-                            ) : null}
-                            Delete Event
-                          </MenuItem>
-                        </Menu>
                       </Stack>
-                      <CardContent sx={{ pt: 0 }}> {/* Reduced padding top as title stack has padding */}
-                        <Grid container spacing={1}>
+                      <CardContent> {/* Removed sx={{ pt: 0 }} */}
+                        <Grid container spacing={2}> {/* Changed spacing to 2 */}
                           <Grid item xs={12} sm={6}>
                             <Typography variant="body2" color="text.secondary">Location: <Typography component="span" variant="body2" color="text.primary">{event.location || 'N/A'}</Typography></Typography>
                           </Grid>
