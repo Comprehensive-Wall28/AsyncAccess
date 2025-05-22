@@ -1,4 +1,3 @@
-import * as React from 'react';
 import PropTypes from 'prop-types';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
@@ -33,7 +32,6 @@ function SideMenuMobile({ open, toggleDrawer, currentUser, onMenuItemClick, sele
         },
       }}
     >
-      {/* ... (Inner Stack for content) */}
       <Stack
         sx={{
           maxWidth: '70dvw',

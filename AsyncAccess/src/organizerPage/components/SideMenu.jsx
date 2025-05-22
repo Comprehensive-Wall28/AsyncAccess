@@ -11,8 +11,6 @@ import OptionsMenu from './OptionsMenu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AsyncAccessLogo from '../../home-page/components/AsyncAccessIcon';
 
-// Same as in UserProfileDisplay.jsx - ensure this is consistent or use a shared config
-// Use the root URL of your backend server where static files are hosted.
 const BACKEND_STATIC_BASE_URL = import.meta.env.VITE_BACKEND_SERVER_URL;
 
 const drawerWidth = 240;

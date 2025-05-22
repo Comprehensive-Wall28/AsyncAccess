@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 import { alpha } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
@@ -10,6 +9,7 @@ import MainGrid from './components/MainGrid';
 import SideMenu from './components/SideMenu';
 import AppTheme from '../shared-theme/AppTheme';
 import UserProfile from './components/UserProfile'; // Import the new UserProfile component
+import CreateEventForm from './components/CreateEventForm'; // Import the new CreateEventForm component
 import { useNavigate } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography'; // Added import for Typography
@@ -73,8 +73,8 @@ export default function Dashboard(props) {
       case 'user-profile':
         mainContent = <UserProfile />; // Render UserProfile component
         break;
-      case 'about':
-        mainContent = <Typography variant="h4" sx={{mt: 2}}>About Page Placeholder</Typography>; // Placeholder for About
+      case 'about': // This 'about' action now maps to Create Event
+        mainContent = <CreateEventForm />; 
         break;
       default:
         mainContent = <MainGrid currentUser={currentUser} isLoading={isLoading && !currentUser} setCurrentUser={setCurrentUser} />;

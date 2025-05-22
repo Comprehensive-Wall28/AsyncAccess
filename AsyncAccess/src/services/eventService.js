@@ -14,3 +14,18 @@ export const getMyEvents = async () => {
         throw error.response || new Error('Fetching bookings failed due to a network or server error.');
     }
 };
+
+/**
+ * Creates a new event.
+ * @param {Object} eventData - The data for the event to be created.
+ * @returns {Promise<Object>} A promise that resolves to the created event object.
+ * @throws Will throw an error if the request fails.
+ */
+export const createEvent = async (eventData) => {
+    try {
+        const response = await apiClient.post('/events', eventData); // Matches POST /events route
+        return response.data;
+    } catch (error) {
+        throw error.response || new Error('Event creation failed due to a network or server error.');
+    }
+};
