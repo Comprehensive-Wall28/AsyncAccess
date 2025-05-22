@@ -12,6 +12,10 @@ import MenuButton from './MenuButton';
 import MenuContent from './MenuContent';
 import { logout } from '../../services/authService'; 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+// Import icons needed for menuItems
+import HomeIcon from '@mui/icons-material/Home';
+import PersonIcon from '@mui/icons-material/Person';
+import EventIcon from '@mui/icons-material/Event';
 
 const BACKEND_STATIC_BASE_URL = import.meta.env.VITE_BACKEND_SERVER_URL;
 
@@ -19,8 +23,14 @@ function SideMenuMobile({ open, toggleDrawer, currentUser, onMenuItemClick, sele
   const profilePictureSrc = currentUser?.profilePicture
     ? (currentUser.profilePicture.startsWith('http') ? currentUser.profilePicture : `${BACKEND_STATIC_BASE_URL}${currentUser.profilePicture}`)
     : null;
+
+  const menuItems = [
+    { text: 'Home', icon: <HomeIcon />, action: 'home' },
+    { text: 'User Profile', icon: <PersonIcon />, action: 'user-profile' },
+    { text: 'Event Management', icon: <EventIcon />, action: 'about' },
+  ];
+
   return (
-    // ... (Drawer and Stack wrappers)
     <Drawer
       anchor="right"
       open={open}
@@ -33,7 +43,6 @@ function SideMenuMobile({ open, toggleDrawer, currentUser, onMenuItemClick, sele
         },
       }}
     >
-      {/* ... (Inner Stack for content) */}
       <Stack
         sx={{
           maxWidth: '70dvw',
@@ -63,8 +72,7 @@ function SideMenuMobile({ open, toggleDrawer, currentUser, onMenuItemClick, sele
         </Stack>
         <Divider />
         <Stack sx={{ flexGrow: 1 }}>
-          {/* ... (MenuContent) */}
-          <MenuContent onMenuItemClick={onMenuItemClick} selectedItem={selectedItem} />
+          <MenuContent menuItems={menuItems} onMenuItemClick={onMenuItemClick} selectedItem={selectedItem} />
           <Divider />
         </Stack>
         <Stack sx={{ p: 2 }}>
