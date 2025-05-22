@@ -16,8 +16,8 @@ export default function Copyright(props) {
       ]}
     >
       {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Sitemark
+      <Link color="inherit" href="https://github.com/Comprehensive-Wall28/AsyncAccess">
+        AsyncAccess
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}

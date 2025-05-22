@@ -1,14 +1,13 @@
 import React from 'react';
 
 import MainLayout from './components/MainLayout';
+import OrganizerDashboard from './organizerPage/Dashboard.jsx';
 import Home from './home-page/Home';
 import SignIn from './sign-in/SignIn';
 import SignUp from './sign-up/SignUp';
 import Dashboard from './dashboard/Dashboard';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Events from './events/Events'
-import BookingListing from "./bookings-page/BookingListing.jsx";
-
+import Events from './events/Events';
 
 function App() {
   return (
@@ -40,16 +39,8 @@ function App() {
           element={<Events />}
         />
 
-          <Route
-          path="/dashboard"
-          element={
-            <MainLayout>
-              {/* Replace HomePageContent with your actual dashboard component later */}
-            </MainLayout>
-          }
-        />
-
-          <Route path="/users/bookings" element={<BookingListing />} />
+        <Route path="/dashboard-organizer" element={<OrganizerDashboard />} />
+        <Route path="/dashboard" element={<MainLayout></MainLayout>} />
 
         {/* Add more routes for other pages here */}
 
