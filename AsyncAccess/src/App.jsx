@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
-import MainLayout from './components/MainLayout';
 import OrganizerDashboard from './organizerPage/Dashboard.jsx';
 import Home from './home-page/Home';
 import SignIn from './sign-in/SignIn';
@@ -57,7 +56,6 @@ function App() {
         />
         
         <Route path="/dashboard-organizer" element={<OrganizerDashboard />} />
-        <Route path="/dashboard" element={<MainLayout></MainLayout>} />
         <Route path="/login-roled" element={<RoledLogin />} />
         <Route path="/signup-roled" element={<RoledSignup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
