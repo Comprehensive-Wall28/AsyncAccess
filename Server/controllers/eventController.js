@@ -16,7 +16,7 @@ const getMyEvents = async (req, res) => {
 
     try {
         const events = await Event.find({ organizer: organizerId })
-            .select('title description date location category image ticketPrice totalTickets bookedTickets status createdAt') 
+            .select('title description date location category image ticketPrice totalTickets bookedTickets status createdAt')
             .sort({ createdAt: -1 }); //sort by creation date
 
         return res.status(200).json(events);
@@ -31,8 +31,8 @@ const getEventAnalytics = async (req, res) => {
         const organizerId = req.user.userId;
 
         const events = await Event.find({ organizer: organizerId })
-                                  .select('title ticketPrice totalTickets bookedTickets') 
-                                  .sort({ createdAt: -1 }); 
+            .select('title ticketPrice totalTickets bookedTickets')
+            .sort({ createdAt: -1 });
 
         if (!events || events.length === 0) {
             return res.status(404).json({ message: "No events found for this Organizer to generate analytics." });
@@ -41,11 +41,11 @@ const getEventAnalytics = async (req, res) => {
         const eventsAnalytics = events.map(event => {
             // Calculate percentage, handle potential division by zero
             const bookedPercentage = event.totalTickets > 0
-                ? parseFloat(((event.bookedTickets / event.totalTickets) * 100).toFixed(2)) 
-                : 0; 
+                ? parseFloat(((event.bookedTickets / event.totalTickets) * 100).toFixed(2))
+                : 0;
 
             return {
-                _id: event._id, 
+                _id: event._id,
                 title: event.title,
                 ticketPrice: event.ticketPrice,
                 totalTickets: event.totalTickets,
@@ -61,14 +61,28 @@ const getEventAnalytics = async (req, res) => {
     }
 };
 
-const getAllEventsAdmin = async (req, res) => {
-    const events = await Event.find().sort({createdAt: -1});
-    res.status(200).json(events);
+const getAllEvents = async (req, res) => {
+    try {
+        const events = await Event.find({status: 'approved'})
+            .select('title description date location category image ticketPrice') // Optionally select fields
+            .sort({createdAt: -1});
+        res.status(200).json(events);
+    } catch (error) {
+        console.error("Error fetching approved events:", error.message);
+        // Send a JSON error response
+        res.status(500).json({ error: "Internal Server Error while fetching approved events" });
+    }
 };
 
-const getAllEvents = async (req, res) => {
-    const events = await Event.find({status: 'approved'}).sort({createdAt: -1});
-    res.status(200).json(events);
+const getAllEventsAdmin = async (req, res) => {
+    try {
+        const events = await Event.find().sort({createdAt: -1});
+        res.status(200).json(events);
+    } catch (error) {
+        console.error("Error fetching all admin events:", error.message);
+        // Send a JSON error response
+        res.status(500).json({ error: "Internal Server Error while fetching all admin events" });
+    }
 };
 
 const getEvent = async (req, res) => {

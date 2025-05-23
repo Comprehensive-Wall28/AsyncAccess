@@ -5,13 +5,13 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const secretKey = process.env.SECRET_KEY;
 const bcrypt = require("bcrypt");
-const sendEmail = require("../utils/emailSender"); 
-const crypto = require("node:crypto"); 
+const sendEmail = require("../utils/emailSender");
+const crypto = require("node:crypto");
 const userController = {
   register: async (req, res) => {
     try {
       const { email, password, name, role, age } = req.body;
-      
+
       const roles = ['Admin', 'Organizer', 'User'];
       if (!roles.includes(role)) {
         return res.status(400).json({ message: "Invalid role provided. Inserts: Admin , User , Organizer" });
@@ -55,14 +55,14 @@ const userController = {
       if (!user) {
         return res.status(404).json({ message: "User not found!" });
       }
-      const isMatch = await user.comparePassword(password); 
+      const isMatch = await user.comparePassword(password);
 
       if (!isMatch) {
         return res.status(400).json({ message: "Incorrect password" });
       }
 
       const currentDateTime = new Date();
-      const expiresAt = new Date(+currentDateTime + 1800000); 
+      const expiresAt = new Date(+currentDateTime + 1800000);
 
       // Generate a JWT token
       const token = jwt.sign(
@@ -80,16 +80,18 @@ const userController = {
         role: user.role,
         age: user.age
      };
+     const isProduction = process.env.NODE_ENV === 'production';
 
       return res
-        .cookie("token", token, {
+        .cookie("token", token, { // Set the token cookie
           expires: expiresAt,
           httpOnly: true,
-          //secure: true, // Re-add when not testing
-          //SameSite: "none", //Re-add when not testing
+          secure: isProduction, // Set to true in production (HTTPS)
+          sameSite: isProduction ? "none" : "lax", // "none" for cross-site requests in production
         })
         .status(200)
         .json({ message: "Logged in successfully", currentUser });
+
     } catch (error) {
       console.error("Error logging in:", error);
       res.status(500).json({ message: "Server error. Check console for more details." });
@@ -121,13 +123,18 @@ const userController = {
       console.error("Error fetching user by ID:", error);
       return res.status(500).json({ message: "Server error while fetching user" });
     }
-  }, 
+  },
 
   updateCurrentUserProfile: async (req, res) => {
     try {
       const userId = req.user.userId;
-      const updateData = {};
-      const allowedFields = ['name', 'age', 'profilePicture'];
+      const updateData = {}; // Initialize empty update object
+      const allowedFields = ['name', 'age']; // Fields from req.body that are allowed
+
+      // Handle file validation error from multer's fileFilter
+      if (req.fileValidationError) {
+        return res.status(400).json({ message: req.fileValidationError });
+      }
 
       allowedFields.forEach(field => {
         if (req.body[field] !== undefined) {
@@ -135,14 +142,26 @@ const userController = {
         }
       });
 
-      // Check if there's anything valid to update
-      if (Object.keys(updateData).length === 0) {
+      // Handle profile picture update from uploaded file
+      if (req.file) {
+        // Path to be stored, e.g., '/uploads/profile-pictures/your-file-name.jpg'
+        // This path assumes your server is set up to serve static files from a 'public' directory
+        // and multer saves files into 'public/uploads/profile-pictures/'
+        updateData.profilePicture = `/uploads/profile-pictures/${req.file.filename}`;
+      } else if (req.body.profilePicture !== undefined && (req.body.profilePicture === "" || req.body.profilePicture === null)) {
+        // Allow clearing the profile picture by sending an empty string or null in the body
+        // This is useful if you want to allow users to remove their picture without uploading a new one.
+        updateData.profilePicture = null;
+      }
+
+      // Check if there's anything to update
+      if (Object.keys(updateData).length === 0 && !req.file) { // also check req.file if it's the only update
         return res.status(400).json({ message: "No valid fields provided for update." });
       }
 
       const updatedUser = await userModel.findByIdAndUpdate(
         userId,
-        updateData,
+        { $set: updateData }, // Use $set to only update provided fields
         {
           new: true, 
           runValidators: true 
@@ -157,7 +176,10 @@ const userController = {
 
     } catch (error) {
       console.error("Error updating current user profile:", error);
-       if (error.name === 'ValidationError') {
+       if (error instanceof multer.MulterError) {
+        return res.status(400).json({ message: `Multer error: ${error.message}` });
+       }
+       if (error.name === 'ValidationError') { // Mongoose validation error
            return res.status(400).json({ message: "Validation failed", errors: error.errors });
        }
       return res.status(500).json({ message: "Server error while updating profile." });
@@ -168,7 +190,7 @@ const userController = {
       const userIdToUpdate = req.params.id;
       const { role } = req.body;
 
-      if (role === undefined) { 
+      if (role === undefined) {
         return res.status(400).json({ message: "Role is required in the request body to update." });
       }
 
@@ -202,7 +224,7 @@ const userController = {
   },
   updatePasswordLoggedIn: async (req, res) => {
     try {
-      const userId = req.user.userId; 
+      const userId = req.user.userId;
       const { oldPassword, newPassword } = req.body;
 
 
@@ -210,11 +232,11 @@ const userController = {
         return res.status(400).json({ message: "Old password and new password are required." });
       }
 
-      const user = await userModel.findById(userId).select('+password'); 
+      const user = await userModel.findById(userId).select('+password');
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      const isMatch = await user.comparePassword(oldPassword); 
+      const isMatch = await user.comparePassword(oldPassword);
 
       if (!isMatch) {
         return res.status(400).json({ message: "Incorrect old password" });
@@ -254,9 +276,9 @@ const userController = {
       // Hash the code before saving
       const hashedCode = crypto
 
-        .createHash("sha256")
-        .update(resetCode)
-        .digest("hex");
+          .createHash("sha256")
+          .update(resetCode)
+          .digest("hex");
 
       // Set hashed code and expiry (e.g., 10 minutes)
       user.resetPasswordToken = hashedCode;
@@ -276,10 +298,10 @@ const userController = {
       try {
         await sendEmail(
 
-          user.email,
-          "Your Password Reset Code", 
-          plainTextMessage,
-          message
+            user.email,
+            "Your Password Reset Code",
+            plainTextMessage,
+            message
         );
         console.log(`Password reset code sent to ${user.email}`);
         return res.status(200).json({ message: "If an account with that email exists, a password reset code has been sent." });
@@ -302,26 +324,26 @@ const userController = {
       const { email, code, newPassword } = req.body;
 
       if (!email || !code || !newPassword) {
-          return res.status(400).json({ message: "Email, reset code, and new password are required." });
+        return res.status(400).json({ message: "Email, reset code, and new password are required." });
       }
       // Hash the code received from the body to match the stored one
       const hashedCode = crypto
-        .createHash("sha256")
-        .update(code) 
-        .digest("hex");
+          .createHash("sha256")
+          .update(code)
+          .digest("hex");
 
       const user = await userModel.findOne({
         email: email, // Find by email
         resetPasswordToken: hashedCode, // Compare hashed code
         resetPasswordExpires: { $gt: Date.now() }, // Check if code is still valid
-      }).select('+password'); 
+      }).select('+password');
 
       if (!user) {
         const userExists = await userModel.findOne({ email });
         if (userExists) {
-            console.log(`Invalid or expired code attempt for email: ${email}`);
+          console.log(`Invalid or expired code attempt for email: ${email}`);
         } else {
-            console.log(`Password reset attempt for non-existent email: ${email}`);
+          console.log(`Password reset attempt for non-existent email: ${email}`);
         }
         return res.status(400).json({ message: "Password reset code is invalid or has expired." });
       }
@@ -344,9 +366,9 @@ const userController = {
   },
   deleteUser: async (req, res) => {
     try {
-      const user = await userModel.findById(req.params.id); 
+      const user = await userModel.findById(req.params.id);
       if (!user) {
-          return res.status(404).json({ message: "User not found" });
+        return res.status(404).json({ message: "User not found" });
       }
 
       const cascadeMessage = await userController.deleteUserData(user._id, user.role);
@@ -355,7 +377,7 @@ const userController = {
 
       return res.status(200).json({
         msg: `User deleted successfully. Cascade actions:\n${cascadeMessage}`,
-        user: { _id: user._id, email: user.email, role: user.role } 
+        user: { _id: user._id, email: user.email, role: user.role }
       });
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -366,7 +388,8 @@ const userController = {
     try {
       const userId = req.user.userId;
 
-      const user = await userModel.findById(userId).select('_id name email role age');
+      // Include profilePicture in the select statement
+      const user = await userModel.findById(userId).select('_id name email role age profilePicture');
 
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -379,7 +402,7 @@ const userController = {
     }
   },
   deleteUserData: async (userId, userRole) => {
-    let messages = []; 
+    let messages = [];
     try {
       if (userRole === 'Organizer') {
         const eventsToDelete = await eventModel.find({ organizer: userId }).select('_id');
@@ -405,35 +428,35 @@ const userController = {
 
       } else if (userRole === 'User') {
         const confirmedBookings = await bookingModel.find({
-            user: userId,
-            bookingStatus: 'Confirmed' 
-        }).select('event numberOfTickets'); 
+          user: userId,
+          bookingStatus: 'Confirmed'
+        }).select('event numberOfTickets');
 
         if (confirmedBookings.length > 0) {
-            let updatedEventCount = 0;
-            for (const booking of confirmedBookings) {
-                try {
-                  const updateResult = await eventModel.findOneAndUpdate(
-                    { _id: booking.event, status: 'approved' }, 
-                    { $inc: { bookedTickets: -booking.numberOfTickets } }, // Action: Decrement bookedTickets
-                    { new: true, runValidators: true } 
-                  );
-                    if (updateResult) {
-                        updatedEventCount++;
-                        console.log(`Returned ${booking.numberOfTickets} tickets to event ${booking.event}`);
-                    } else {
-                        console.warn(`Could not find event ${booking.event} to return tickets for booking ${booking._id}`);
-                    }
-                } catch (eventUpdateError) {
-                    console.error(`Error returning tickets for event ${booking.event} from booking ${booking._id}:`, eventUpdateError);
-                    messages.push(`Error updating event ${booking.event}: ${eventUpdateError.message}`);
-                }
+          let updatedEventCount = 0;
+          for (const booking of confirmedBookings) {
+            try {
+              const updateResult = await eventModel.findOneAndUpdate(
+                  { _id: booking.event, status: 'approved' },
+                  { $inc: { bookedTickets: -booking.numberOfTickets } }, // Action: Decrement bookedTickets
+                  { new: true, runValidators: true }
+              );
+              if (updateResult) {
+                updatedEventCount++;
+                console.log(`Returned ${booking.numberOfTickets} tickets to event ${booking.event}`);
+              } else {
+                console.warn(`Could not find event ${booking.event} to return tickets for booking ${booking._id}`);
+              }
+            } catch (eventUpdateError) {
+              console.error(`Error returning tickets for event ${booking.event} from booking ${booking._id}:`, eventUpdateError);
+              messages.push(`Error updating event ${booking.event}: ${eventUpdateError.message}`);
             }
-             if (updatedEventCount > 0) {
-                messages.push(`Returned tickets to ${updatedEventCount} events due to user deletion.`);
-             }
+          }
+          if (updatedEventCount > 0) {
+            messages.push(`Returned tickets to ${updatedEventCount} events due to user deletion.`);
+          }
         } else {
-             messages.push("No confirmed bookings found for this user to return tickets from.");
+          messages.push("No confirmed bookings found for this user to return tickets from.");
         }
 
         const bookingDeletionResult = await bookingModel.deleteMany({ user: userId });
@@ -454,6 +477,16 @@ const userController = {
       throw new Error(`Failed to delete associated data: ${error.message}`);
     }
   },
+  logout: async (req, res) => {
+    try {
+      // Clear the token cookie
+      res.clearCookie('token', { httpOnly: true, sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', secure: process.env.NODE_ENV === 'production' });
+      res.status(200).json({ message: 'Logged out successfully' });
+    } catch (error) {
+      console.error("Error logging out:", error);
+      res.status(500).json({ message: "Server error during logout." });
+    }
+  }
 };
 
 module.exports = userController;

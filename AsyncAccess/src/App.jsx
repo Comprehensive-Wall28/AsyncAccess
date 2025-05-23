@@ -1,54 +1,99 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
-// Import your layout and page components
-import MainLayout from './components/MainLayout';
-import Home from './home-page/Home'; // Import the Home component
+import Home from './home-page/Home';
 import SignIn from './sign-in/SignIn';
+import SignUp from './sign-up/SignUp';
+import Dashboard from './dashboard/Dashboard';
+
+import Events from './events/Events'
+
+import BookingListing from "./booking-page/Checkout.jsx";
+import Unauthorized from './unauthorized/Unauthorized';
+import Unauthenticated from './unauthenticated/Unauthenticated';
+import NotFound from './NotFound.jsx';
+import RoledSignup from './sign-up-role/SignUp.jsx'
+import ForgotPassword from './forgot-password/ForgotPassword.jsx';
+import DashboardAdmin from './dashboard-admin/Dashboard.jsx'
+import OrganizerDashboard from './organizerPage/Dashboard.jsx';
+import EventsPage from './events/Events'; // Assuming 'Events.jsx' is the page wrapper
+import EventDetails from './events/components/EventDetails'; // Corrected import path
+
 
 function App() {
-  return (
-    // Router should wrap the entire application content
-    <Router>
-      {/* Routes defines the different paths */}
-      <Routes>
-        {/* --- Updated Route for the root path --- */}
-        {/* This route now renders the Home component directly */}
-        <Route
-          path="/" // Define the path for the home page
-          element={<Home />} // Render the Home component
-        />
-        {/* --- End Updated Route --- */}
+    return (
+        <Router>
+            <Routes>
+                <
+                    Route
+                    path="/"
+                    element={<Home />} />
+                <
+                    Route
+                    path="/login"
+                    element={<SignIn />} />
+                <
+                    Route
+                    path="/signup"
+                    element={<SignUp />} />
+                <
+                    Route
+                    path="/marketing"
+                    element={<Home />} />
+                <
+                    Route
+                    path="/events"
+                    element={<EventsPage />} />
+                <
+                    Route
+                    path="/events/:id"
+                    element={<EventDetails />} />
 
-        <Route
-          path="/login" // Define the path for the home page
-          element={<SignIn />} // Render the Home component
-        />
+                <Route
+                    path="/dashboard"
+
+                    element={<Dashboard />}
+                />
+                <Route
+                    path="/signup"
+                    element={<SignUp />}
+                />
+                <Route
+                    path="/marketing"
+                    element={<Home />}
+                />
+                <Route
+                    path="/events"
+                    element={<Events />}
+                />
 
 
-        {/* Route for the Marketing Page (Optional: Keep as an alias or remove) */}
-        {/* This path also renders the Home component */}
-        <Route
-          path="/marketing" // Define the path for the marketing page
-          element={<Home />} // Render the Home component
-        />
+                <Route path="/dashboard-organizer" element={<OrganizerDashboard />} />
 
-        {/* Add routes for other pages that *should* use MainLayout */}
-        {/* Example: A dashboard page using the original layout */}
-        <Route
-          path="/dashboard"
-          element={
-            <MainLayout>
-              {/* Replace HomePageContent with your actual dashboard component later */}
-            </MainLayout>
-          }
-        />
+                {/*<Route path="/organizer-management" element={<OrganizerDashboard />} />*/}
 
-        {/* Add more routes for other pages here */}
+                <Route path="/bookings" element={<BookingListing />} />
+                {/*<Route path="events/:id" element={<EventAnalytics />} />*/}
+  
+                <Route path="/signup-roled" element={<RoledSignup />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/dashboard-admin" element={<DashboardAdmin />} />
 
-      </Routes>
-    </Router>
-  );
+
+                <Route
+                    path="/unauthorized"
+                    element={<Unauthorized />}
+                />
+                <Route
+                    path="/unauthenticated"
+                    element={<Unauthenticated />}
+                />
+
+                {/* DONT PLACE BELOW HERE!*/}
+                <Route path="*" element={<NotFound />} /> {/* Catch-all route */}
+            </Routes>
+        </Router>
+    );
 }
 
 export default App;
