@@ -15,7 +15,6 @@ import { useNavigate } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography'; // Added import for Typography
 import { apiClient } from '../services/authService'; // Import the NAMED export
-import authService from '../services/authService'; // Import authService
 
 export default function Dashboard(props) {
   const [currentUser, setCurrentUser] = React.useState(null);
@@ -23,7 +22,6 @@ export default function Dashboard(props) {
   const [error, setError] = React.useState('');
   const [currentView, setCurrentView] = React.useState('home'); // State for current view
   const navigate = useNavigate();
-  const handleAuthError = authService.useAuthRedirect(); // Initialize handleAuthError
 
   const handleMenuItemClick = (action) => {
     setCurrentView(action);
@@ -37,19 +35,33 @@ export default function Dashboard(props) {
         const response = await apiClient.get('/users/profile');
         if(response.data?.role !== 'Organizer') {
           navigate('/unauthorized', { replace: true }); // Redirect if not Organizer
+          return; // Ensure no further state updates after redirect
         }
         setCurrentUser(response.data);
 
       } catch (err) {
         console.error("Failed to fetch user profile:", err);
-        handleAuthError(err); // Use centralized auth error handler
 
-        // Fallback error setting if handleAuthError doesn't redirect or throw
-        // This part might need adjustment based on how handleAuthError behaves for non-redirect errors
         const errorMessage = err.response?.data?.message || err.message || 'An unexpected error occurred.';
-        if (!err.response || (err.response.status !== 401 && err.response.status !== 403 && !errorMessage.includes("User not found"))) {
-            setError(errorMessage);
+        if (err.response) {
+            if (err.response.status === 401) {
+                console.warn(`Received 401 from API. Redirecting to /unauthenticated`);
+                navigate('/unauthenticated', { replace: true });
+                return;
+            }
+            if (err.response.status === 403) {
+                console.warn(`Received 403 from API. Redirecting to /unauthorized`);
+                navigate('/unauthorized', { replace: true });
+                return;
+            }
+            if (errorMessage.includes("User not found") || (err.response.status === 404 && errorMessage.includes("profile"))) {
+                console.warn(`Received error "${errorMessage}". Redirecting to /notfound`);
+                navigate('/notfound', { replace: true });
+                return;
+            }
         }
+        
+        setError(errorMessage);
         setCurrentUser(null);
       } finally {
         setIsLoading(false);
@@ -57,7 +69,7 @@ export default function Dashboard(props) {
     };
 
     fetchUserProfile();
-  }, [navigate, handleAuthError]); // Added handleAuthError to dependency array
+  }, [navigate]); // Removed handleAuthError from dependency array
 
   let mainContent;
   if (isLoading && !currentUser && currentView !== 'user-profile' && currentView !== 'analytics') { // Show loading for home view if user not yet loaded

@@ -24,7 +24,6 @@ import Review from './components/Review';
 import SitemarkIcon from '../home-page/components/AsyncAccessIcon';
 import AppTheme from '../shared-theme/AppTheme';
 import ColorModeIconDropdown from '../shared-theme/ColorModeIconDropdown';
-import authService from '../services/authService'; // Import authService
 
 const steps = ['Review your order'];
 
@@ -91,7 +90,6 @@ export default function Checkout(props) {
     const [currentUser, setCurrentUser] = React.useState(null);
     const [isLoadingAuth, setIsLoadingAuth] = React.useState(true);
     const [authError, setAuthError] = React.useState('');
-    const handleAuthError = authService.useAuthRedirect(); // Initialize handleAuthError
 
 
     const baseTicketPrice = Number(passedTicketPrice) || 0;
@@ -173,18 +171,27 @@ export default function Checkout(props) {
                 }
             } catch (err) {
                 console.error("Failed to fetch user profile for checkout:", err);
-                handleAuthError(err); // Use centralized auth error handler
 
-                // Fallback error setting if handleAuthError doesn't redirect or throw
                 const errorMessage = err.response?.data?.message || err.message || 'An unexpected error occurred.';
-                // Check if the error was one that handleAuthError would redirect for
-                const isRedirectError = (err.response && (err.response.status === 401 || err.response.status === 403)) ||
-                                      errorMessage.includes("User not found") ||
-                                      (err.response?.status === 404 && errorMessage.includes("profile"));
-
-                if (!isRedirectError) {
-                    setAuthError(errorMessage);
+                if (err.response) {
+                    if (err.response.status === 401) {
+                        console.warn(`Received 401 from API. Redirecting to /unauthenticated`);
+                        navigate('/unauthenticated', { replace: true });
+                        return;
+                    }
+                    if (err.response.status === 403) {
+                        console.warn(`Received 403 from API. Redirecting to /unauthorized`);
+                        navigate('/unauthorized', { replace: true });
+                        return;
+                    }
+                    if (errorMessage.includes("User not found") || (err.response.status === 404 && errorMessage.includes("profile"))) {
+                        console.warn(`Received error "${errorMessage}". Redirecting to /notfound`);
+                        navigate('/notfound', { replace: true });
+                        return;
+                    }
                 }
+                
+                setAuthError(errorMessage);
                 setCurrentUser(null);
             } finally {
                 // Only set loading to false if not already set by an early return or if handleAuthError caused a redirect (which might unmount)
@@ -197,7 +204,7 @@ export default function Checkout(props) {
         };
 
         fetchUserProfile();
-    }, [navigate, handleAuthError]); // Added handleAuthError to dependency array
+    }, [navigate]); // Removed handleAuthError from dependency array
 
 
     React.useEffect(() => {

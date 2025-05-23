@@ -295,14 +295,6 @@ export default function SignIn(props) {
             >
               Forgot your password?
             </Link>
-               <Link
-              type="button"
-              component={route} to="/login-roled"
-              variant="body2"
-              sx={{ alignSelf: 'center' }}
-            >
-              Login as Organizer / Admin
-            </Link>
           </Box>
           {/* {loginError && <Alert severity="error" sx={{ mt: 2 }}>{loginError}</Alert>} */} {/* Removed from here, moved up */}
           </Box> {/* This closes the <Box component="form"> */}

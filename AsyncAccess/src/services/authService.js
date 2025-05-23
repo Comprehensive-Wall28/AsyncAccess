@@ -1,6 +1,4 @@
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import React from 'react';
 const BACKEND_STATIC_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const apiClientInstance = axios.create({
@@ -98,28 +96,6 @@ const verifyMfa = async (email, mfaCode) => {
   }
 };
 
-const useAuthRedirect = () => {
-  const navigate = useNavigate();
-  return (error) => {
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      const redirectPath = error.response.status === 401 ? '/unauthenticated' : '/unauthorized';
-      console.warn(`Received ${error.response.status} from API. Redirecting to ${redirectPath}`);
-      navigate(redirectPath, { replace: true });
-      return; // Stop further execution after redirect
-    }
-    // Check for specific "User not found" error message from response data or general error message
-    // Adjust "User not found" to the exact message your API returns.
-    const errorMessage = error.response?.data?.message || error.message || '';
-    if (errorMessage.includes("User not found") || (error.response?.status === 404 && errorMessage.includes("profile"))) { // Added more specific check for 404 on profile
-      console.warn(`Received error "${errorMessage}". Redirecting to /notfound`);
-      navigate('/notfound', { replace: true });
-      return; // Stop further execution after redirect
-    }
-    // Re-throw other errors for component-level handling if necessary.
-    throw error;
-  };
-};
-
 export { apiClientInstance as apiClient };
 
 export default {
@@ -129,7 +105,6 @@ export default {
   resetPassword,
   signup,
   updateUserProfilePicture,
-  useAuthRedirect,
   verifyEmail,
   verifyMfa, // Add verifyMfa
 };
