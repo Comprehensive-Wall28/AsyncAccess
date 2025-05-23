@@ -38,14 +38,15 @@ export default function Dashboard(props) {
         // Axios automatically parses JSON and throws for non-2xx status codes
         setCurrentUser(response.data); 
         if (response.data?.role !== 'User') {
-          navigate('/unauthorized', { replace: true }); // Redirect if not Admin
+          navigate('/unauthorized', { replace: true }); // Redirect if not User (adjust as needed)
         }
-      } catch (error) {
-        handleAuthError(error);
-        if(error.response){
-        } else {
-          // Something else happened in setting up the request that triggered an Error
-          setError(err.message || 'An unexpected error occurred.');
+      } catch (error) { // Renamed err to error for consistency
+        handleAuthError(error); // This will now handle "User not found"
+
+        // Fallback error setting if handleAuthError doesn't redirect or throw
+        const errorMessage = error.response?.data?.message || error.message || 'An unexpected error occurred.';
+        if (!error.response || (error.response.status !== 401 && error.response.status !== 403 && !errorMessage.includes("User not found"))) {
+            setError(errorMessage);
         }
         setCurrentUser(null); // Ensure currentUser is null on error
       } finally {
@@ -54,7 +55,7 @@ export default function Dashboard(props) {
     };
 
     fetchUserProfile();
-  }, [navigate]);
+  }, [navigate, handleAuthError]); // Added handleAuthError to dependency array
 
   let mainContent;
   if (isLoading && !currentUser && currentView !== 'user-profile') { // Show loading for home view if user not yet loaded

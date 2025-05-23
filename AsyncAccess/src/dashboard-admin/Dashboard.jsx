@@ -44,10 +44,13 @@ function Dashboard(props) {
           navigate('/unauthorized', { replace: true }); // Redirect if not Admin
         }
       } catch (error) {
-        handleAuthError(error);
-          // Generic error for any other issues
+        handleAuthError(error); // This will now handle "User not found"
+        // If handleAuthError doesn't throw (e.g., after a redirect), 
+        // we might still want to set an error for other cases.
+        // However, if a redirect happens, this component might unmount.
+        if (!error.response || (error.response.status !== 401 && error.response.status !== 403 && !(error.message?.includes("User not found") || error.response?.data?.message?.includes("User not found")))) {
           setError(error.message || 'An unexpected error occurred.');
-
+        }
         setCurrentUser(null); // Ensure currentUser is null on error
       } finally {
         setIsLoading(false);
@@ -55,7 +58,7 @@ function Dashboard(props) {
     };
 
     fetchUserProfile();
-  }, [navigate]);
+  }, [navigate, handleAuthError]); // Added handleAuthError to dependency array
 
   let mainContent;
   if (isLoading && !currentUser && currentView !== 'user-profile') { // Show loading for home view if user not yet loaded
