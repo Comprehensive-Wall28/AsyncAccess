@@ -67,6 +67,7 @@ export default function VerifyEmail(props) {
   const [code, setCode] = React.useState('');
   const [error, setError] = React.useState('');
   const [successMessage, setSuccessMessage] = React.useState('');
+  const [initialMessage, setInitialMessage] = React.useState(location.state?.initialMessage || ''); // New state for message from SignIn
   const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
@@ -84,6 +85,7 @@ export default function VerifyEmail(props) {
     event.preventDefault();
     setError('');
     setSuccessMessage('');
+    setInitialMessage(''); // Clear initial message on new submission attempt
 
     if (!code.trim() || code.length !== 6 || !/^\d{6}$/.test(code)) {
       setError('Please enter a valid 6-digit verification code.');
@@ -125,6 +127,9 @@ export default function VerifyEmail(props) {
             A verification code has been sent to <strong>{email}</strong>.
             Please enter the code below.
           </Typography>
+          {initialMessage && <Alert severity="info" sx={{ mb: 2 }}>{initialMessage}</Alert>} {/* Display message from SignIn */}
+          {error && <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>}
+          {successMessage && <Alert severity="success" sx={{ mt: 1 }}>{successMessage}</Alert>}
           <Box
             component="form"
             onSubmit={handleSubmit}
@@ -144,8 +149,6 @@ export default function VerifyEmail(props) {
                 inputProps={{ maxLength: 6 }}
               />
             </FormControl>
-            {error && <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>}
-            {successMessage && <Alert severity="success" sx={{ mt: 1 }}>{successMessage}</Alert>}
             <Button
               type="submit"
               fullWidth

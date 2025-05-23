@@ -75,7 +75,7 @@ export default function SignIn(props) {
   const [emailErrorMessage, setEmailErrorMessage] = React.useState(''); // Added for consistency
   const [passwordError, setPasswordError] = React.useState('');
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState(''); // Added for consistency
-  const [loginError, setLoginError] = React.useState('');
+  const [loginErrorText, setLoginErrorText] = React.useState(''); // For general login errors
   const [loading, setLoading] = React.useState(false);
   const [showForgotPassword, setShowForgotPassword] = React.useState(false);
   const [rememberMe, setRememberMe] = React.useState(false); // State for "Remember me"
@@ -130,7 +130,7 @@ export default function SignIn(props) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     // Clear previous errors
-    setLoginError('');
+    setLoginErrorText('');
 
     if (!validateInputs()) {
       return;
@@ -139,18 +139,12 @@ export default function SignIn(props) {
     setLoading(true);
     try {
       const userData = await authService.login(email, password);
-      console.log('Login attempt response:', userData);
 
-      // Check if MFA is required
       if (userData.mfaRequired && userData.email) {
-        console.log('MFA required, navigating to MFA verification page.');
         navigate('/mfa-verify', { state: { email: userData.email }, replace: true });
-        return; // Stop further execution here
+        return; 
       }
       
-      // This part will only be reached if MFA is not required (or if login flow changes)
-      console.log('Login successful (no MFA or MFA already handled):', userData); 
-
       if (rememberMe && userData.currentUser) {
         localStorage.setItem('currentUser', JSON.stringify(userData.currentUser));
       } else {
@@ -175,20 +169,24 @@ export default function SignIn(props) {
       }
       navigate(dashboardPath, { replace: true });
 
-    } catch (error) {
-      // The error from authService.js might be an object with a message property
-      // Check for the custom emailNotVerified flag
-      if (error.response?.data?.emailNotVerified) {
-        setLoginError(error.response.data.message || 'Email not verified. Please check your inbox.');
-        // Optionally, provide a link/button to navigate to /verify-email
-        // For example, you could add another state to show a "Resend verification" or "Go to verification" button
-      } else if (error.response?.data?.mfaRequired) { 
-        // This case might not be hit if backend directly sends mfaRequired in success response
-        // but good for robustness if backend error structure changes
-        console.log('MFA required (from error block), navigating to MFA verification page.');
-        navigate('/mfa-verify', { state: { email: error.response.data.email || email }, replace: true });
+    } catch (error) { // 'error' here is likely error.response.data from authService
+      if (error.emailNotVerified) { // Check directly on the error object
+        // Directly navigate to verify-email page, passing the error message and email
+        navigate('/verify-email', { 
+          state: { 
+            email: error.email || email, // Use email from error object if available
+            initialMessage: error.message || 'Your email is not verified. A new verification code has been sent.' 
+          }, 
+          replace: true 
+        });
+      } else if (error.mfaRequired) { // Check directly on the error object
+        navigate('/mfa-verify', { 
+            state: { email: error.email || email }, // Use email from error object if available
+            replace: true 
+        });
       } else {
-        setLoginError(error.message || (typeof error === 'string' ? error : 'Login failed. Please check your credentials or try again later.'));
+        // If error is an object with a message, use it, otherwise use a generic message
+        setLoginErrorText(error.message || (typeof error === 'string' ? error : 'Login failed. Please check your credentials or try again later.'));
       }
     } finally {
       setLoading(false);
@@ -272,7 +270,8 @@ export default function SignIn(props) {
             >
               {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign in'}
             </Button>
-            {loginError && <Alert severity="error" sx={{ mt: 1 }}>{loginError}</Alert>} {/* Moved Alert here for better visibility */}
+            {loginErrorText && <Alert severity="error" sx={{ mt: 1 }}>{loginErrorText}</Alert>}
+            {/* The dedicated button for verify email is removed as navigation is automatic */}
             <Divider>
               <Typography sx={{ color: 'text.secondary' }}>or</Typography>
           </Divider>

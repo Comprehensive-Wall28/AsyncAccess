@@ -158,10 +158,40 @@ const userController = {
       }
 
       if (!user.isEmailVerified) {
-        return res.status(403).json({ 
-            message: "Email not verified. Please check your inbox for the verification code.",
+        // Resend verification email
+        const verificationCode = crypto.randomInt(100000, 999999).toString();
+        const hashedVerificationCode = crypto.createHash("sha256").update(verificationCode).digest("hex");
+
+        user.emailVerificationToken = hashedVerificationCode;
+        user.emailVerificationTokenExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
+        await user.save();
+
+        const verificationEmailSubject = "Verify Your Email Address for AsyncAccess";
+        const verificationEmailHtml = `
+          <h1>Action Required: Verify Your Email</h1>
+          <p>You attempted to log in, but your email address is not yet verified.</p>
+          <p>Please use the following code to verify your email address. This code is valid for 15 minutes:</p>
+          <h2 style="text-align: center; letter-spacing: 5px; font-size: 2em;">${verificationCode}</h2>
+          <p>If you did not attempt to log in, please ignore this email.</p>
+        `;
+        const verificationEmailText = `Your AsyncAccess email verification code is: ${verificationCode}. It is valid for 15 minutes.`;
+
+        try {
+          console.log(`Preparing to resend verification email to: ${email}`);
+          await sendEmail(email, verificationEmailSubject, verificationEmailText, verificationEmailHtml);
+          console.log(`Verification email successfully re-queued for: ${email}`);
+          return res.status(403).json({ 
+              message: "Your email is not verified. A new verification code has been sent to your email address. Please check your inbox.",
+              emailNotVerified: true,
+              email: user.email // Send email back to FE to prefill verification page
+          });
+        } catch (emailError) {
+          console.error(`Error resending verification email to ${email}:`, emailError.message);
+          return res.status(500).json({ 
+            message: "Your email is not verified. We tried to send a new verification code, but failed. Please try logging in again or contact support.",
             emailNotVerified: true 
-        });
+          });
+        }
       }
 
       const isMatch = await user.comparePassword(password);
@@ -612,7 +642,7 @@ const userController = {
           messages.push(bookingMsg);
 
           const eventDeletionResult = await eventModel.deleteMany({ _id: { $in: eventIdsToDelete } });
-          const eventMsg = `Deleted ${eventDeletionResult.deletedCount} events organized by the user.`;
+          const eventMsg = `Deleted ${eventDeletionResult.deletedCount} events organized by the user.`; // Corrected line
           console.log(eventMsg);
           messages.push(eventMsg);
 
