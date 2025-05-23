@@ -27,7 +27,7 @@ import Select from '@mui/material/Select'; // Added for dropdown
 import InputLabel from '@mui/material/InputLabel'; // Added for dropdown label
 import { deleteUserById, updateUserRoleById } from '../../services/userService'; // Added updateUserRoleById
 
-function UsersList({ users, onUserDeleted, onRoleChanged }) {
+function UsersList({ users, onUserDeleted, onRoleChanged, currentUserId }) { // Added currentUserId prop
   const [search, setSearch] = React.useState('');
   const [page, setPage] = React.useState(0);
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -47,8 +47,9 @@ function UsersList({ users, onUserDeleted, onRoleChanged }) {
 
   const filteredUsers = users.filter(
     user =>
-      user.name?.toLowerCase().includes(search.toLowerCase()) ||
-      user.email?.toLowerCase().includes(search.toLowerCase())
+      (user.id || user._id) !== currentUserId && // Exclude current user
+      (user.name?.toLowerCase().includes(search.toLowerCase()) ||
+      user.email?.toLowerCase().includes(search.toLowerCase()))
   );
 
   const paginatedUsers = filteredUsers.slice(page * usersPerPage, page * usersPerPage + usersPerPage);
