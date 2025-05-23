@@ -14,23 +14,12 @@ import AppTheme from '../shared-theme/AppTheme';
 import UserProfile from './components/UserProfile'; // Import the new UserProfile component
 import UsersList from './components/UsersList';
 import { getAllUsers } from '../services/userService';
-import {
-  chartsCustomizations,
-  dataGridCustomizations,
-  datePickersCustomizations,
-  treeViewCustomizations,
-} from './theme/customizations';
+import AdminEventsDisplay from './components/AdminEventsDisplay'; // Import the new AdminEventsDisplay component
 import { useNavigate } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography'; // Added import for Typography
 import { apiClient } from '../services/authService'; // Import the NAMED export
-import authService from '../services/authService';
-const xThemeComponents  = {
-  ...chartsCustomizations,
-  ...dataGridCustomizations,
-  ...datePickersCustomizations,
-  ...treeViewCustomizations,
-};
+
 
 function Dashboard(props) {
   const [currentUser, setCurrentUser] = React.useState(null);
@@ -40,7 +29,6 @@ function Dashboard(props) {
   const [users, setUsers] = React.useState([]);
   const [usersLoading, setUsersLoading] = React.useState(false);
   const [usersError, setUsersError] = React.useState('');
-  const handleAuthError = authService.useAuthRedirect();
   const navigate = useNavigate();
 
   const handleMenuItemClick = (action) => {
@@ -57,12 +45,31 @@ function Dashboard(props) {
         setCurrentUser(response.data); // Assuming the response returns the user data directly
         if (response.data?.role !== 'Admin') {
           navigate('/unauthorized', { replace: true }); // Redirect if not Admin
+          return; // Ensure no further state updates after redirect
         }
       } catch (error) {
-        handleAuthError(error);
-          // Generic error for any other issues
-          setError(error.message || 'An unexpected error occurred.');
+        // handleAuthError(error); // This will now handle "User not found" - REMOVE
+        
+        const errorMessage = error.response?.data?.message || error.message || 'An unexpected error occurred.';
+        if (error.response) {
+            if (error.response.status === 401) {
+                console.warn(`Received 401 from API. Redirecting to /unauthenticated`);
+                navigate('/unauthenticated', { replace: true });
+                return;
+            }
+            if (error.response.status === 403) {
+                console.warn(`Received 403 from API. Redirecting to /unauthorized`);
+                navigate('/unauthorized', { replace: true });
+                return;
+            }
+            if (errorMessage.includes("User not found") || (error.response.status === 404 && errorMessage.includes("profile"))) {
+                console.warn(`Received error "${errorMessage}". Redirecting to /notfound`);
+                navigate('/notfound', { replace: true });
+                return;
+            }
+        }
 
+        setError(errorMessage);
         setCurrentUser(null); // Ensure currentUser is null on error
       } finally {
         setIsLoading(false);
@@ -70,7 +77,7 @@ function Dashboard(props) {
     };
 
     fetchUserProfile();
-  }, [navigate]);
+  }, [navigate]); // Removed handleAuthError from dependency array
 
   React.useEffect(() => {
     if (currentView === 'users') {
@@ -96,8 +103,15 @@ function Dashboard(props) {
       case 'user-profile':
         mainContent = <UserProfile />; // Render UserProfile component
         break;
-      case 'about':
-        mainContent = <Typography variant="h4" sx={{mt: 2}}>About Page Placeholder</Typography>; // Placeholder for About
+      case 'about': // This will now render AdminEventsDisplay
+        mainContent = <AdminEventsDisplay />; 
+        break;
+      case 'users':
+        mainContent = usersLoading
+          ? <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300}}><CircularProgress /></Box>
+          : usersError
+            ? <Alert severity="error">{usersError}</Alert>
+            : <UsersList users={users} />;
         break;
       case 'users':
         mainContent = usersLoading
@@ -111,7 +125,7 @@ function Dashboard(props) {
     }
   }
   return (
-    <AppTheme {...props} themeComponents={xThemeComponents}>
+    <AppTheme {...props}>
       <CssBaseline enableColorScheme />
       <Box sx={{ display: 'flex' }}>
         <SideMenu currentUser={currentUser} onMenuItemClick={handleMenuItemClick} selectedItem={currentView} />

@@ -12,9 +12,11 @@ import Drawer from '@mui/material/Drawer';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
-import Sitemark from './AsyncAccessIcon';
+import AsyncIcon from './AsyncAccessIcon';
 import Menu from '@mui/material/Menu';
-import { Link } from 'react-router-dom'; // Import Link
+import { Link, useNavigate } from 'react-router-dom'; // Import Link and useNavigate
+import Avatar from '@mui/material/Avatar'; // Import Avatar
+import { apiClient, logout as logoutUser } from '../../services/authService'; // Import apiClient and logout
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   display: 'flex',
@@ -34,22 +36,70 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
 
 export default function AppAppBar() {
   const [open, setOpen] = React.useState(false);
+  // const [anchorEl, setAnchorEl] = React.useState(null); // Removed
+  const [profileMenuAnchorEl, setProfileMenuAnchorEl] = React.useState(null); // For profile menu
+  const [currentUser, setCurrentUser] = React.useState(null);
+  const [isLoadingUser, setIsLoadingUser] = React.useState(true);
+  const navigate = useNavigate();
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  React.useEffect(() => {
+    const fetchUserProfile = async () => {
+      setIsLoadingUser(true);
+      try {
+        const response = await apiClient.get('/users/profile');
+        setCurrentUser(response.data);
+      } catch (error) {
+        // If error (e.g., 401), user is not logged in
+        setCurrentUser(null);
+        // console.error('Error fetching user profile for AppBar:', error);
+      } finally {
+        setIsLoadingUser(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
 
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
   };
-
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
+  
+  const handleProfileMenuOpen = (event) => {
+    setProfileMenuAnchorEl(event.currentTarget);
   };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
+  const handleProfileMenuClose = () => {
+    setProfileMenuAnchorEl(null);
   };
 
-  const menuId = 'dashboard-menu';
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      setCurrentUser(null);
+      handleProfileMenuClose();
+      navigate('/'); // Redirect to home or login page after logout
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Optionally show an error message to the user
+    }
+  };
+
+  // const menuId = 'dashboard-menu'; // Removed
+  const profileMenuId = 'profile-menu';
+
+  const getDashboardPath = () => {
+    if (currentUser) {
+      switch (currentUser.role) {
+        case 'Admin':
+          return '/dashboard-admin';
+        case 'Organizer':
+          return '/dashboard-organizer';
+        default:
+          return '/dashboard';
+      }
+    }
+    return '/dashboard'; // Default for not logged in, or if role is not Admin/Organizer
+  };
 
   return (
     <AppBar
@@ -73,70 +123,22 @@ export default function AppAppBar() {
       <Container maxWidth="lg">
         <StyledToolbar variant="dense" disableGutters>
           <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', px: 0 }}>
-            <Sitemark />
+            <AsyncIcon />
             <Box sx={{ display: { xs: 'none', md: 'flex' }, ml: 2 }}> {/* Added ml: 2 here */}
               <Button
                 variant="text"
                 color="info"
                 size="small"
+                component={Link}
+                to={getDashboardPath()}
                 sx={{ px: 1 }}
-                aria-controls={menuId}
-                aria-haspopup="true"
-                onClick={handleMenuOpen}
               >
-                Dashboards
+                Dashboard
               </Button>
-              <Menu
-                id={menuId}
-                anchorEl={anchorEl}
-                keepMounted
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
-                MenuListProps={{ dense: true }}
-                PaperProps={{
-                  sx: {
-                    display: 'flex',
-                    minWidth: 200,
-                    mt: 1,
-                    '& .MuiMenuItem-root': {
-                      px: 2,
-                      py: 1,
-                      borderRadius: 1,
-                      '&:hover': {
-                        backgroundColor: 'action.hover',
-                      },
-                    },
-                  },
-                }}
-              >
-                <MenuItem onClick={handleMenuClose} component={Link} to="/dashboard">
-                  User Dashboard
-                </MenuItem>
-                <MenuItem onClick={handleMenuClose} component={Link} to="/dashboard-admin">
-                  Admin Dashboard
-                </MenuItem>
-                <MenuItem onClick={handleMenuClose} component={Link} to="/dashboard-organizer">
-                  Organizer Dashboard
-                </MenuItem>
-              </Menu>
+              {/* Menu component removed */}
               <Button variant="text" color="info" size="small" component={Link} to="/events" sx={{ px: 1 }}>
                 Events
               </Button>
-              {/* <Button variant="text" color="info" size="small">
-                Testimonials
-              </Button> */}
-              <Button variant="text" color="info" size="small" sx={{ px: 1 }}>
-                Highlights
-              </Button>
-              {/* <Button variant="text" color="info" size="small">
-                Pricing
-              </Button> */}
-              {/* <Button variant="text" color="info" size="small" sx={{ minWidth: 0 }}>
-                FAQ
-              </Button> */}
-              {/* <Button variant="text" color="info" size="small" sx={{ minWidth: 0 }}>
-                Blog
-              </Button> */}
             </Box>
           </Box>
           <Box
@@ -146,12 +148,57 @@ export default function AppAppBar() {
               alignItems: 'center',
             }}
           > {/* Use Link component for navigation */}
-            <Button color="primary" variant="text" size="small" component={Link} to="/login">
-              Sign in
-            </Button>
-            <Button color="primary" variant="contained" size="small" component={Link} to="/signup"> {/* Assuming /signup for this button */}
-              Sign up
-            </Button>
+            {isLoadingUser ? (
+              <div /> // Or a small spinner/placeholder while loading user state
+            ) : currentUser ? (
+              <>
+                <IconButton onClick={handleProfileMenuOpen} size="small" sx={{ p: 0 }}>
+                  <Avatar 
+                    alt={currentUser.name || 'User'} 
+                    src={currentUser.profilePictureUrl || undefined} // Use undefined if no URL to show default/initials
+                    sx={{ width: 32, height: 32 }}
+                  />
+                </IconButton>
+                <Menu
+                  id={profileMenuId}
+                  anchorEl={profileMenuAnchorEl}
+                  keepMounted
+                  open={Boolean(profileMenuAnchorEl)}
+                  onClose={handleProfileMenuClose}
+                  MenuListProps={{ dense: true }}
+                  PaperProps={{
+                    sx: {
+                      minWidth: 150,
+                      mt: 1,
+                      '& .MuiMenuItem-root': {
+                        px: 2,
+                        py: 1,
+                        borderRadius: 1,
+                        '&:hover': {
+                          backgroundColor: 'action.hover',
+                        },
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem onClick={() => { handleProfileMenuClose(); navigate(getDashboardPath()); }}>
+                    Dashboard
+                  </MenuItem>
+                  <MenuItem onClick={handleLogout}>
+                    Logout
+                  </MenuItem>
+                </Menu>
+              </>
+            ) : (
+              <>
+                <Button color="primary" variant="text" size="small" component={Link} to="/login">
+                  Sign in
+                </Button>
+                <Button color="primary" variant="contained" size="small" component={Link} to="/signup"> {/* Assuming /signup for this button */}
+                  Sign up
+                </Button>
+              </>
+            )}
             <ColorModeIconDropdown />
           </Box>
           <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 1 }}>
@@ -183,23 +230,33 @@ export default function AppAppBar() {
 
                 
                 {/* <MenuItem>Events</MenuItem> */}
-                <Button color="primary" variant="outlined" fullWidth component={Link} to="/dashboard">
+                <Button color="primary" variant="outlined" fullWidth component={Link} to={getDashboardPath()}>
                   Your Dashboard
                 </Button>
                 {/* <MenuItem>Pricing</MenuItem>
                 <MenuItem>FAQ</MenuItem>
                 <MenuItem>Blog</MenuItem> */}
                 <Divider sx={{ my: 2 }} /> {/* Adjusted margin slightly */}
-                <MenuItem>
-                  <Button color="primary" variant="contained" fullWidth component={Link} to="/signup">
-                    Sign up
-                  </Button>
-                </MenuItem>
-                <MenuItem>
-                  <Button color="primary" variant="outlined" fullWidth component={Link} to="/login">
-                    Sign in
-                  </Button>
-                </MenuItem>
+                {currentUser ? (
+                  <MenuItem onClick={handleLogout}>
+                    <Button color="primary" variant="outlined" fullWidth>
+                      Logout
+                    </Button>
+                  </MenuItem>
+                ) : (
+                  <>
+                    <MenuItem>
+                      <Button color="primary" variant="contained" fullWidth component={Link} to="/signup">
+                        Sign up
+                      </Button>
+                    </MenuItem>
+                    <MenuItem>
+                      <Button color="primary" variant="outlined" fullWidth component={Link} to="/login">
+                        Sign in
+                      </Button>
+                    </MenuItem>
+                  </>
+                )}
               </Box>
             </Drawer>
           </Box>

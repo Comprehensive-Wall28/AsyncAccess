@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 import { alpha } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
@@ -10,32 +9,17 @@ import Header from './components/Header';
 import MainGrid from './components/MainGrid';
 import SideMenu from './components/SideMenu';
 import AppTheme from '../shared-theme/AppTheme';
-
 import UserProfile from './components/UserProfile'; // Import the new UserProfile component
-import {
-  chartsCustomizations,
-  dataGridCustomizations,
-  datePickersCustomizations,
-  treeViewCustomizations,
-} from './theme/customizations';
 import { useNavigate } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography'; // Added import for Typography
 import { apiClient } from '../services/authService'; // Import the NAMED export
-import authService from '../services/authService';
-const xThemeComponents = {
-  ...chartsCustomizations,
-  ...dataGridCustomizations,
-  ...datePickersCustomizations,
-  ...treeViewCustomizations,
-};
 
 export default function Dashboard(props) {
   const [currentUser, setCurrentUser] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState('');
   const [currentView, setCurrentView] = React.useState('home'); // State for current view
-  const handleAuthError = authService.useAuthRedirect();
   const navigate = useNavigate();
 
   const handleMenuItemClick = (action) => {
@@ -52,15 +36,32 @@ export default function Dashboard(props) {
         // Axios automatically parses JSON and throws for non-2xx status codes
         setCurrentUser(response.data); 
         if (response.data?.role !== 'User') {
-          navigate('/unauthorized', { replace: true }); // Redirect if not Admin
+          navigate('/unauthorized', { replace: true }); // Redirect if not User (adjust as needed)
+          return; // Ensure no further state updates after redirect
         }
-      } catch (error) {
-        handleAuthError(error);
-        if(error.response){
-        } else {
-          // Something else happened in setting up the request that triggered an Error
-          setError(err.message || 'An unexpected error occurred.');
+      } catch (error) { // Renamed err to error for consistency
+        // handleAuthError(error); // This will now handle "User not found" - REMOVE
+
+        const errorMessage = error.response?.data?.message || error.message || 'An unexpected error occurred.';
+        if (error.response) {
+            if (error.response.status === 401) {
+                console.warn(`Received 401 from API. Redirecting to /unauthenticated`);
+                navigate('/unauthenticated', { replace: true });
+                return;
+            }
+            if (error.response.status === 403) {
+                console.warn(`Received 403 from API. Redirecting to /unauthorized`);
+                navigate('/unauthorized', { replace: true });
+                return;
+            }
+            if (errorMessage.includes("User not found") || (error.response.status === 404 && errorMessage.includes("profile"))) {
+                console.warn(`Received error "${errorMessage}". Redirecting to /notfound`);
+                navigate('/notfound', { replace: true });
+                return;
+            }
         }
+        
+        setError(errorMessage);
         setCurrentUser(null); // Ensure currentUser is null on error
       } finally {
         setIsLoading(false);
@@ -68,7 +69,7 @@ export default function Dashboard(props) {
     };
 
     fetchUserProfile();
-  }, [navigate]);
+  }, [navigate]); // Removed handleAuthError from dependency array
 
   let mainContent;
   if (isLoading && !currentUser && currentView !== 'user-profile') { // Show loading for home view if user not yet loaded
@@ -91,7 +92,7 @@ export default function Dashboard(props) {
     }
   }
   return (
-    <AppTheme {...props} themeComponents={xThemeComponents}>
+    <AppTheme {...props} >
       <CssBaseline enableColorScheme />
       <Box sx={{ display: 'flex' }}>
         <SideMenu currentUser={currentUser} onMenuItemClick={handleMenuItemClick} selectedItem={currentView} />

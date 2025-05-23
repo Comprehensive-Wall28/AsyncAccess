@@ -1,16 +1,12 @@
-import * as React from 'react';
+
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
-import IconButton from '@mui/material/IconButton';
 import InputLabel from '@mui/material/InputLabel';
 import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import GitHubIcon from '@mui/icons-material/GitHub';
-import LinkedInIcon from '@mui/icons-material/LinkedIn';
-import TwitterIcon from '@mui/icons-material/X';
 import SitemarkIcon from './AsyncAccessIcon';
 
 function Copyright() {
@@ -60,7 +56,7 @@ export default function Footer() {
               Join the newsletter
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-              Subscribe for weekly updates. No spams ever!
+              Subscribe for weekly updates!
             </Typography>
             <InputLabel htmlFor="email-newsletter">Email</InputLabel>
             <Stack direction="row" spacing={1} useFlexGap>
@@ -104,18 +100,9 @@ export default function Footer() {
           <Link color="text.secondary" variant="body2" href="#">
             Events
           </Link>
-          {/* <Link color="text.secondary" variant="body2" href="#">
-            Testimonials
-          </Link> */}
           <Link color="text.secondary" variant="body2" href="#">
             Highlights
           </Link>
-          {/* <Link color="text.secondary" variant="body2" href="#">
-            Pricing
-          </Link> */}
-          {/* <Link color="text.secondary" variant="body2" href="#">
-            FAQs
-          </Link> */}
         </Box>
         <Box
           sx={{

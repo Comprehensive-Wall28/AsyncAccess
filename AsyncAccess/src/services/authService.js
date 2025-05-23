@@ -1,6 +1,4 @@
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import React from 'react';
 const BACKEND_STATIC_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const apiClientInstance = axios.create({
@@ -78,18 +76,24 @@ export const updateUserProfilePicture = async (file) => {
   }
 };
 
-const useAuthRedirect = () => {
-  const navigate = useNavigate();
-  return (error) => {
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      const redirectPath = error.response.status === 401 ? '/unauthenticated' : '/unauthorized';
-      console.warn(`Received ${error.response.status} from API. Redirecting to ${redirectPath}`);
-      navigate(redirectPath, { replace: true });
-      return; // Stop further execution after redirect
-    }
-    // Re-throw other errors for component-level handling if necessary.
-    throw error;
-  };
+export const verifyEmail = async (email, code) => {
+  try {
+    const response = await apiClientInstance.post('/verify-email', { email, code });
+    return response.data;
+  } catch (error) {
+    console.error('Email verification service error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Email verification failed');
+  }
+};
+
+const verifyMfa = async (email, mfaCode) => {
+  try {
+    const response = await apiClientInstance.post('/verify-mfa', { email, mfaCode });
+    return response.data; // Should contain { message, currentUser, token }
+  } catch (error) {
+    console.error('MFA verification service error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('MFA verification failed');
+  }
 };
 
 export { apiClientInstance as apiClient };
@@ -101,5 +105,6 @@ export default {
   resetPassword,
   signup,
   updateUserProfilePicture,
-  useAuthRedirect
+  verifyEmail,
+  verifyMfa, // Add verifyMfa
 };

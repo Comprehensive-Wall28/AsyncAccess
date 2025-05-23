@@ -10,8 +10,13 @@ import MenuContent from './MenuContent';
 import OptionsMenu from './OptionsMenu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AsyncAccessLogo from '../../home-page/components/AsyncAccessIcon';
-import ListItem from '@mui/material/ListItem';
+import ListItem from '@mui/material/ListItem'; // Added import
+import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import HomeIcon from '@mui/icons-material/Home';
+import PersonIcon from '@mui/icons-material/Person';
+import InfoIcon from '@mui/icons-material/Info'; // Or a more appropriate icon like EventIcon if available
+import EventIcon from '@mui/icons-material/Event'; // Assuming EventIcon is suitable and imported
 
 // Same as in UserProfileDisplay.jsx - ensure this is consistent or use a shared config
 // Use the root URL of your backend server where static files are hosted.
@@ -47,6 +52,12 @@ export default function SideMenu({ currentUser, onMenuItemClick, selectedItem })
     ? (currentUser.profilePicture.startsWith('http') ? currentUser.profilePicture : `${BACKEND_STATIC_BASE_URL}${currentUser.profilePicture}`)
     : null;
   const displayName = currentUser ? getFirstAndLastName(currentUser.name) : "Loading...";
+
+  const menuItems = [
+    { text: 'Home', icon: <HomeIcon />, action: 'home' },
+    { text: 'User Profile', icon: <PersonIcon />, action: 'user-profile' },
+    { text: 'Event Management', icon: <EventIcon />, action: 'about' }, 
+  ];
 
   return (
     <Drawer

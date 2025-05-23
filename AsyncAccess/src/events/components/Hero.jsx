@@ -67,6 +67,7 @@ export default function Hero() {
           alignItems: 'center',
           pt: { xs: 14, sm: 20 },
           pb: { xs: 8, sm: 12 },
+
         }}
       >
         <Stack
@@ -79,17 +80,22 @@ export default function Hero() {
             sx={{
               display: 'flex',
               flexDirection: { xs: 'column', sm: 'row' },
-              alignItems: 'center',
-              fontSize: 'clamp(2.2rem, 8vw, 3.5rem)',
+              alignItems: 'baseline', 
+              fontSize: 'clamp(2.2rem, 3vw, 2.8rem)', // Adjusted for smaller text
             }}
           >
-            Check our 
+            Check out our {' '} 
+
             <Typography
               component="span"
               variant="h1"
               sx={(theme) => ({
                 fontSize: 'inherit',
                 color: 'primary.main',
+                // Add marginLeft when flexDirection is 'row' (sm and up)
+                [theme.breakpoints.up('sm')]: {
+                  marginLeft: theme.spacing(1), 
+                },
                 ...theme.applyStyles('dark', {
                   color: 'primary.light',
                 }),
@@ -98,64 +104,7 @@ export default function Hero() {
             Events
             </Typography>
           </Typography>
-          <Typography
-            sx={{
-              textAlign: 'center',
-              color: 'text.secondary',
-              width: { sm: '100%', md: '80%' },
-            }}
-          >
-            Explore a variety of Events and book tickets with ease!
-          </Typography>
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={1}
-            useFlexGap
-            sx={{ pt: 2, width: { xs: '100%', sm: '350px' } }}
-          >
-            <InputLabel htmlFor="email-hero" sx={visuallyHidden}>
-              Email
-            </InputLabel>
-            <TextField
-              id="email-hero"
-              hiddenLabel
-              value={email} // Bind the TextField value to the state
-              onChange={(e) => setEmail(e.target.value)} // Update state on change
-              size="small"
-              variant="outlined"
-              aria-label="Enter your email address"
-              placeholder="Your email address"
-              fullWidth
-              slotProps={{
-                htmlInput: {
-                  autoComplete: 'off',
-                  'aria-label': 'Enter your email address',
-                },
-              }}
-            />
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={handleStartNowClick} // Add the click handler
-              sx={{ minWidth: 'fit-content' }}
-            >
-              Start now
-            </Button>
-          </Stack>
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ textAlign: 'center' }}
-          >
-            By clicking &quot;Start now&quot; you agree to our&nbsp;
-            <Link href="#" color="primary">
-              Terms & Conditions
-            </Link>
-            .
-          </Typography>
         </Stack>
-        {/* <StyledBox id="image" /> */}
       </Container>
     </Box>
   );
