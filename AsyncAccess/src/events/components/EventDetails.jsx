@@ -29,8 +29,8 @@ import Footer from '../../home-page/components/Footer';
 const BACKEND_STATIC_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const apiClientInstance = axios.create({
-  baseURL: BACKEND_STATIC_BASE_URL,
-  withCredentials: true,
+    baseURL: BACKEND_STATIC_BASE_URL,
+    withCredentials: true,
 });
 
 const EventDetails = (props) => {
@@ -43,33 +43,23 @@ const EventDetails = (props) => {
     useEffect(() => {
         if (!id) {
             setLoading(false);
-            // event and error are already null from initialState or previous resets.
-            // The redirect useEffect (added below) will handle navigation.
             return;
         }
 
         const fetchEvent = async () => {
             setLoading(true);
-            setError(null); // Reset error state
-            setEvent(null); // Reset event state
+            setError(null);
+            setEvent(null);
             try {
                 const response = await apiClientInstance.get(`/events/${id}`);
-                // Check if response.data is truthy and not an empty object
                 if (response.data && Object.keys(response.data).length > 0) {
                     setEvent(response.data);
-                } else {
-                    // API returned 200 but no/empty data, treat as not found.
-                    // Event remains null, error remains null. setLoading(false) in finally.
-                    // The redirect useEffect will handle this.
                 }
             } catch (err) {
                 console.error("Error fetching event:", err);
                 if (err.response && err.response.status === 404) {
-                    // For 404, treat as "not found".
-                    // Event remains null, error remains null. setLoading(false) in finally.
-                    // The redirect useEffect will handle this.
+                    // Handled by the redirect useEffect
                 } else {
-                    // For other errors, set an error message.
                     setError(err.response?.data?.error || err.message || "Failed to fetch event details.");
                 }
             } finally {
@@ -80,13 +70,30 @@ const EventDetails = (props) => {
         fetchEvent();
     }, [id]);
 
-    // useEffect for handling navigation when event is not found
     useEffect(() => {
-        // Condition: loading is finished, no error occurred, and no event data.
         if (!loading && !event && !error) {
             navigate('/notfound', { replace: true });
         }
     }, [loading, event, error, navigate]);
+
+    const handleBookNowClick = () => {
+        if (event) {
+            const currentAvailableTickets = (typeof event.totalTickets === 'number' && typeof event.bookedTickets === 'number')
+                ? event.totalTickets - event.bookedTickets
+                : Infinity; // Default to Infinity if data is missing, though UI should prevent this
+
+            navigate('/bookings', {
+                state: {
+                    eventId: event._id,
+                    eventTitle: event.title,
+                    ticketPrice: event.ticketPrice,
+                    availableTickets: currentAvailableTickets, // Pass available tickets
+                }
+            });
+        } else {
+            console.error("Cannot proceed to booking, event data is not available.");
+        }
+    };
 
     const renderPageContent = () => {
         if (loading) {
@@ -113,9 +120,6 @@ const EventDetails = (props) => {
         }
 
         if (!event) {
-            // If loading is false, error is null, and event is null,
-            // the useEffect above should trigger navigation to /notfound.
-            // Show a loader briefly.
             return (
                 <Container sx={{ py: 8, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
                     <CircularProgress size={60} />
@@ -127,10 +131,8 @@ const EventDetails = (props) => {
             ? event.totalTickets - event.bookedTickets
             : 'N/A';
 
-        // Main event details content
         return (
             <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 5 }, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-
                 <Paper
                     sx={{
                         borderRadius: 4,
@@ -138,14 +140,14 @@ const EventDetails = (props) => {
                         width: '60%',
                         maxWidth: '900px',
                         boxShadow: '0px 0px 20px 10px rgb(72, 111, 220)',
-                        mt: 10,// Add top margin
-                        backgroundColor: 'background.paper', // Ensure paper has a background
-                        zIndex: 1, // Ensure paper is above the main box background
+                        mt: 10,
+                        backgroundColor: 'background.paper',
+                        zIndex: 1,
                     }}
                 >
                     <Box sx={{
                         p: { xs: 2, sm: 3, md: 4 },
-                        textAlign: 'center' // Center all text inside the box by default
+                        textAlign: 'center'
                     }}>
                         <Typography
                             variant="h1"
@@ -178,7 +180,6 @@ const EventDetails = (props) => {
                         <Grid container spacing={3} justifyContent="center">
                             <Grid item xs={12} md={7} sx={{ display: 'flex', flexDirection: 'column' }}>
                                 <Stack spacing={2} sx={{ flexGrow: 1 }}>
-                                    {/* Date & Time */}
                                     <Paper
                                         elevation={2}
                                         sx={{
@@ -209,7 +210,6 @@ const EventDetails = (props) => {
                                         </Box>
                                     </Paper>
 
-                                    {/* Location */}
                                     <Paper
                                         elevation={2}
                                         sx={{
@@ -234,7 +234,6 @@ const EventDetails = (props) => {
                                         </Box>
                                     </Paper>
 
-                                    {/* Categories */}
                                     {event.category && event.category.length > 0 && (
                                         <Paper
                                             elevation={2}
@@ -267,7 +266,6 @@ const EventDetails = (props) => {
 
                             <Grid item xs={12} md={5} sx={{ display: 'flex', flexDirection: 'column' }}>
                                 <Stack spacing={2} sx={{ flexGrow: 1 }}>
-                                    {/* Ticket Price */}
                                     <Paper
                                         elevation={2}
                                         sx={{
@@ -290,7 +288,6 @@ const EventDetails = (props) => {
                                         </Box>
                                     </Paper>
 
-                                    {/* Available Tickets */}
                                     <Paper
                                         elevation={2}
                                         sx={{
@@ -324,13 +321,11 @@ const EventDetails = (props) => {
                                                 px: 4,
                                                 fontSize: '1.1rem',
                                                 boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                                                // mt: 2, // Removed, Stack spacing handles it
-                                                // alignSelf: 'center' // Removed, Box wrapper handles centering
                                             }}
-                                            onClick={() => alert('Booking functionality to be implemented!')}
-                                            disabled={availableTickets <= 0}
+                                            onClick={handleBookNowClick}
+                                            disabled={availableTickets === 'N/A' || availableTickets <= 0}
                                         >
-                                            {availableTickets > 0 ? 'Book Now' : 'Sold Out'}
+                                            {availableTickets === 'N/A' || availableTickets > 0 ? 'Book Now' : 'Sold Out'}
                                         </Button>
                                     </Box>
                                 </Stack>
@@ -348,20 +343,17 @@ const EventDetails = (props) => {
             <AppAppBar />
             <Box
                 component="main"
-                sx={(theme) => ({ // Added theme argument to access theme.applyStyles
+                sx={(theme) => ({
                     flexGrow: 1,
-                    width: '100%', // Ensure the box takes full width for the background
+                    width: '100%',
                     backgroundRepeat: 'no-repeat',
                     backgroundImage:
-                        'radial-gradient(ellipse 80% 50% at 50% -20%, hsl(210, 100%, 90%), transparent)', // Light mode gradient
-                    ...theme.applyStyles('dark', { // Dark mode gradient
+                        'radial-gradient(ellipse 80% 50% at 50% -20%, hsl(210, 100%, 90%), transparent)',
+                    ...theme.applyStyles('dark', {
                         backgroundImage:
                             'radial-gradient(ellipse 80% 50% at 50% -20%, hsl(210, 100%, 16%), transparent)',
                     }),
-                    // Add some padding top to account for the AppAppBar, similar to Hero's container
-                    // pt: { xs: 'calc(var(--template-frame-height, 0px) + 28px + 56px + 20px)', md: 'calc(var(--template-frame-height, 0px) + 28px + 64px + 40px)' },
-                    // The content itself (Paper) has mt: 10, so direct pt on main box might not be needed or could be simpler
-                    minHeight: '100vh', // Ensure background covers the whole viewport height
+                    minHeight: '100vh',
                 })}
             >
                 {renderPageContent()}
