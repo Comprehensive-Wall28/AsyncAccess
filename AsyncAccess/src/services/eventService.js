@@ -16,6 +16,21 @@ export const getMyEvents = async () => {
 };
 
 /**
+ * Fetches event analytics data for the currently logged-in organizer.
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of event analytics objects.
+ * @throws Will throw an error if the request fails.
+ */
+export const getEventAnalyticsData = async () => {
+    try {
+        const response = await apiClient.get('/users/events/analytics');
+        return response.data; // Axios automatically parses JSON
+    } catch (error) {
+        console.error("Error fetching event analytics:", error.response || error.message);
+        throw error.response || new Error('Fetching event analytics failed due to a network or server error.');
+    }
+};
+
+/**
  * Creates a new event.
  * @param {Object} eventData - The data for the event to be created.
  * @returns {Promise<Object>} A promise that resolves to the created event object.
@@ -77,5 +92,37 @@ export const deleteEventById = async (eventId) => {
         return response.data;
     } catch (error) {
         throw error.response || new Error('Event deletion failed due to a network or server error.');
+    }
+};
+
+/**
+ * Fetches all events for admin view (pending, approved, etc.).
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of event objects.
+ * @throws Will throw an error if the request fails.
+ */
+export const getAllEventsForAdmin = async () => {
+    try {
+        // Assuming '/events/all' is the admin endpoint that uses eventController.getAllEventsAdmin
+        const response = await apiClient.get('/events/all'); 
+        return response.data;
+    } catch (error) {
+        throw error.response || new Error('Fetching all events for admin failed due to a network or server error.');
+    }
+};
+
+/**
+ * Admin updates an event by its ID. Can update status and other event details.
+ * @param {string} eventId - The ID of the event to update.
+ * @param {Object} eventData - The data to update the event with (e.g., { title, location, status }).
+ * @returns {Promise<Object>} A promise that resolves to the server's response (e.g., the updated event).
+ * @throws Will throw an error if the request fails.
+ */
+export const adminUpdateEventById = async (eventId, eventData) => {
+    try {
+        // This endpoint should be capable of handling partial updates including status.
+        const response = await apiClient.put(`/events/${eventId}`, eventData);
+        return response.data;
+    } catch (error) {
+        throw error.response || new Error('Event update by admin failed due to a network or server error.');
     }
 };

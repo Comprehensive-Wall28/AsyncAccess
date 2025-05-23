@@ -9,11 +9,13 @@ import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'; // Icon for Create Event
+import BarChartRoundedIcon from '@mui/icons-material/BarChartRounded'; // Icon for Analytics
 
 const mainListItems = [
   { text: 'Home', icon: <HomeRoundedIcon />, action: 'home' },
   { text: 'Information', icon: <SettingsRoundedIcon />, action: 'user-profile' }, 
   { text: 'Create Event', icon: <AddCircleOutlineIcon />, action: 'about' }, // Changed text and icon, action 'about' is used by Dashboard
+  { text: 'Analytics', icon: <BarChartRoundedIcon />, action: 'analytics' },
 ];
 
 const secondaryListItems = [

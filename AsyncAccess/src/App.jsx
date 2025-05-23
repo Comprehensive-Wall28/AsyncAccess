@@ -16,7 +16,7 @@ import RoledLogin from './sign-in-role/SignIn.jsx'
 import RoledSignup from './sign-up-role/SignUp.jsx'
 import ForgotPassword from './forgot-password/ForgotPassword.jsx';
 import DashboardAdmin from './dashboard-admin/Dashboard.jsx'
-
+import OrganizerDashboard from './organizerPage/Dashboard.jsx';
 import EventsPage from './events/Events'; // Assuming 'Events.jsx' is the page wrapper
 import EventDetails from './events/components/EventDetails'; // Corrected import path
 
@@ -69,7 +69,7 @@ function App() {
                 />
 
 
-
+                <Route path="/dashboard-organizer" element={<OrganizerDashboard />} />
 
                 {/*<Route path="/organizer-management" element={<OrganizerDashboard />} />*/}
 

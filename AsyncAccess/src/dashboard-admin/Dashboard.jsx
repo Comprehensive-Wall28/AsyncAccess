@@ -12,23 +12,13 @@ import SideMenu from './components/SideMenu';
 import AppTheme from '../shared-theme/AppTheme';
 
 import UserProfile from './components/UserProfile'; // Import the new UserProfile component
-import {
-  chartsCustomizations,
-  dataGridCustomizations,
-  datePickersCustomizations,
-  treeViewCustomizations,
-} from './theme/customizations';
+import AdminEventsDisplay from './components/AdminEventsDisplay'; // Import the new AdminEventsDisplay component
 import { useNavigate } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography'; // Added import for Typography
 import { apiClient } from '../services/authService'; // Import the NAMED export
 import authService from '../services/authService';
-const xThemeComponents  = {
-  ...chartsCustomizations,
-  ...dataGridCustomizations,
-  ...datePickersCustomizations,
-  ...treeViewCustomizations,
-};
+
 
 function Dashboard(props) {
   const [currentUser, setCurrentUser] = React.useState(null);
@@ -80,15 +70,15 @@ function Dashboard(props) {
       case 'user-profile':
         mainContent = <UserProfile />; // Render UserProfile component
         break;
-      case 'about':
-        mainContent = <Typography variant="h4" sx={{mt: 2}}>About Page Placeholder</Typography>; // Placeholder for About
+      case 'about': // This will now render AdminEventsDisplay
+        mainContent = <AdminEventsDisplay />; 
         break;
       default:
         mainContent = <MainGrid currentUser={currentUser} isLoading={isLoading && !currentUser} setCurrentUser={setCurrentUser} />;
     }
   }
   return (
-    <AppTheme {...props} themeComponents={xThemeComponents}>
+    <AppTheme {...props}>
       <CssBaseline enableColorScheme />
       <Box sx={{ display: 'flex' }}>
         <SideMenu currentUser={currentUser} onMenuItemClick={handleMenuItemClick} selectedItem={currentView} />
