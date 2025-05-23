@@ -131,14 +131,48 @@ const userController = {
         return res.status(400).json({ message: "Invalid verification code or email, or code has expired." });
       }
 
-      // console.log(`Verify Email Success: User ${email} found with matching, non-expired token. Proceeding to verify.`); // Optional: Can be removed
       user.isEmailVerified = true;
       user.emailVerificationToken = undefined;
       user.emailVerificationTokenExpires = undefined;
+      // MFA fields should also be cleared if they were somehow set before email verification
+      user.mfaCode = undefined;
+      user.mfaCodeExpires = undefined;
       await user.save();
       console.log(`Verify Email: Email ${email} verified successfully.`);
 
-      res.status(200).json({ message: "Email verified successfully. You can now log in." });
+      // Automatically log in the user by generating JWT and session
+      const currentDateTime = new Date();
+      const expiresAt = new Date(+currentDateTime + 1800000); // 30 minutes, adjust as needed
+
+      const token = jwt.sign(
+          { user: { userId: user._id, role: user.role } },
+          secretKey,
+          { expiresIn: 3 * 60 * 60 } // Token expiry
+      );
+
+      const currentUser = {
+        userId: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        age: user.age,
+        profilePicture: user.profilePicture
+      };
+      const isProduction = process.env.NODE_ENV === 'production';
+
+      return res
+        .cookie("token", token, {
+          expires: expiresAt,
+          httpOnly: true,
+          secure: isProduction,
+          sameSite: isProduction ? "none" : "lax",
+        })
+        .status(200)
+        .json({ 
+            message: "Email verified successfully. You are now logged in.", 
+            currentUser // Send currentUser data to the frontend
+        });
+
     } catch (error) {
       console.error("Error verifying email:", error);
       res.status(500).json({ message: "Server error during email verification." });

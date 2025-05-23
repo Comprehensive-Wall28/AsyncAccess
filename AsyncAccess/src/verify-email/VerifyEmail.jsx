@@ -94,11 +94,38 @@ export default function VerifyEmail(props) {
 
     setLoading(true);
     try {
-      const response = await verifyEmailService(email, code);
-      setSuccessMessage(response.message || 'Email verified successfully! Redirecting to login...');
-      setTimeout(() => {
-        navigate('/login', { state: { email: email, verified: true } });
-      }, 2000);
+      const responseData = await verifyEmailService(email, code); // responseData now contains { message, currentUser }
+      setSuccessMessage(responseData.message || 'Email verified successfully! You are now logged in. Redirecting...');
+      
+      if (responseData.currentUser) {
+        // Store currentUser in localStorage (similar to SignIn.jsx)
+        // For simplicity, we'll always store it here. 
+        // A "Remember Me" option could be added to the signup form if needed.
+        localStorage.setItem('currentUser', JSON.stringify(responseData.currentUser));
+
+        // Role-based redirection
+        let dashboardPath = '/dashboard'; // Default path
+        switch (responseData.currentUser.role) {
+          case 'Admin':
+            dashboardPath = '/dashboard-admin';
+            break;
+          case 'Organizer':
+            dashboardPath = '/dashboard-organizer';
+            break;
+          default: // User or other roles
+            dashboardPath = '/dashboard';
+            break;
+        }
+        setTimeout(() => {
+          navigate(dashboardPath, { replace: true });
+        }, 2000); // Keep a short delay for the user to read the success message
+      } else {
+        // Fallback if currentUser is not in response, though backend should always send it on success now
+        setError('Verification successful, but auto-login failed. Please try logging in manually.');
+        setTimeout(() => {
+          navigate('/login', { state: { email: email, verified: true } });
+        }, 2000);
+      }
     } catch (err) {
       setError(err.message || 'Failed to verify email. Please check the code and try again.');
     } finally {
