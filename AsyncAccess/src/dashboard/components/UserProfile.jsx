@@ -2,15 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Box, Paper, Typography, List, ListItem, ListItemText, Avatar,
   IconButton, Button, CircularProgress, Alert, Divider, Stack, Input,
-  OutlinedInput, InputAdornment, FormControl // Added OutlinedInput, InputAdornment, FormControl
+  OutlinedInput, InputAdornment, FormControl
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import { getCurrentUserProfile, updateUserProfile } from '../../services/userService';
-import authService from '../../services/authService';  // Import authService
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const VITE_BACKEND_SERVER_URL = import.meta.env.VITE_BACKEND_SERVER_URL;
 
@@ -26,7 +25,29 @@ export default function UserProfile() {
   const [profilePictureFile, setProfilePictureFile] = useState(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState(null);
   const fileInputRef = useRef(null);
-  const handleAuthError = authService.useAuthRedirect(); // Use the hook here
+  const navigate = useNavigate(); // Initialize useNavigate
+
+  const handleAuthNavigation = (err) => {
+    const errorMessage = err.response?.data?.message || err.message || 'An unexpected error occurred.';
+    if (err.response) {
+      if (err.response.status === 401) {
+        console.warn(`Received 401 from API. Redirecting to /unauthenticated`);
+        navigate('/unauthenticated', { replace: true });
+        return true;
+      }
+      if (err.response.status === 403) {
+        console.warn(`Received 403 from API. Redirecting to /unauthorized`);
+        navigate('/unauthorized', { replace: true });
+        return true;
+      }
+      if (errorMessage.includes("User not found") || (err.response.status === 404 && errorMessage.includes("profile"))) {
+        console.warn(`Received error "${errorMessage}". Redirecting to /notfound`);
+        navigate('/notfound', { replace: true });
+        return true;
+      }
+    }
+    return false;
+  };
 
   const fetchUser = async () => {
     setIsLoading(true);
@@ -35,8 +56,8 @@ export default function UserProfile() {
       setUser(userData);
       setError('');
     } catch (err) {
+      if (handleAuthNavigation(err)) return;
       setError(err.message || 'Failed to fetch user data.');
-      handleAuthError(err); // Call the hook to handle potential auth errors
     } finally {
       setIsLoading(false);
     }
@@ -44,7 +65,7 @@ export default function UserProfile() {
 
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, []); // navigate is stable, fetchUser is memoized by useEffect
 
   const handleEdit = (field, currentValue) => {
     setEditingField(field);
@@ -69,8 +90,8 @@ export default function UserProfile() {
       setSuccessMessage(response.msg || 'Profile updated successfully!');
       setEditingField(null);
     } catch (err) {
+      if (handleAuthNavigation(err)) return;
       setError(err.message || `Failed to update ${field}.`);
-      handleAuthError(err);
     } finally {
       setIsLoading(false);
     }
@@ -98,7 +119,8 @@ export default function UserProfile() {
       setProfilePictureFile(null);
       setProfilePicturePreview(null);
     } catch (err) {
-      setError(err.message || 'Failed to upload profile picture.');      handleAuthError(err);
+      if (handleAuthNavigation(err)) return;
+      setError(err.message || 'Failed to upload profile picture.');
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -116,7 +138,8 @@ export default function UserProfile() {
       setProfilePictureFile(null);
       setProfilePicturePreview(null);
     } catch (err) {
-      setError(err.message || 'Failed to remove profile picture.');      handleAuthError(err);
+      if (handleAuthNavigation(err)) return;
+      setError(err.message || 'Failed to remove profile picture.');
       console.error(err);
     } finally {
       setIsLoading(false);
