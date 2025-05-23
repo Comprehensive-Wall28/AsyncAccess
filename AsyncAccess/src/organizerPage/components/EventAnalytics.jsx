@@ -28,8 +28,15 @@ export default function EventAnalytics() {
         setAnalyticsData(data || []);
       } catch (err) {
         console.error("Failed to fetch event analytics:", err);
-        setError(err.data?.error || err.message || 'Failed to load event analytics.');
-        setAnalyticsData([]);
+        // Check for a specific "no data found" error from the API
+        // Based on the provided error structure: err.data.message
+        if (err && err.status === 404 && err.data && err.data.message === "No events found for this Organizer to generate analytics.") {
+          setAnalyticsData([]); // Ensure data is empty
+          setError('');         // Clear error state to allow the "no data" Typography to show
+        } else {
+          setError(err.data?.error || err.data?.message || err.message || 'Failed to load event analytics.');
+          setAnalyticsData([]); // Ensure data is empty on other errors too
+        }
       } finally {
         setIsLoading(false);
       }

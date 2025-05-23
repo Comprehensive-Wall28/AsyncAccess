@@ -13,16 +13,35 @@ import IconButton from '@mui/material/IconButton';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl'; // Added import
-import FormLabel from '@mui/material/FormLabel'; // Added import
-import { apiClient } from '../../services/authService'; // Adjust path if needed
-import { deleteUserById } from '../../services/userService'; // <-- Add this import
+import FormControl from '@mui/material/FormControl';
+import FormLabel from '@mui/material/FormLabel';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
+import Select from '@mui/material/Select'; // Added for dropdown
+import InputLabel from '@mui/material/InputLabel'; // Added for dropdown label
+import { deleteUserById, updateUserRoleById } from '../../services/userService'; // Added updateUserRoleById
 
 function UsersList({ users, onUserDeleted, onRoleChanged }) {
   const [search, setSearch] = React.useState('');
   const [page, setPage] = React.useState(0);
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const [selectedUserId, setSelectedUserId] = React.useState(null);
+  const [selectedUser, setSelectedUser] = React.useState(null); // Store the whole user object
+
+  const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
+  const [deleteLoading, setDeleteLoading] = React.useState(false);
+  const [deleteError, setDeleteError] = React.useState('');
+
+  const [openRoleDialog, setOpenRoleDialog] = React.useState(false);
+  const [selectedNewRole, setSelectedNewRole] = React.useState('');
+  const [roleChangeLoading, setRoleChangeLoading] = React.useState(false);
+  const [roleChangeError, setRoleChangeError] = React.useState('');
+
 
   const usersPerPage = 10;
 
@@ -34,30 +53,80 @@ function UsersList({ users, onUserDeleted, onRoleChanged }) {
 
   const paginatedUsers = filteredUsers.slice(page * usersPerPage, page * usersPerPage + usersPerPage);
 
-  const handleMenuOpen = (event, userId) => {
+  const handleMenuOpen = (event, user) => { // Pass the whole user object
     setAnchorEl(event.currentTarget);
-    setSelectedUserId(userId);
+    setSelectedUser(user);
   };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    setSelectedUserId(null);
+    // Don't clear selectedUser here, dialogs might need it
   };
 
-  const handleDeleteUser = async () => {
-    try {
-      await deleteUserById(selectedUserId); // <-- Use the service function
-      if (onUserDeleted) onUserDeleted(selectedUserId);
-    } catch (err) {
-      alert('Failed to delete user');
+  const handleOpenDeleteDialog = () => {
+    if (selectedUser) {
+      setOpenDeleteDialog(true);
     }
     handleMenuClose();
   };
 
-  const handleChangeRole = () => {
-    if (onRoleChanged) onRoleChanged(selectedUserId);
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+    setDeleteError('');
+    setSelectedUser(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedUser) return;
+
+    setDeleteLoading(true);
+    setDeleteError('');
+    try {
+      await deleteUserById(selectedUser.id || selectedUser._id);
+      if (onUserDeleted) {
+        onUserDeleted(selectedUser.id || selectedUser._id);
+      }
+      handleCloseDeleteDialog();
+    } catch (err) {
+      setDeleteError(err.message || 'Failed to delete user. Please try again.');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleOpenRoleDialog = () => {
+    if (selectedUser) {
+      setSelectedNewRole(selectedUser.role); // Pre-fill with current role
+      setOpenRoleDialog(true);
+    }
     handleMenuClose();
   };
+
+  const handleCloseRoleDialog = () => {
+    setOpenRoleDialog(false);
+    setRoleChangeError('');
+    setSelectedNewRole('');
+    setSelectedUser(null);
+  };
+
+  const handleConfirmRoleChange = async () => {
+    if (!selectedUser || !selectedNewRole) return;
+
+    setRoleChangeLoading(true);
+    setRoleChangeError('');
+    try {
+      await updateUserRoleById(selectedUser.id || selectedUser._id, selectedNewRole);
+      if (onRoleChanged) {
+        onRoleChanged(selectedUser.id || selectedUser._id, selectedNewRole); // Notify parent
+      }
+      handleCloseRoleDialog();
+    } catch (err) {
+      setRoleChangeError(err.response?.data?.message || err.message || 'Failed to change role.');
+    } finally {
+      setRoleChangeLoading(false);
+    }
+  };
+
 
   return (
     <React.Fragment>
@@ -102,7 +171,7 @@ function UsersList({ users, onUserDeleted, onRoleChanged }) {
                 <TableCell align="right">
                   <IconButton
                     aria-label="more"
-                    onClick={e => handleMenuOpen(e, user.id || user._id)}
+                    onClick={e => handleMenuOpen(e, user)} // Pass user object
                   >
                     <MoreVertIcon />
                   </IconButton>
@@ -121,10 +190,13 @@ function UsersList({ users, onUserDeleted, onRoleChanged }) {
         <Menu
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
-          onClose={handleMenuClose}
+          onClose={() => {
+            handleMenuClose();
+            setSelectedUser(null); 
+          }}
         >
-          <MenuItem onClick={handleDeleteUser}>Delete User</MenuItem>
-          <MenuItem onClick={handleChangeRole}>Change Role</MenuItem>
+          <MenuItem onClick={handleOpenDeleteDialog}>Delete User</MenuItem>
+          <MenuItem onClick={handleOpenRoleDialog}>Change Role</MenuItem>
         </Menu>
       </TableContainer>
       <TablePagination
@@ -135,6 +207,71 @@ function UsersList({ users, onUserDeleted, onRoleChanged }) {
         rowsPerPage={usersPerPage}
         rowsPerPageOptions={[usersPerPage]}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{"Confirm Deletion"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete this user? This action cannot be undone.
+          </DialogContentText>
+          {deleteError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {deleteError}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} disabled={deleteLoading}>
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error" autoFocus disabled={deleteLoading}>
+            {deleteLoading ? <CircularProgress size={24} color="inherit" /> : "Delete"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Change Role Dialog */}
+      <Dialog open={openRoleDialog} onClose={handleCloseRoleDialog}>
+        <DialogTitle>Change User Role</DialogTitle>
+        <DialogContent sx={{ minWidth: '300px' }}>
+          <DialogContentText sx={{ mb: 2 }}>
+            Select a new role for {selectedUser?.name || 'this user'}.
+          </DialogContentText>
+          <FormControl fullWidth>
+            <InputLabel id="role-select-label">Role</InputLabel>
+            <Select
+              labelId="role-select-label"
+              id="role-select"
+              value={selectedNewRole}
+              label="Role"
+              onChange={(e) => setSelectedNewRole(e.target.value)}
+            >
+              <MenuItem value="User">User</MenuItem>
+              <MenuItem value="Organizer">Organizer</MenuItem>
+              <MenuItem value="Admin">Admin</MenuItem>
+            </Select>
+          </FormControl>
+          {roleChangeError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {roleChangeError}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseRoleDialog} disabled={roleChangeLoading}>
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmRoleChange} color="primary" disabled={roleChangeLoading || !selectedNewRole || selectedNewRole === selectedUser?.role}>
+            {roleChangeLoading ? <CircularProgress size={24} color="inherit" /> : "Save"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </React.Fragment>
   );
 }
