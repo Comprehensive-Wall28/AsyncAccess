@@ -9,6 +9,8 @@ router.post("/login", userController.login );
 
 router.post("/register", userController.register);
 
+router.post("/verify-email", userController.verifyEmail); // New route for email verification
+
 router.put("/update-password", authenticationMiddleware, userController.updatePasswordLoggedIn);
 //(Forgot Password Step 1)
 router.put("/forgetPassword", userController.requestPasswordReset);

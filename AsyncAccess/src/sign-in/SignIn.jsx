@@ -167,7 +167,14 @@ export default function SignIn(props) {
 
     } catch (error) {
       // The error from authService.js might be an object with a message property
-      setLoginError(error.message || (typeof error === 'string' ? error : 'Login failed. Please check your credentials or try again later.'));
+      // Check for the custom emailNotVerified flag
+      if (error.response?.data?.emailNotVerified) {
+        setLoginError(error.response.data.message || 'Email not verified. Please check your inbox.');
+        // Optionally, provide a link/button to navigate to /verify-email
+        // For example, you could add another state to show a "Resend verification" or "Go to verification" button
+      } else {
+        setLoginError(error.message || (typeof error === 'string' ? error : 'Login failed. Please check your credentials or try again later.'));
+      }
     } finally {
       setLoading(false);
     }
@@ -250,6 +257,7 @@ export default function SignIn(props) {
             >
               {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign in'}
             </Button>
+            {loginError && <Alert severity="error" sx={{ mt: 1 }}>{loginError}</Alert>} {/* Moved Alert here for better visibility */}
             <Divider>
               <Typography sx={{ color: 'text.secondary' }}>or</Typography>
           </Divider>
@@ -282,7 +290,7 @@ export default function SignIn(props) {
               Login as Organizer / Admin
             </Link>
           </Box>
-          {loginError && <Alert severity="error" sx={{ mt: 2 }}>{loginError}</Alert>}
+          {/* {loginError && <Alert severity="error" sx={{ mt: 2 }}>{loginError}</Alert>} */} {/* Removed from here, moved up */}
           </Box> {/* This closes the <Box component="form"> */}
         </Card>
       </SignInContainer>

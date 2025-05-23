@@ -19,28 +19,141 @@ const userController = {
 
       if(!email || !password || !name || !role){
         return res.status(400).json({ message: "Missing fields. Please provide Name, Email, Password and Role" });
-
       }
-      const existingUser = await userModel.findOne({ email });
-      if (existingUser) {
-        return res.status(409).json({ message: "User already exists" });
+      let existingUser = await userModel.findOne({ email });
+      if (existingUser && existingUser.isEmailVerified) {
+        return res.status(409).json({ message: "User already exists and is verified." });
+      }
+      if (existingUser && !existingUser.isEmailVerified) {
+        // Potentially resend verification for an unverified existing user
+        // For now, let's treat as a new registration attempt that needs verification
+        // Or, you might want to delete the old unverified user and create a new one
+        // For simplicity, we'll overwrite or update. Let's assume we update.
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      const newUser = new userModel({
-        email,
-        password: hashedPassword,
-        name,
-        role,
-        age,
-      });
+      
+      // Generate a 6-digit verification code
+      const verificationCode = crypto.randomInt(100000, 999999).toString();
+      const hashedVerificationCode = crypto.createHash("sha256").update(verificationCode).digest("hex");
 
-      await newUser.save();
+      const emailVerificationTokenExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
 
-      res.status(201).json({ message: "User registered successfully" });
+      if (existingUser && !existingUser.isEmailVerified) {
+        existingUser.password = hashedPassword;
+        existingUser.name = name;
+        existingUser.role = role;
+        existingUser.age = age;
+        existingUser.emailVerificationToken = hashedVerificationCode;
+        existingUser.emailVerificationTokenExpires = emailVerificationTokenExpires;
+        existingUser.isEmailVerified = false; // Ensure it's false
+        await existingUser.save();
+      } else {
+        existingUser = new userModel({
+          email,
+          password: hashedPassword,
+          name,
+          role,
+          age,
+          isEmailVerified: false,
+          emailVerificationToken: hashedVerificationCode,
+          emailVerificationTokenExpires: emailVerificationTokenExpires,
+        });
+        await existingUser.save();
+      }
+      
+      // Send verification email
+      const verificationEmailSubject = "Verify Your Email Address for AsyncAccess";
+      const verificationEmailHtml = `
+        <h1>Welcome to AsyncAccess!</h1>
+        <p>Please use the following code to verify your email address. This code is valid for 15 minutes:</p>
+        <h2 style="text-align: center; letter-spacing: 5px; font-size: 2em;">${verificationCode}</h2>
+        <p>If you did not request this, please ignore this email.</p>
+        <p>NOTE: Please, do not insert valid credentials like passwords. Testing purposes only! (Penta-Nodes team)</p>
+      `;
+      const verificationEmailText = `Welcome to AsyncAccess! Your email verification code is: ${verificationCode}. It is valid for 15 minutes.`;
+
+      try {
+        console.log(`Preparing to send verification email to: ${email}`);
+        await sendEmail(email, verificationEmailSubject, verificationEmailText, verificationEmailHtml);
+        console.log(`Verification email successfully queued for: ${email}`);
+        res.status(201).json({ message: "Registration successful. Please check your email to verify your account." });
+      } catch (emailError) {
+        console.error(`Error sending verification email to ${email}:`, emailError.message);
+        // Optionally, delete the user or mark them for re-verification if email fails
+        // For now, we'll inform the client about the registration but with a warning about email.
+        // A more robust solution might involve a retry mechanism or manual verification process.
+        // await userModel.deleteOne({ _id: existingUser._id }); // Example: Rollback user creation
+        res.status(500).json({ message: "User registered, but failed to send verification email. Please contact support or try registering again later." });
+      }
+
     } catch (error) {
       console.error("Error registering user:", error);
-      res.status(500).json({ message: "Server error" });
+      res.status(500).json({ message: "Server error during registration." });
+    }
+  },
+  verifyEmail: async (req, res) => {
+    try {
+      const { email, code } = req.body;
+      console.log(`Verify Email Attempt: Email: ${email}, Code (Plain from FE): ${code}`);
+
+      if (!email || !code) {
+        console.log('Verify Email Error: Email or code missing in request body.');
+        return res.status(400).json({ message: "Email and verification code are required." });
+      }
+
+      const hashedCodeFromFrontend = crypto.createHash("sha256").update(code).digest("hex");
+      console.log(`Verify Email: Hashed code from frontend input: ${hashedCodeFromFrontend}`);
+
+      const user = await userModel.findOne({
+        email,
+        emailVerificationToken: hashedCodeFromFrontend,
+        emailVerificationTokenExpires: { $gt: Date.now() },
+      });
+
+      if (!user) {
+        console.log(`Verify Email: Initial findOne failed for email: ${email} with hashed code: ${hashedCodeFromFrontend}`);
+        // Check if user exists but code is wrong or expired
+        const existingUser = await userModel.findOne({ email });
+        if (!existingUser) {
+          console.log(`Verify Email Error: No user found with email: ${email}`);
+          return res.status(400).json({ message: "Invalid verification code or email, or code has expired." });
+        }
+
+        console.log(`Verify Email Debug: User found with email: ${email}.`);
+        console.log(`Verify Email Debug: DB Hashed Token: ${existingUser.emailVerificationToken}`);
+        console.log(`Verify Email Debug: FE Hashed Token: ${hashedCodeFromFrontend}`);
+        console.log(`Verify Email Debug: DB Token Expires: ${existingUser.emailVerificationTokenExpires} (Timestamp: ${new Date(existingUser.emailVerificationTokenExpires).toISOString()})`);
+        console.log(`Verify Email Debug: Current Time: ${Date.now()} (Timestamp: ${new Date(Date.now()).toISOString()})`);
+        
+        if (existingUser.isEmailVerified) {
+            console.log(`Verify Email Info: Email ${email} is already verified.`);
+            return res.status(400).json({ message: "Email is already verified." });
+        }
+        if (existingUser.emailVerificationToken !== hashedCodeFromFrontend) {
+            console.log(`Verify Email Error: Stored token does not match submitted token for ${email}.`);
+            return res.status(400).json({ message: "Invalid verification code." });
+        }
+        if (existingUser.emailVerificationTokenExpires <= Date.now()) {
+            console.log(`Verify Email Error: Verification code expired for ${email}.`);
+            return res.status(400).json({ message: "Verification code has expired." });
+        }
+        // This case should ideally not be reached if the above checks are comprehensive
+        console.log(`Verify Email Error: Fallthrough - Invalid code/email or expired for ${email}.`);
+        return res.status(400).json({ message: "Invalid verification code or email, or code has expired." });
+      }
+
+      console.log(`Verify Email Success: User ${email} found with matching, non-expired token. Proceeding to verify.`);
+      user.isEmailVerified = true;
+      user.emailVerificationToken = undefined;
+      user.emailVerificationTokenExpires = undefined;
+      await user.save();
+      console.log(`Verify Email Success: Email ${email} verified and user record updated.`);
+
+      res.status(200).json({ message: "Email verified successfully. You can now log in." });
+    } catch (error) {
+      console.error("Error verifying email:", error);
+      res.status(500).json({ message: "Server error during email verification." });
     }
   },
   login: async (req, res) => {
@@ -55,6 +168,14 @@ const userController = {
       if (!user) {
         return res.status(404).json({ message: "User not found!" });
       }
+
+      if (!user.isEmailVerified) {
+        return res.status(403).json({ 
+            message: "Email not verified. Please check your inbox for the verification code.",
+            emailNotVerified: true // Custom flag for frontend
+        });
+      }
+
       const isMatch = await user.comparePassword(password);
 
       if (!isMatch) {
@@ -269,6 +390,13 @@ const userController = {
         // Don't notify a potential attacker of a valid email (:
         return res.status(200).json({ message: "If an account with that email exists, a password reset code has been sent." });
       }
+      
+      if (!user.isEmailVerified) {
+        // Optionally, you could allow password reset for unverified emails or guide them to verify first.
+        // For now, let's prevent password reset for unverified emails to keep MFA flow distinct.
+        return res.status(403).json({ message: "Cannot reset password for an unverified email. Please verify your email first." });
+      }
+
 
       // Generate a 6-digit code
       const resetCode = crypto.randomInt(100000, 999999).toString(); // Generate a 6-digit number and convert to string
@@ -296,6 +424,7 @@ const userController = {
       const plainTextMessage = `You requested a password reset. Your reset code is: ${resetCode}. It is valid for 10 minutes.`;
 
       try {
+        console.log(`Preparing to send password reset email to: ${user.email}`);
         await sendEmail(
 
             user.email,
@@ -303,10 +432,10 @@ const userController = {
             plainTextMessage,
             message
         );
-        console.log(`Password reset code sent to ${user.email}`);
+        console.log(`Password reset code successfully queued for ${user.email}`);
         return res.status(200).json({ message: "If an account with that email exists, a password reset code has been sent." });
       } catch (emailError) {
-        console.error("Failed to send password reset code email:", emailError);
+        console.error(`Failed to send password reset code email to ${user.email}:`, emailError.message);
         // Clear the fields if email fails
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;

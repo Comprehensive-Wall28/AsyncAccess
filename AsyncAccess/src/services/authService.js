@@ -78,6 +78,16 @@ export const updateUserProfilePicture = async (file) => {
   }
 };
 
+export const verifyEmail = async (email, code) => {
+  try {
+    const response = await apiClientInstance.post('/verify-email', { email, code });
+    return response.data;
+  } catch (error) {
+    console.error('Email verification service error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Email verification failed');
+  }
+};
+
 const useAuthRedirect = () => {
   const navigate = useNavigate();
   return (error) => {
@@ -101,5 +111,6 @@ export default {
   resetPassword,
   signup,
   updateUserProfilePicture,
-  useAuthRedirect
+  useAuthRedirect,
+  verifyEmail
 };
