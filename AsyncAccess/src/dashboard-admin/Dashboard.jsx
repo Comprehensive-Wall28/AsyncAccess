@@ -80,15 +80,27 @@ function Dashboard(props) {
   }, [navigate]); // Removed handleAuthError from dependency array
 
   React.useEffect(() => {
-    if (currentView === 'users') {
+    if (currentView === 'users' && currentUser?.role === 'Admin') { // Ensure only admin can fetch users
       setUsersLoading(true);
       setUsersError('');
       getAllUsers()
         .then(res => setUsers(res.data))
-        .catch(err => setUsersError(err.message || 'Failed to load users'))
+        .catch(err => setUsersError(err.response?.data?.message || err.message || 'Failed to load users'))
         .finally(() => setUsersLoading(false));
     }
-  }, [currentView]);
+  }, [currentView, currentUser]);
+
+  const handleUserDeleted = (deletedUserId) => {
+    setUsers(prevUsers => prevUsers.filter(user => (user.id || user._id) !== deletedUserId));
+  };
+
+  const handleRoleChanged = (updatedUserId, newRole) => {
+    setUsers(prevUsers =>
+      prevUsers.map(user =>
+        (user.id || user._id) === updatedUserId ? { ...user, role: newRole } : user
+      )
+    );
+  };
 
   let mainContent;
   if (isLoading && !currentUser && currentView !== 'user-profile') { // Show loading for home view if user not yet loaded
@@ -111,14 +123,12 @@ function Dashboard(props) {
           ? <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300}}><CircularProgress /></Box>
           : usersError
             ? <Alert severity="error">{usersError}</Alert>
-            : <UsersList users={users} />;
-        break;
-      case 'users':
-        mainContent = usersLoading
-          ? <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300}}><CircularProgress /></Box>
-          : usersError
-            ? <Alert severity="error">{usersError}</Alert>
-            : <UsersList users={users} />;
+            : <UsersList 
+                users={users} 
+                onUserDeleted={handleUserDeleted}
+                onRoleChanged={handleRoleChanged}
+                currentUserId={currentUser?._id || currentUser?.id} 
+              />;
         break;
       default:
         mainContent = <MainGrid currentUser={currentUser} isLoading={isLoading && !currentUser} setCurrentUser={setCurrentUser} />;
