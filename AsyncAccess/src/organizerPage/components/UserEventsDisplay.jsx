@@ -333,7 +333,9 @@ export default function UserEventsDisplay({ currentUser }) {
                             <Typography variant="body2" color="text.secondary">Location: <Typography component="span" variant="body2" color="text.primary">{event.location || 'N/A'}</Typography></Typography>
                           </Grid>
                           <Grid item xs={12} sm={6}>
-                            <Typography variant="body2" color="text.secondary">Category: <Typography component="span" variant="body2" color="text.primary">{event.category || 'N/A'}</Typography></Typography>
+                            <Typography variant="body2" color="text.secondary">Category: <Typography component="span" variant="body2" color="text.primary">
+                              {Array.isArray(event.category) && event.category.length > 0 ? event.category[0] : event.category || 'N/A'}
+                            </Typography></Typography>
                           </Grid>
                           <Grid item xs={6} sm={3}>
                             <Typography variant="body2" color="text.secondary">Price: <Typography component="span" variant="body2" color="text.primary">${event.ticketPrice != null ? event.ticketPrice.toFixed(2) : 'N/A'}</Typography></Typography>

@@ -124,6 +124,19 @@ export default function SignUp(props) {
       setEmailErrorMessage('');
     }
 
+    // Validate Password
+    if (!password) {
+      setPasswordError(true);
+      setPasswordErrorMessage('Password is required.');
+      isValid = false;
+    } else if (password.length < 6) {
+      setPasswordError(true);
+      setPasswordErrorMessage('Password must be at least 6 characters long.');
+      isValid = false;
+    } else {
+      setPasswordErrorMessage('');
+    }
+
     return isValid;
   };
 
