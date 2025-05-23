@@ -11,6 +11,8 @@ router.post("/register", userController.register);
 
 router.post("/verify-email", userController.verifyEmail); // New route for email verification
 
+router.post("/verify-mfa", userController.verifyMfa); // New route for MFA verification
+
 router.put("/update-password", authenticationMiddleware, userController.updatePasswordLoggedIn);
 //(Forgot Password Step 1)
 router.put("/forgetPassword", userController.requestPasswordReset);

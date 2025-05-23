@@ -139,7 +139,17 @@ export default function SignIn(props) {
     setLoading(true);
     try {
       const userData = await authService.login(email, password);
-      console.log('Login successful:', userData); // userData contains { message, currentUser }
+      console.log('Login attempt response:', userData);
+
+      // Check if MFA is required
+      if (userData.mfaRequired && userData.email) {
+        console.log('MFA required, navigating to MFA verification page.');
+        navigate('/mfa-verify', { state: { email: userData.email }, replace: true });
+        return; // Stop further execution here
+      }
+      
+      // This part will only be reached if MFA is not required (or if login flow changes)
+      console.log('Login successful (no MFA or MFA already handled):', userData); 
 
       if (rememberMe && userData.currentUser) {
         localStorage.setItem('currentUser', JSON.stringify(userData.currentUser));
@@ -172,6 +182,11 @@ export default function SignIn(props) {
         setLoginError(error.response.data.message || 'Email not verified. Please check your inbox.');
         // Optionally, provide a link/button to navigate to /verify-email
         // For example, you could add another state to show a "Resend verification" or "Go to verification" button
+      } else if (error.response?.data?.mfaRequired) { 
+        // This case might not be hit if backend directly sends mfaRequired in success response
+        // but good for robustness if backend error structure changes
+        console.log('MFA required (from error block), navigating to MFA verification page.');
+        navigate('/mfa-verify', { state: { email: error.response.data.email || email }, replace: true });
       } else {
         setLoginError(error.message || (typeof error === 'string' ? error : 'Login failed. Please check your credentials or try again later.'));
       }

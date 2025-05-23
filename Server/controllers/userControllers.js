@@ -95,15 +95,12 @@ const userController = {
   verifyEmail: async (req, res) => {
     try {
       const { email, code } = req.body;
-      console.log(`Verify Email Attempt: Email: ${email}, Code (Plain from FE): ${code}`);
 
       if (!email || !code) {
-        console.log('Verify Email Error: Email or code missing in request body.');
         return res.status(400).json({ message: "Email and verification code are required." });
       }
 
       const hashedCodeFromFrontend = crypto.createHash("sha256").update(code).digest("hex");
-      console.log(`Verify Email: Hashed code from frontend input: ${hashedCodeFromFrontend}`);
 
       const user = await userModel.findOne({
         email,
@@ -112,43 +109,34 @@ const userController = {
       });
 
       if (!user) {
-        console.log(`Verify Email: Initial findOne failed for email: ${email} with hashed code: ${hashedCodeFromFrontend}`);
-        // Check if user exists but code is wrong or expired
         const existingUser = await userModel.findOne({ email });
         if (!existingUser) {
-          console.log(`Verify Email Error: No user found with email: ${email}`);
+          console.log(`Verify Email: No user found with email: ${email} during verification attempt.`);
           return res.status(400).json({ message: "Invalid verification code or email, or code has expired." });
         }
-
-        console.log(`Verify Email Debug: User found with email: ${email}.`);
-        console.log(`Verify Email Debug: DB Hashed Token: ${existingUser.emailVerificationToken}`);
-        console.log(`Verify Email Debug: FE Hashed Token: ${hashedCodeFromFrontend}`);
-        console.log(`Verify Email Debug: DB Token Expires: ${existingUser.emailVerificationTokenExpires} (Timestamp: ${new Date(existingUser.emailVerificationTokenExpires).toISOString()})`);
-        console.log(`Verify Email Debug: Current Time: ${Date.now()} (Timestamp: ${new Date(Date.now()).toISOString()})`);
         
         if (existingUser.isEmailVerified) {
-            console.log(`Verify Email Info: Email ${email} is already verified.`);
+            console.log(`Verify Email: Email ${email} is already verified.`);
             return res.status(400).json({ message: "Email is already verified." });
         }
         if (existingUser.emailVerificationToken !== hashedCodeFromFrontend) {
-            console.log(`Verify Email Error: Stored token does not match submitted token for ${email}.`);
+            console.log(`Verify Email: Invalid verification code for ${email}.`);
             return res.status(400).json({ message: "Invalid verification code." });
         }
         if (existingUser.emailVerificationTokenExpires <= Date.now()) {
-            console.log(`Verify Email Error: Verification code expired for ${email}.`);
+            console.log(`Verify Email: Verification code expired for ${email}.`);
             return res.status(400).json({ message: "Verification code has expired." });
         }
-        // This case should ideally not be reached if the above checks are comprehensive
-        console.log(`Verify Email Error: Fallthrough - Invalid code/email or expired for ${email}.`);
+        console.log(`Verify Email: Fallthrough - Invalid code/email or expired for ${email}.`);
         return res.status(400).json({ message: "Invalid verification code or email, or code has expired." });
       }
 
-      console.log(`Verify Email Success: User ${email} found with matching, non-expired token. Proceeding to verify.`);
+      // console.log(`Verify Email Success: User ${email} found with matching, non-expired token. Proceeding to verify.`); // Optional: Can be removed
       user.isEmailVerified = true;
       user.emailVerificationToken = undefined;
       user.emailVerificationTokenExpires = undefined;
       await user.save();
-      console.log(`Verify Email Success: Email ${email} verified and user record updated.`);
+      console.log(`Verify Email: Email ${email} verified successfully.`);
 
       res.status(200).json({ message: "Email verified successfully. You can now log in." });
     } catch (error) {
@@ -164,7 +152,7 @@ const userController = {
         return res.status(400).json({ message: "Missing fields. Please provide Email and Password" });
       }
 
-      const user = await userModel.findOne({ email });
+      const user = await userModel.findOne({ email }).select('+password +emailVerificationToken +emailVerificationTokenExpires +mfaCode +mfaCodeExpires'); // Select MFA fields
       if (!user) {
         return res.status(404).json({ message: "User not found!" });
       }
@@ -172,7 +160,7 @@ const userController = {
       if (!user.isEmailVerified) {
         return res.status(403).json({ 
             message: "Email not verified. Please check your inbox for the verification code.",
-            emailNotVerified: true // Custom flag for frontend
+            emailNotVerified: true 
         });
       }
 
@@ -182,16 +170,94 @@ const userController = {
         return res.status(400).json({ message: "Incorrect password" });
       }
 
-      const currentDateTime = new Date();
-      const expiresAt = new Date(+currentDateTime + 1800000);
+      // MFA Step: Generate and send MFA code
+      const mfaVerificationCode = crypto.randomInt(100000, 999999).toString();
+      const hashedMfaCode = crypto.createHash("sha256").update(mfaVerificationCode).digest("hex");
+      
+      user.mfaCode = hashedMfaCode;
+      user.mfaCodeExpires = Date.now() + 10 * 60 * 1000; // MFA code valid for 10 minutes
+      await user.save();
 
-      // Generate a JWT token
+      const mfaEmailSubject = "Your AsyncAccess Login Verification Code";
+      const mfaEmailHtml = `
+        <h1>Login Verification</h1>
+        <p>Please use the following code to complete your login. This code is valid for 10 minutes:</p>
+        <h2 style="text-align: center; letter-spacing: 5px; font-size: 2em;">${mfaVerificationCode}</h2>
+        <p>If you did not attempt to log in, please secure your account immediately.</p>
+      `;
+      const mfaEmailText = `Your AsyncAccess login verification code is: ${mfaVerificationCode}. It is valid for 10 minutes.`;
+
+      try {
+        console.log(`Preparing to send MFA code to: ${email}`);
+        await sendEmail(email, mfaEmailSubject, mfaEmailText, mfaEmailHtml);
+        console.log(`MFA code successfully queued for: ${email}`);
+        return res.status(200).json({ 
+          message: "MFA required. Please check your email for the verification code.",
+          mfaRequired: true,
+          email: user.email // Send email back to FE to prefill MFA form
+        });
+      } catch (emailError) {
+        console.error(`Error sending MFA code to ${email}:`, emailError.message);
+        // Potentially revert MFA fields or handle error more gracefully
+        user.mfaCode = undefined;
+        user.mfaCodeExpires = undefined;
+        await user.save();
+        return res.status(500).json({ message: "Login successful, but failed to send MFA code. Please try logging in again." });
+      }
+
+    } catch (error) {
+      console.error("Error logging in:", error);
+      res.status(500).json({ message: "Server error. Check console for more details." });
+    }
+  },
+  verifyMfa: async (req, res) => {
+    try {
+      const { email, mfaCode } = req.body;
+
+      if (!email || !mfaCode) {
+        return res.status(400).json({ message: "Email and MFA code are required." });
+      }
+
+      const hashedMfaCodeFromFrontend = crypto.createHash("sha256").update(mfaCode).digest("hex");
+
+      const user = await userModel.findOne({
+        email,
+        mfaCode: hashedMfaCodeFromFrontend,
+        mfaCodeExpires: { $gt: Date.now() },
+      }).select('+password +emailVerificationToken +emailVerificationTokenExpires +mfaCode +mfaCodeExpires');
+
+      if (!user) {
+        // Removed detailed debug logs for failed findOne
+        const existingUser = await userModel.findOne({ email });
+         if (!existingUser) {
+          console.log(`Verify MFA: No user found with email: ${email} during MFA attempt.`);
+        } else {
+           if (existingUser.mfaCode !== hashedMfaCodeFromFrontend) {
+             console.log(`Verify MFA: Invalid MFA code for ${email}.`);
+           }
+           if (existingUser.mfaCodeExpires && existingUser.mfaCodeExpires <= Date.now()) {
+             console.log(`Verify MFA: MFA code expired for ${email}.`);
+           }
+        }
+        return res.status(400).json({ message: "Invalid or expired MFA code." });
+      }
+      
+      // console.log(`Verify MFA Success: User ${email} found with matching, non-expired MFA code.`); // Optional: Can be removed
+
+      // Clear MFA code fields
+      user.mfaCode = undefined;
+      user.mfaCodeExpires = undefined;
+      await user.save();
+      console.log(`Verify MFA: MFA successful for ${email}.`);
+
+      // Proceed with generating JWT and sending response (similar to original login success)
+      const currentDateTime = new Date();
+      const expiresAt = new Date(+currentDateTime + 1800000); // 30 minutes, adjust as needed
+
       const token = jwt.sign(
           { user: { userId: user._id, role: user.role } },
           secretKey,
-          {
-            expiresIn: 3 * 60 * 60,
-          }
+          { expiresIn: 3 * 60 * 60 } // Token expiry
       );
 
       const currentUser = {
@@ -200,22 +266,22 @@ const userController = {
         email: user.email,
         role: user.role,
         age: user.age
-     };
-     const isProduction = process.env.NODE_ENV === 'production';
+      };
+      const isProduction = process.env.NODE_ENV === 'production';
 
       return res
-        .cookie("token", token, { // Set the token cookie
+        .cookie("token", token, {
           expires: expiresAt,
           httpOnly: true,
-          secure: isProduction, // Set to true in production (HTTPS)
-          sameSite: isProduction ? "none" : "lax", // "none" for cross-site requests in production
+          secure: isProduction,
+          sameSite: isProduction ? "none" : "lax",
         })
         .status(200)
         .json({ message: "Logged in successfully", currentUser });
 
     } catch (error) {
-      console.error("Error logging in:", error);
-      res.status(500).json({ message: "Server error. Check console for more details." });
+      console.error("Error verifying MFA:", error);
+      res.status(500).json({ message: "Server error during MFA verification." });
     }
   },
   getAllUsers: async (req, res) => {
@@ -469,8 +535,8 @@ const userController = {
 
       if (!user) {
         const userExists = await userModel.findOne({ email });
-        if (userExists) {
-          console.log(`Invalid or expired code attempt for email: ${email}`);
+        if (userExists) { 
+          console.log(`Invalid or expired password reset code attempt for email: ${email}`);
         } else {
           console.log(`Password reset attempt for non-existent email: ${email}`);
         }
@@ -485,6 +551,7 @@ const userController = {
       user.resetPasswordExpires = undefined;
 
       await user.save();
+      console.log(`Password has been reset successfully for email: ${email}.`); // Added success log
 
       return res.status(200).json({ message: "Password has been reset successfully." });
 

@@ -88,6 +88,16 @@ export const verifyEmail = async (email, code) => {
   }
 };
 
+const verifyMfa = async (email, mfaCode) => {
+  try {
+    const response = await apiClientInstance.post('/verify-mfa', { email, mfaCode });
+    return response.data; // Should contain { message, currentUser, token }
+  } catch (error) {
+    console.error('MFA verification service error:', error.response?.data || error.message);
+    throw error.response?.data || new Error('MFA verification failed');
+  }
+};
+
 const useAuthRedirect = () => {
   const navigate = useNavigate();
   return (error) => {
@@ -112,5 +122,6 @@ export default {
   signup,
   updateUserProfilePicture,
   useAuthRedirect,
-  verifyEmail
+  verifyEmail,
+  verifyMfa, // Add verifyMfa
 };
