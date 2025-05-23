@@ -16,6 +16,21 @@ export const getMyEvents = async () => {
 };
 
 /**
+ * Fetches event analytics data for the currently logged-in organizer.
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of event analytics objects.
+ * @throws Will throw an error if the request fails.
+ */
+export const getEventAnalyticsData = async () => {
+    try {
+        const response = await apiClient.get('/users/events/analytics');
+        return response.data; // Axios automatically parses JSON
+    } catch (error) {
+        console.error("Error fetching event analytics:", error.response || error.message);
+        throw error.response || new Error('Fetching event analytics failed due to a network or server error.');
+    }
+};
+
+/**
  * Creates a new event.
  * @param {Object} eventData - The data for the event to be created.
  * @returns {Promise<Object>} A promise that resolves to the created event object.
