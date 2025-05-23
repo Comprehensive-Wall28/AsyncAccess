@@ -36,7 +36,7 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
 
 export default function AppAppBar() {
   const [open, setOpen] = React.useState(false);
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  // const [anchorEl, setAnchorEl] = React.useState(null); // Removed
   const [profileMenuAnchorEl, setProfileMenuAnchorEl] = React.useState(null); // For profile menu
   const [currentUser, setCurrentUser] = React.useState(null);
   const [isLoadingUser, setIsLoadingUser] = React.useState(true);
@@ -63,15 +63,7 @@ export default function AppAppBar() {
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
   };
-
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
+  
   const handleProfileMenuOpen = (event) => {
     setProfileMenuAnchorEl(event.currentTarget);
   };
@@ -92,7 +84,7 @@ export default function AppAppBar() {
     }
   };
 
-  const menuId = 'dashboard-menu';
+  // const menuId = 'dashboard-menu'; // Removed
   const profileMenuId = 'profile-menu';
 
   const getDashboardPath = () => {
@@ -137,46 +129,13 @@ export default function AppAppBar() {
                 variant="text"
                 color="info"
                 size="small"
+                component={Link}
+                to={getDashboardPath()}
                 sx={{ px: 1 }}
-                aria-controls={menuId}
-                aria-haspopup="true"
-                onClick={handleMenuOpen}
               >
-                Dashboards
+                Dashboard
               </Button>
-              <Menu
-                id={menuId}
-                anchorEl={anchorEl}
-                keepMounted
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
-                MenuListProps={{ dense: true }}
-                PaperProps={{
-                  sx: {
-                    display: 'flex',
-                    minWidth: 200,
-                    mt: 1,
-                    '& .MuiMenuItem-root': {
-                      px: 2,
-                      py: 1,
-                      borderRadius: 1,
-                      '&:hover': {
-                        backgroundColor: 'action.hover',
-                      },
-                    },
-                  },
-                }}
-              >
-                <MenuItem onClick={handleMenuClose} component={Link} to="/dashboard">
-                  User Dashboard
-                </MenuItem>
-                <MenuItem onClick={handleMenuClose} component={Link} to="/dashboard-admin">
-                  Admin Dashboard
-                </MenuItem>
-                <MenuItem onClick={handleMenuClose} component={Link} to="/dashboard-organizer">
-                  Organizer Dashboard
-                </MenuItem>
-              </Menu>
+              {/* Menu component removed */}
               <Button variant="text" color="info" size="small" component={Link} to="/events" sx={{ px: 1 }}>
                 Events
               </Button>
