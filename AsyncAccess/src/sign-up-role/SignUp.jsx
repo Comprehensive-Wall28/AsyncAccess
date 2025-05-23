@@ -164,7 +164,7 @@ export default function SignUp(props) {
       const userData = await signup(name, email, password, role);
       console.log('Registration successful:', userData);
       // TODO: Handle successful registration (e.g., show success message, redirect to login)
-      navigate('/login-roled?registered=true'); // Redirect to login page after success
+      navigate('/login?registered=true'); // Redirect to login page after success
     } catch (error) {
       console.error('Registration failed:', error);
       setRegistrationError(error.message || 'Registration failed. Please try again.');

@@ -147,7 +147,23 @@ export default function SignIn(props) {
         localStorage.removeItem('currentUser'); // Clear if not "Remember me" or no currentUser
       }
 
-      navigate('/dashboard', { replace: true });
+      // Role-based redirection
+      let dashboardPath = '/dashboard'; // Default path
+      if (userData.currentUser) {
+        switch (userData.currentUser.role) {
+          case 'Admin':
+            dashboardPath = '/dashboard-admin';
+            break;
+          case 'Organizer':
+            dashboardPath = '/dashboard-organizer';
+            break;
+          // 'User' role or any other role will use the default '/dashboard'
+          default:
+            dashboardPath = '/dashboard';
+            break;
+        }
+      }
+      navigate(dashboardPath, { replace: true });
 
     } catch (error) {
       // The error from authService.js might be an object with a message property

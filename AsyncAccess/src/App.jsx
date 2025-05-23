@@ -12,7 +12,6 @@ import BookingListing from "./booking-page/Checkout.jsx";
 import Unauthorized from './unauthorized/Unauthorized';
 import Unauthenticated from './unauthenticated/Unauthenticated';
 import NotFound from './NotFound.jsx';
-import RoledLogin from './sign-in-role/SignIn.jsx'
 import RoledSignup from './sign-up-role/SignUp.jsx'
 import ForgotPassword from './forgot-password/ForgotPassword.jsx';
 import DashboardAdmin from './dashboard-admin/Dashboard.jsx'
@@ -75,7 +74,7 @@ function App() {
 
                 <Route path="/bookings" element={<BookingListing />} />
                 {/*<Route path="events/:id" element={<EventAnalytics />} />*/}
-                <Route path="/login-roled" element={<RoledLogin />} />
+  
                 <Route path="/signup-roled" element={<RoledSignup />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/dashboard-admin" element={<DashboardAdmin />} />
