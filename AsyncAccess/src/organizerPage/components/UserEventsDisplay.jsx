@@ -66,11 +66,6 @@ export default function UserEventsDisplay({ currentUser }) {
   const [anchorEl, setAnchorEl] = React.useState(null); // Added for menu
   const [eventActionTarget, setEventActionTarget] = React.useState(null); // Added for menu context
 
-  const [openCancelDialog, setOpenCancelDialog] = React.useState(false);
-  const [eventToCancel, setEventToCancel] = React.useState(null); // Renamed from setBookingToCancel
-  const [cancelInProgress, setCancelInProgress] = React.useState(false);
-  const [cancelError, setCancelError] = React.useState('');
-
   // State for Delete Dialog
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
   const [eventToDelete, setEventToDelete] = React.useState(null);
@@ -97,37 +92,6 @@ export default function UserEventsDisplay({ currentUser }) {
   const handleMenuClose = () => { // Added
     setAnchorEl(null);
     setEventActionTarget(null);
-  };
-
-  const handleOpenCancelDialog = (eventData) => { // Modified to take eventData
-    setEventToCancel(eventData);
-    setOpenCancelDialog(true);
-    setCancelError('');
-    handleMenuClose(); // Close menu when dialog opens
-  };
-
-  const handleCloseCancelDialog = () => {
-    if (cancelInProgress) return;
-    setOpenCancelDialog(false);
-    setEventToCancel(null);
-    setCancelError('');
-  };
-
-  const handleConfirmCancel = async () => {
-    if (!eventToCancel) return;
-    setCancelInProgress(true);
-    setCancelError('');
-    try {
-      const result = await eventsService.cancelEventById(eventToCancel._id); 
-      setEvents(prevEvents =>
-          prevEvents.map(e => e._id === eventToCancel._id ? { ...e, status: result.event?.status || 'Cancelled' } : e)
-      );
-      handleCloseCancelDialog();
-    } catch (err) {
-      setCancelError(err.data?.error || err.message || 'Failed to cancel event.');
-    } finally {
-      setCancelInProgress(false);
-    }
   };
 
   // Handlers for Delete Dialog
@@ -350,15 +314,6 @@ export default function UserEventsDisplay({ currentUser }) {
                                 Edit Event
                               </MenuItem>
                               <MenuItem
-                                onClick={() => handleOpenCancelDialog(eventActionTarget)}
-                                disabled={cancelInProgress || (eventActionTarget?.status && eventActionTarget.status.toLowerCase() === 'cancelled')}
-                              >
-                                {cancelInProgress && eventToCancel?._id === eventActionTarget?._id ? (
-                                  <CircularProgress size={20} color="inherit" sx={{mr:1}} />
-                                ) : null}
-                                Cancel Event
-                              </MenuItem>
-                              <MenuItem
                                 onClick={() => handleOpenDeleteDialog(eventActionTarget)}
                                 disabled={deleteInProgress} // Potentially add other conditions e.g. event status
                                 sx={{ color: 'error.main' }}
@@ -410,29 +365,6 @@ export default function UserEventsDisplay({ currentUser }) {
               </Stack>
           )}
         </CardContent>
-        {eventToCancel && (
-            <Dialog
-                open={openCancelDialog}
-                onClose={handleCloseCancelDialog}
-                aria-labelledby="cancel-event-dialog-title"
-                aria-describedby="cancel-event-dialog-description"
-            >
-              <DialogTitle id="cancel-event-dialog-title">Confirm Event Cancellation</DialogTitle>
-              <DialogContent>
-                <DialogContentText id="cancel-event-dialog-description">
-                  Are you sure you want to cancel the event "{eventToCancel.title || 'this event'}"?
-                  This action may affect users who have booked tickets and cannot be undone easily.
-                </DialogContentText>
-                {cancelError && <Alert severity="error" sx={{ mt: 2 }}>{cancelError}</Alert>}
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleCloseCancelDialog} disabled={cancelInProgress}>Back</Button>
-                <Button onClick={handleConfirmCancel} color="error" autoFocus disabled={cancelInProgress}>
-                  {cancelInProgress ? <CircularProgress size={24} color="inherit" /> : "Confirm Cancellation"}
-                </Button>
-              </DialogActions>
-            </Dialog>
-        )}
         {/* Delete Confirmation Dialog */}
         {eventToDelete && (
             <Dialog

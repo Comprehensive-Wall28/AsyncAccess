@@ -18,16 +18,14 @@ import Divider from '@mui/material/Divider'; // Import Divider
 import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded';
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import AddressForm from './components/AddressForm';
-import Info from './components/Info';
-import InfoMobile from './components/InfoMobile';
-import PaymentForm from './components/PaymentForm';
+import Info from './components/Info'; // Add this line
+import InfoMobile from './components/InfoMobile'; // Add this line
 import Review from './components/Review';
-import SitemarkIcon from './components/SitemarkIcon';
+import SitemarkIcon from '../home-page/components/AsyncAccessIcon';
 import AppTheme from '../shared-theme/AppTheme';
 import ColorModeIconDropdown from '../shared-theme/ColorModeIconDropdown';
 
-const steps = ['Shipping address', 'Payment details', 'Review your order'];
+const steps = ['Review your order'];
 
 // Define your API base URL (ensure this is correctly set in your .env file)
 const BACKEND_API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -42,7 +40,6 @@ function getStepContent(
     step,
     productName,
     productPrice,
-    shippingPrice,
     totalPriceForReviewDisplay,
     numberOfTickets,
     onIncreaseTickets,
@@ -50,16 +47,11 @@ function getStepContent(
     availableTickets
 ) {
     switch (step) {
-        case 0:
-            return <AddressForm />;
-        case 1:
-            return <PaymentForm />;
-        case 2:
+        case 0: // Was case 2, now the only step
             return (
                 <Review
                     productName={productName}
                     productPrice={productPrice}
-                    shippingPrice={shippingPrice}
                     totalPriceForReviewDisplay={totalPriceForReviewDisplay}
                     numberOfTickets={numberOfTickets}
                     onIncreaseTickets={onIncreaseTickets}
@@ -94,13 +86,18 @@ export default function Checkout(props) {
     const [bookingError, setBookingError] = React.useState(null); // For API errors
     const [isPlacingOrder, setIsPlacingOrder] = React.useState(false); // For loading state
 
+    // Auth state
+    const [currentUser, setCurrentUser] = React.useState(null);
+    const [isLoadingAuth, setIsLoadingAuth] = React.useState(true);
+    const [authError, setAuthError] = React.useState('');
+
+
     const baseTicketPrice = Number(passedTicketPrice) || 0;
     const eventName = passedEventTitle || "Event Ticket";
-    const shippingCost = 9.99;
 
 
     const subtotalPrice = baseTicketPrice * numberOfTickets;
-    const totalPriceForCheckout = subtotalPrice + shippingCost;
+    const totalPriceForCheckout = subtotalPrice; // Removed shippingCost from this calculation
 
 
     const handleIncreaseTickets = () => {
@@ -119,7 +116,8 @@ export default function Checkout(props) {
     const handleNext = async () => { // Make handleNext async
         setBookingError(null); // Clear previous errors
 
-        if (activeStep === steps.length - 1) { // "Place order" step
+        if (activeStep === steps.length - 1) // "Place order" step
+        {
             if (!passedEventId || numberOfTickets <= 0) {
                 setBookingError("Cannot place order. Event details are missing or ticket quantity is invalid.");
                 return;
@@ -158,6 +156,53 @@ export default function Checkout(props) {
     };
 
     React.useEffect(() => {
+        const fetchUserProfile = async () => {
+            setIsLoadingAuth(true);
+            setAuthError('');
+            try {
+                const response = await apiClient.get('/users/profile');
+                if (response.data?.role !== 'User') {
+                    // Redirect if not 'User' role
+                    navigate('/unauthorized', { replace: true, state: { message: 'Access denied. Only users can proceed to checkout.' } });
+                    setCurrentUser(null); // Ensure currentUser is null before redirecting
+                    setIsLoadingAuth(false); // Stop loading as we are redirecting
+                    return; // Exit early
+                } else {
+                    setCurrentUser(response.data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch user profile for checkout:", err);
+                if (err.response) {
+                    if (err.response.status === 401 || err.response.status === 403) {
+                        // Redirect to unauthenticated page
+                        navigate('/unauthenticated', { replace: true, state: { message: 'Please log in to proceed to checkout.' } });
+                        // Clear any stored user data if applicable
+                        // localStorage.removeItem('currentUser'); 
+                        setCurrentUser(null); // Ensure currentUser is null
+                        setIsLoadingAuth(false); // Stop loading
+                        return; // Exit early
+                    } else {
+                        setAuthError(err.response.data?.message || `Server error: ${err.response.status}`);
+                    }
+                } else if (err.request) {
+                    setAuthError('Network error. Please check your connection.');
+                } else {
+                    setAuthError(err.message || 'An unexpected error occurred while verifying your access.');
+                }
+                setCurrentUser(null);
+            } finally {
+                // Only set loading to false if not already set by an early return
+                if (isLoadingAuth) { // Check if still true, as it might have been set to false in catch blocks
+                    setIsLoadingAuth(false);
+                }
+            }
+        };
+
+        fetchUserProfile();
+    }, [navigate]); // Removed isLoadingAuth from dependency array as it's set inside
+
+
+    React.useEffect(() => {
         if (numberOfTickets > actualAvailableTickets && actualAvailableTickets >= 1) {
             setNumberOfTickets(actualAvailableTickets);
         } else if (actualAvailableTickets === 0 && numberOfTickets > 0) {
@@ -166,6 +211,54 @@ export default function Checkout(props) {
             setNumberOfTickets(1); // Reset to 1 if tickets become available
         }
     }, [actualAvailableTickets, numberOfTickets, activeStep]);
+
+    if (isLoadingAuth) {
+        return (
+            <AppTheme {...props}>
+                <CssBaseline enableColorScheme />
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                    <CircularProgress />
+                </Box>
+            </AppTheme>
+        );
+    }
+
+    // This block will now primarily handle errors that don't cause a redirect (e.g., network errors, other server errors)
+    if (authError && !currentUser) { 
+        return (
+            <AppTheme {...props}>
+                <CssBaseline enableColorScheme />
+                <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', p: 3 }}>
+                    <Alert severity="error" sx={{ mb: 2 }}>{authError}</Alert>
+                    <Button variant="outlined" onClick={() => navigate('/events')}>
+                        Back to Events
+                    </Button>
+                </Box>
+            </AppTheme>
+        );
+    }
+    
+    // If still loading or no current user after auth checks (and no redirect happened),
+    // this might indicate a state where redirection should have occurred or an unhandled case.
+    // For robustness, we can keep a generic message or redirect.
+    // Given the redirects above, this condition should be less likely to be hit for auth/authz issues.
+    if (!currentUser) { 
+        // This case should ideally not be reached if redirects are working for auth/authz.
+        // If it is reached, it implies an issue not covered by redirects or a transient state.
+        // Consider redirecting to a generic error page or login if this state is problematic.
+        // For now, keeping a simple message, but this might need refinement based on observed behavior.
+        return (
+            <AppTheme {...props}>
+                 <CssBaseline enableColorScheme />
+                 <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', p:3 }}>
+                     <Typography>Unable to verify access. Please try again later.</Typography>
+                     <Button variant="outlined" onClick={() => navigate('/events')} sx={{mt: 2}}>
+                        Back to Events
+                    </Button>
+                 </Box>
+            </AppTheme>
+        );
+    }
 
 
     return (
@@ -229,11 +322,7 @@ export default function Checkout(props) {
                             You are booking {numberOfTickets} ticket(s) for the event: <strong>{eventName}</strong>.
                         </Typography>
                         <Info
-                            totalPrice={
-                                activeStep >= 2
-                                    ? `$${totalPriceForCheckout.toFixed(2)}`
-                                    : `$${subtotalPrice.toFixed(2)}`
-                            }
+                            totalPrice={`$${totalPriceForCheckout.toFixed(2)}`} // Always show total price
                         />
                     </Box>
                 </Grid>
@@ -309,17 +398,11 @@ export default function Checkout(props) {
                                     Selected products
                                 </Typography>
                                 <Typography variant="body1">
-                                    {activeStep >= 2
-                                        ? `$${totalPriceForCheckout.toFixed(2)}`
-                                        : `$${subtotalPrice.toFixed(2)}`}
+                                    {`$${totalPriceForCheckout.toFixed(2)}`} {/* Always show total price */}
                                 </Typography>
                             </div>
                             <InfoMobile
-                                totalPrice={
-                                    activeStep >= 2
-                                        ? `$${totalPriceForCheckout.toFixed(2)}`
-                                        : `$${subtotalPrice.toFixed(2)}`
-                                }
+                                totalPrice={`$${totalPriceForCheckout.toFixed(2)}`} // Always show total price
                             />
                         </CardContent>
                     </Card>
@@ -367,9 +450,7 @@ export default function Checkout(props) {
                                 <Typography variant="h1">📦</Typography>
                                 <Typography variant="h5">Thank you for your order!</Typography>
                                 <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-                                    Your order number is
-                                    <strong>&nbsp;#140396</strong>. We have emailed your order
-                                    confirmation and will update you once its shipped.
+                                   Check your profile for your booking details.
                                 </Typography>
                                 <Button
                                     variant="contained"
@@ -385,7 +466,6 @@ export default function Checkout(props) {
                                     activeStep,
                                     eventName,
                                     baseTicketPrice,
-                                    shippingCost,
                                     totalPriceForCheckout,
                                     numberOfTickets,
                                     handleIncreaseTickets,

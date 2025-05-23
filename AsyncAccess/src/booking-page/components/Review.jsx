@@ -22,7 +22,6 @@ const payments = [
 export default function Review({
                                  productName = "Product", // This is the eventName
                                  productPrice = 0,
-                                 shippingPrice = 0,
                                  totalPriceForReviewDisplay = 0,
                                  numberOfTickets = 1,
                                  onIncreaseTickets,
@@ -76,13 +75,6 @@ export default function Review({
             </Typography>
           </ListItem>
 
-          {/* Shipping ListItem re-added */}
-          <ListItem sx={{ py: 1, px: 0 }}>
-            <ListItemText primary="Shipping" secondary="Plus taxes" />
-            <Typography variant="body2">${shippingPrice.toFixed(2)}</Typography>
-          </ListItem>
-
-
           <ListItem sx={{ py: 1, px: 0 }}>
             <ListItemText primary="Total" />
             <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
@@ -97,37 +89,6 @@ export default function Review({
             spacing={2}
             sx={{ my: 2 }}
         >
-          <div>
-            <Typography variant="subtitle2" gutterBottom>
-              Shipment details
-            </Typography>
-            <Typography gutterBottom>John Smith</Typography>
-            <Typography gutterBottom sx={{ color: 'text.secondary' }}>
-              {addresses.join(', ')}
-            </Typography>
-          </div>
-          <div>
-            <Typography variant="subtitle2" gutterBottom>
-              Payment details
-            </Typography>
-            <Grid container>
-              {payments.map((payment) => (
-                  <React.Fragment key={payment.name}>
-                    <Stack
-                        direction="row"
-                        spacing={1}
-                        useFlexGap
-                        sx={{ width: '100%', mb: 1 }}
-                    >
-                      <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-                        {payment.name}
-                      </Typography>
-                      <Typography variant="body2">{payment.detail}</Typography>
-                    </Stack>
-                  </React.Fragment>
-              ))}
-            </Grid>
-          </div>
         </Stack>
       </Stack>
   );
