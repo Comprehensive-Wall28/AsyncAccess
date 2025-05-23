@@ -13,6 +13,8 @@ import IconButton from '@mui/material/IconButton';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl'; // Added import
+import FormLabel from '@mui/material/FormLabel'; // Added import
 import { apiClient } from '../../services/authService'; // Adjust path if needed
 import { deleteUserById } from '../../services/userService'; // <-- Add this import
 
@@ -60,16 +62,21 @@ function UsersList({ users, onUserDeleted, onRoleChanged }) {
   return (
     <React.Fragment>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-        <TextField
-          label="Search users"
-          variant="outlined"
-          size="small"
-          value={search}
-          onChange={e => {
-            setSearch(e.target.value);
-            setPage(0);
-          }}
-        />
+        <FormControl variant="outlined" size="small">
+          <FormLabel htmlFor="search-users" sx={{ mb: 0.5, fontSize: '0.875rem' }}>Search users</FormLabel>
+          <TextField
+            id="search-users"
+            variant="outlined"
+            size="small"
+            placeholder="Filter by name or email..." // Placeholder can be more descriptive
+            value={search}
+            onChange={e => {
+              setSearch(e.target.value);
+              setPage(0);
+            }}
+            sx={{ minWidth: '25ch' }} // Ensure it has some width
+          />
+        </FormControl>
       </Box>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="users table">

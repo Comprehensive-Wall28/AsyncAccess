@@ -12,7 +12,7 @@ import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
 
 const mainListItems = [
   { text: 'Home', icon: <HomeRoundedIcon />, action: 'home' },
-  { text: 'Information', icon: <SettingsRoundedIcon />, action: 'user-profile' }, // Renamed and added action
+  { text: 'User Profile', icon: <SettingsRoundedIcon />, action: 'user-profile' }, // Renamed from "Information"
   { text: 'About', icon: <InfoRoundedIcon />, action: 'about' },
 ];
 

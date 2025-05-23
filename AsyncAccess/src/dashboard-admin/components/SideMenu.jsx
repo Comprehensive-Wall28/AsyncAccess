@@ -17,6 +17,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import PersonIcon from '@mui/icons-material/Person';
 import InfoIcon from '@mui/icons-material/Info'; // Or a more appropriate icon like EventIcon if available
 import EventIcon from '@mui/icons-material/Event'; // Assuming EventIcon is suitable and imported
+import GroupIcon from '@mui/icons-material/Group'; // Import GroupIcon for Users
 
 // Same as in UserProfileDisplay.jsx - ensure this is consistent or use a shared config
 // Use the root URL of your backend server where static files are hosted.
@@ -57,6 +58,7 @@ export default function SideMenu({ currentUser, onMenuItemClick, selectedItem })
     { text: 'Home', icon: <HomeIcon />, action: 'home' },
     { text: 'User Profile', icon: <PersonIcon />, action: 'user-profile' },
     { text: 'Event Management', icon: <EventIcon />, action: 'about' }, 
+    { text: 'Users', icon: <GroupIcon />, action: 'users' }, // Added Users item
   ];
 
   return (
@@ -89,14 +91,8 @@ export default function SideMenu({ currentUser, onMenuItemClick, selectedItem })
           flexDirection: 'column',
         }}
       >
-        <MenuContent onMenuItemClick={onMenuItemClick} selectedItem={selectedItem} />
-        <ListItem
-          button
-          selected={selectedItem === 'users'}
-          onClick={() => onMenuItemClick('users')}
-        >
-          <ListItemText primary="Users" />
-        </ListItem>
+        <MenuContent menuItems={menuItems} onMenuItemClick={onMenuItemClick} selectedItem={selectedItem} />
+        {/* Removed standalone Users ListItem */}
       </Box>
       <Stack
         direction="row"

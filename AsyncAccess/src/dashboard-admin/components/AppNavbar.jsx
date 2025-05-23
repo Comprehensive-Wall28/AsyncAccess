@@ -11,7 +11,6 @@ import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import SideMenuMobile from './SideMenuMobile';
 import MenuButton from './MenuButton';
 import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
-import Button from '@mui/material/Button';
 
 const Toolbar = styled(MuiToolbar)({
   width: '100%',
@@ -69,15 +68,7 @@ export default function AppNavbar({ currentUser, onMenuItemClick, selectedItem }
               Dashboard
             </Typography>
           </Stack>
-          {/* Add Users button here */}
-          <Button
-            color={selectedItem === 'users' ? 'primary' : 'inherit'}
-            variant={selectedItem === 'users' ? 'contained' : 'text'}
-            onClick={() => onMenuItemClick && onMenuItemClick('users')}
-            sx={{ display: { xs: 'inline-flex', md: 'none' } }}
-          >
-            Users
-          </Button>
+          {/* Remove Users button here - it's now part of SideMenuMobile's MenuContent */}
           <ColorModeIconDropdown />
           <MenuButton aria-label="menu" onClick={toggleDrawer(true)}>
             <MenuRoundedIcon />

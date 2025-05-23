@@ -16,6 +16,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import HomeIcon from '@mui/icons-material/Home';
 import PersonIcon from '@mui/icons-material/Person';
 import EventIcon from '@mui/icons-material/Event';
+import GroupIcon from '@mui/icons-material/Group'; // Import GroupIcon for Users
 
 const BACKEND_STATIC_BASE_URL = import.meta.env.VITE_BACKEND_SERVER_URL;
 
@@ -28,6 +29,7 @@ function SideMenuMobile({ open, toggleDrawer, currentUser, onMenuItemClick, sele
     { text: 'Home', icon: <HomeIcon />, action: 'home' },
     { text: 'User Profile', icon: <PersonIcon />, action: 'user-profile' },
     { text: 'Event Management', icon: <EventIcon />, action: 'about' },
+    { text: 'Users', icon: <GroupIcon />, action: 'users' }, // Added Users item
   ];
 
   return (
