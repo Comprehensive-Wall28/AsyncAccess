@@ -95,6 +95,20 @@ export default function AppAppBar() {
   const menuId = 'dashboard-menu';
   const profileMenuId = 'profile-menu';
 
+  const getDashboardPath = () => {
+    if (currentUser) {
+      switch (currentUser.role) {
+        case 'Admin':
+          return '/dashboard-admin';
+        case 'Organizer':
+          return '/dashboard-organizer';
+        default:
+          return '/dashboard';
+      }
+    }
+    return '/dashboard'; // Default for not logged in, or if role is not Admin/Organizer
+  };
+
   return (
     <AppBar
       position="fixed"
@@ -208,7 +222,7 @@ export default function AppAppBar() {
                     },
                   }}
                 >
-                  <MenuItem onClick={() => { handleProfileMenuClose(); navigate('/dashboard'); }}>
+                  <MenuItem onClick={() => { handleProfileMenuClose(); navigate(getDashboardPath()); }}>
                     Dashboard
                   </MenuItem>
                   <MenuItem onClick={handleLogout}>
@@ -257,7 +271,7 @@ export default function AppAppBar() {
 
                 
                 {/* <MenuItem>Events</MenuItem> */}
-                <Button color="primary" variant="outlined" fullWidth component={Link} to="/dashboard">
+                <Button color="primary" variant="outlined" fullWidth component={Link} to={getDashboardPath()}>
                   Your Dashboard
                 </Button>
                 {/* <MenuItem>Pricing</MenuItem>
