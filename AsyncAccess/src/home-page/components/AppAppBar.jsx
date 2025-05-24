@@ -18,6 +18,8 @@ import { Link, useNavigate } from 'react-router-dom'; // Import Link and useNavi
 import Avatar from '@mui/material/Avatar'; // Import Avatar
 import { apiClient, logout as logoutUser } from '../../services/authService'; // Import apiClient and logout
 
+const BACKEND_STATIC_BASE_URL = import.meta.env.VITE_BACKEND_SERVER_URL; // Added
+
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -155,7 +157,10 @@ export default function AppAppBar() {
                 <IconButton onClick={handleProfileMenuOpen} size="small" sx={{ p: 0 }}>
                   <Avatar 
                     alt={currentUser.name || 'User'} 
-                    src={currentUser.profilePictureUrl || undefined} // Use undefined if no URL to show default/initials
+                    src={currentUser.profilePicture
+                      ? (currentUser.profilePicture.startsWith('http') ? currentUser.profilePicture : `${BACKEND_STATIC_BASE_URL}${currentUser.profilePicture}`)
+                      : undefined
+                    }
                     sx={{ width: 32, height: 32 }}
                   />
                 </IconButton>
