@@ -9,21 +9,24 @@ import Stack from '@mui/material/Stack';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
+import GroupIcon from '@mui/icons-material/Group'; // Import GroupIcon for Users
 
-const mainListItems = [
+// Default menu items if not provided by props, can be kept for reference or removed if always provided
+const defaultMainListItems = [
   { text: 'Home', icon: <HomeRoundedIcon />, action: 'home' },
-  { text: 'Information', icon: <SettingsRoundedIcon />, action: 'user-profile' }, // Renamed and added action
+  { text: 'User Profile', icon: <SettingsRoundedIcon />, action: 'user-profile' },
   { text: 'Event Management', icon: <InfoRoundedIcon />, action: 'about' },
+  // Note: 'Users' item will typically be added by the parent component (SideMenu, SideMenuMobile)
 ];
 
 const secondaryListItems = [
 ];
 
-export default function MenuContent({ onMenuItemClick, selectedItem }) {
+export default function MenuContent({ menuItems = defaultMainListItems, onMenuItemClick, selectedItem }) {
   return (
     <Stack sx={{ flexGrow: 1, p: 1, justifyContent: 'space-between' }}>
       <List dense>
-        {mainListItems.map((item) => ( // Changed key from index
+        {menuItems.map((item) => ( // Use the menuItems prop
           <ListItem key={item.action} disablePadding sx={{ display: 'block' }}>
             <ListItemButton 
               selected={selectedItem === item.action}

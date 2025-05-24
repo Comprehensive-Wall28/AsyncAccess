@@ -160,13 +160,12 @@ export default function SignUp(props) {
     setLoading(true);
     try {
       // Call the signup service
-      // Assuming role is 'user' for standard signups, adjust if needed
       const userData = await signup(name, email, password, role);
-      console.log('Registration successful:', userData);
-      // TODO: Handle successful registration (e.g., show success message, redirect to login)
-      navigate('/login?registered=true'); // Redirect to login page after success
+      // Minimal log, navigation implies success for verification step
+      // console.log('Roled registration successful, verification needed:', userData); // Removed verbose log
+      navigate('/verify-email', { state: { email: email } });
     } catch (error) {
-      console.error('Registration failed:', error);
+      console.error('Roled registration failed:', error);
       setRegistrationError(error.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);

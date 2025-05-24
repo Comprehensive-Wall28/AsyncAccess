@@ -75,7 +75,7 @@ export default function SignIn(props) {
   const [emailErrorMessage, setEmailErrorMessage] = React.useState(''); // Added for consistency
   const [passwordError, setPasswordError] = React.useState('');
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState(''); // Added for consistency
-  const [loginError, setLoginError] = React.useState('');
+  const [loginErrorText, setLoginErrorText] = React.useState(''); // For general login errors
   const [loading, setLoading] = React.useState(false);
   const [showForgotPassword, setShowForgotPassword] = React.useState(false);
   const [rememberMe, setRememberMe] = React.useState(false); // State for "Remember me"
@@ -130,7 +130,7 @@ export default function SignIn(props) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     // Clear previous errors
-    setLoginError('');
+    setLoginErrorText('');
 
     if (!validateInputs()) {
       return;
@@ -139,8 +139,12 @@ export default function SignIn(props) {
     setLoading(true);
     try {
       const userData = await authService.login(email, password);
-      console.log('Login successful:', userData); // userData contains { message, currentUser }
 
+      if (userData.mfaRequired && userData.email) {
+        navigate('/mfa-verify', { state: { email: userData.email }, replace: true });
+        return; 
+      }
+      
       if (rememberMe && userData.currentUser) {
         localStorage.setItem('currentUser', JSON.stringify(userData.currentUser));
       } else {
@@ -165,9 +169,25 @@ export default function SignIn(props) {
       }
       navigate(dashboardPath, { replace: true });
 
-    } catch (error) {
-      // The error from authService.js might be an object with a message property
-      setLoginError(error.message || (typeof error === 'string' ? error : 'Login failed. Please check your credentials or try again later.'));
+    } catch (error) { // 'error' here is likely error.response.data from authService
+      if (error.emailNotVerified) { // Check directly on the error object
+        // Directly navigate to verify-email page, passing the error message and email
+        navigate('/verify-email', { 
+          state: { 
+            email: error.email || email, // Use email from error object if available
+            initialMessage: error.message || 'Your email is not verified. A new verification code has been sent.' 
+          }, 
+          replace: true 
+        });
+      } else if (error.mfaRequired) { // Check directly on the error object
+        navigate('/mfa-verify', { 
+            state: { email: error.email || email }, // Use email from error object if available
+            replace: true 
+        });
+      } else {
+        // If error is an object with a message, use it, otherwise use a generic message
+        setLoginErrorText(error.message || (typeof error === 'string' ? error : 'Login failed. Please check your credentials or try again later.'));
+      }
     } finally {
       setLoading(false);
     }
@@ -250,6 +270,8 @@ export default function SignIn(props) {
             >
               {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign in'}
             </Button>
+            {loginErrorText && <Alert severity="error" sx={{ mt: 1 }}>{loginErrorText}</Alert>}
+            {/* The dedicated button for verify email is removed as navigation is automatic */}
             <Divider>
               <Typography sx={{ color: 'text.secondary' }}>or</Typography>
           </Divider>
@@ -273,16 +295,8 @@ export default function SignIn(props) {
             >
               Forgot your password?
             </Link>
-               <Link
-              type="button"
-              component={route} to="/login-roled"
-              variant="body2"
-              sx={{ alignSelf: 'center' }}
-            >
-              Login as Organizer / Admin
-            </Link>
           </Box>
-          {loginError && <Alert severity="error" sx={{ mt: 2 }}>{loginError}</Alert>}
+          {/* {loginError && <Alert severity="error" sx={{ mt: 2 }}>{loginError}</Alert>} */} {/* Removed from here, moved up */}
           </Box> {/* This closes the <Box component="form"> */}
         </Card>
       </SignInContainer>

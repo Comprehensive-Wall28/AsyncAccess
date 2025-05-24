@@ -162,44 +162,49 @@ export default function Checkout(props) {
             try {
                 const response = await apiClient.get('/users/profile');
                 if (response.data?.role !== 'User') {
-                    // Redirect if not 'User' role
                     navigate('/unauthorized', { replace: true, state: { message: 'Access denied. Only users can proceed to checkout.' } });
-                    setCurrentUser(null); // Ensure currentUser is null before redirecting
-                    setIsLoadingAuth(false); // Stop loading as we are redirecting
-                    return; // Exit early
+                    setCurrentUser(null); 
+                    setIsLoadingAuth(false); 
+                    return; 
                 } else {
                     setCurrentUser(response.data);
                 }
             } catch (err) {
                 console.error("Failed to fetch user profile for checkout:", err);
+
+                const errorMessage = err.response?.data?.message || err.message || 'An unexpected error occurred.';
                 if (err.response) {
-                    if (err.response.status === 401 || err.response.status === 403) {
-                        // Redirect to unauthenticated page
-                        navigate('/unauthenticated', { replace: true, state: { message: 'Please log in to proceed to checkout.' } });
-                        // Clear any stored user data if applicable
-                        // localStorage.removeItem('currentUser'); 
-                        setCurrentUser(null); // Ensure currentUser is null
-                        setIsLoadingAuth(false); // Stop loading
-                        return; // Exit early
-                    } else {
-                        setAuthError(err.response.data?.message || `Server error: ${err.response.status}`);
+                    if (err.response.status === 401) {
+                        console.warn(`Received 401 from API. Redirecting to /unauthenticated`);
+                        navigate('/unauthenticated', { replace: true });
+                        return;
                     }
-                } else if (err.request) {
-                    setAuthError('Network error. Please check your connection.');
-                } else {
-                    setAuthError(err.message || 'An unexpected error occurred while verifying your access.');
+                    if (err.response.status === 403) {
+                        console.warn(`Received 403 from API. Redirecting to /unauthorized`);
+                        navigate('/unauthorized', { replace: true });
+                        return;
+                    }
+                    if (errorMessage.includes("User not found") || (err.response.status === 404 && errorMessage.includes("profile"))) {
+                        console.warn(`Received error "${errorMessage}". Redirecting to /notfound`);
+                        navigate('/notfound', { replace: true });
+                        return;
+                    }
                 }
+                
+                setAuthError(errorMessage);
                 setCurrentUser(null);
             } finally {
-                // Only set loading to false if not already set by an early return
-                if (isLoadingAuth) { // Check if still true, as it might have been set to false in catch blocks
+                // Only set loading to false if not already set by an early return or if handleAuthError caused a redirect (which might unmount)
+                // A more robust way might be to check if the component is still mounted.
+                // For simplicity, we rely on the fact that if a redirect happens, setIsLoadingAuth(false) might be for an unmounted component.
+                if (isLoadingAuth) { 
                     setIsLoadingAuth(false);
                 }
             }
         };
 
         fetchUserProfile();
-    }, [navigate]); // Removed isLoadingAuth from dependency array as it's set inside
+    }, [navigate]); // Removed handleAuthError from dependency array
 
 
     React.useEffect(() => {

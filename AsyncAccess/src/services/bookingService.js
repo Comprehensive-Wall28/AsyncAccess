@@ -1,5 +1,4 @@
 import { apiClient } from './authService'; // Assuming apiClient is exported from authService.js
-import authService from './authService';
 /**
  * Fetches the bookings for the currently logged-in user.
  * The backend endpoint should handle user identification via session/token.
@@ -7,21 +6,21 @@ import authService from './authService';
  * @throws Will throw an error if the request fails, including the response object for handling.
  */
  export const getMyBookings = async () => {
-    const handleAuthError = authService.useAuthRedirect();
     try {
         const response = await apiClient.get('/users/bookings');
         return response.data; // Axios automatically parses JSON
     } catch (error) {
-        throw error.response || new Error('Fetching bookings failed due to a network or server error.');
+        // Re-throw error for component to handle, including potential redirects
+        throw error; 
     }
 };
 
 export const cancelBookingById = async (bookingId) => {    
-    const handleAuthError = authService.useAuthRedirect();
     try {
         const response = await apiClient.delete(`/bookings/${bookingId}`);
         return response.data; // Expected: { message: '...', booking: updatedBooking }
     } catch (error) {
-        throw handleAuthError(error);
+        // Re-throw error for component to handle, including potential redirects
+        throw error; 
     }
 };

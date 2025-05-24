@@ -2,15 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Box, Paper, Typography, List, ListItem, ListItemText, Avatar,
   IconButton, Button, CircularProgress, Alert, Divider, Stack, Input,
-  OutlinedInput, InputAdornment, FormControl // Added OutlinedInput, InputAdornment, FormControl
+  OutlinedInput, InputAdornment, FormControl,
+  Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle // Added Dialog components
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import PhotoCamera from '@mui/icons-material/PhotoCamera';
-import { getCurrentUserProfile, updateUserProfile } from '../../services/userService';
-import authService from '../../services/authService';  // Import authService
+import { getCurrentUserProfile, updateUserProfile, deleteUserById, logoutUser } from '../../services/userService'; // Added deleteUserById, logoutUser
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const VITE_BACKEND_SERVER_URL = import.meta.env.VITE_BACKEND_SERVER_URL;
 
@@ -26,7 +26,34 @@ export default function UserProfile() {
   const [profilePictureFile, setProfilePictureFile] = useState(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState(null);
   const fileInputRef = useRef(null);
-  const handleAuthError = authService.useAuthRedirect(); // Use the hook here
+  const navigate = useNavigate(); // Initialize useNavigate
+
+  // State for delete account dialog
+  const [openDeleteAccountDialog, setOpenDeleteAccountDialog] = useState(false);
+  const [deleteAccountLoading, setDeleteAccountLoading] = useState(false);
+  const [deleteAccountError, setDeleteAccountError] = useState('');
+
+  const handleAuthNavigation = (err) => {
+    const errorMessage = err.response?.data?.message || err.message || 'An unexpected error occurred.';
+    if (err.response) {
+      if (err.response.status === 401) {
+        console.warn(`Received 401 from API. Redirecting to /unauthenticated`);
+        navigate('/unauthenticated', { replace: true });
+        return true;
+      }
+      if (err.response.status === 403) {
+        console.warn(`Received 403 from API. Redirecting to /unauthorized`);
+        navigate('/unauthorized', { replace: true });
+        return true;
+      }
+      if (errorMessage.includes("User not found") || (err.response.status === 404 && errorMessage.includes("profile"))) {
+        console.warn(`Received error "${errorMessage}". Redirecting to /notfound`);
+        navigate('/notfound', { replace: true });
+        return true;
+      }
+    }
+    return false;
+  };
 
   const fetchUser = async () => {
     setIsLoading(true);
@@ -35,8 +62,8 @@ export default function UserProfile() {
       setUser(userData);
       setError('');
     } catch (err) {
+      if (handleAuthNavigation(err)) return;
       setError(err.message || 'Failed to fetch user data.');
-      handleAuthError(err); // Call the hook to handle potential auth errors
     } finally {
       setIsLoading(false);
     }
@@ -44,7 +71,7 @@ export default function UserProfile() {
 
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, []); // navigate is stable, fetchUser is memoized by useEffect
 
   const handleEdit = (field, currentValue) => {
     setEditingField(field);
@@ -69,8 +96,8 @@ export default function UserProfile() {
       setSuccessMessage(response.msg || 'Profile updated successfully!');
       setEditingField(null);
     } catch (err) {
+      if (handleAuthNavigation(err)) return;
       setError(err.message || `Failed to update ${field}.`);
-      handleAuthError(err);
     } finally {
       setIsLoading(false);
     }
@@ -98,7 +125,8 @@ export default function UserProfile() {
       setProfilePictureFile(null);
       setProfilePicturePreview(null);
     } catch (err) {
-      setError(err.message || 'Failed to upload profile picture.');      handleAuthError(err);
+      if (handleAuthNavigation(err)) return;
+      setError(err.message || 'Failed to upload profile picture.');
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -116,12 +144,43 @@ export default function UserProfile() {
       setProfilePictureFile(null);
       setProfilePicturePreview(null);
     } catch (err) {
-      setError(err.message || 'Failed to remove profile picture.');      handleAuthError(err);
+      if (handleAuthNavigation(err)) return;
+      setError(err.message || 'Failed to remove profile picture.');
       console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleOpenDeleteAccountDialog = () => {
+    setDeleteAccountError('');
+    setOpenDeleteAccountDialog(true);
+  };
+
+  const handleCloseDeleteAccountDialog = () => {
+    setOpenDeleteAccountDialog(false);
+  };
+
+  const handleConfirmDeleteAccount = async () => {
+    if (!user || !user._id) {
+      setDeleteAccountError('User information is not available.');
+      return;
+    }
+    setDeleteAccountLoading(true);
+    setDeleteAccountError('');
+    try {
+      await deleteUserById(user._id);
+      // Assuming logoutUser handles cookie/session invalidation (ideally backend)
+      await logoutUser(); 
+      navigate('/login', { replace: true });
+      // No need to set loading to false here as we are navigating away
+    } catch (err) {
+      if (handleAuthNavigation(err)) return; // Use existing auth navigation for 401/403
+      setDeleteAccountError(err.response?.data?.message || err.message || 'Failed to delete account. Please try again.');
+      setDeleteAccountLoading(false);
+    }
+  };
+
 
   if (isLoading && !user) { // Show loading only on initial load
     return <CircularProgress />;
@@ -265,6 +324,48 @@ export default function UserProfile() {
           <ListItemText primary="Role" secondary={user.role} />
         </ListItem>
       </List>
+
+      <Divider sx={{ my: 3 }} />
+
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+        <Button
+          variant="contained"
+          color="error"
+          onClick={handleOpenDeleteAccountDialog}
+          disabled={isLoading || deleteAccountLoading}
+        >
+          Delete Account
+        </Button>
+      </Box>
+
+      {/* Delete Account Confirmation Dialog */}
+      <Dialog
+        open={openDeleteAccountDialog}
+        onClose={handleCloseDeleteAccountDialog}
+        aria-labelledby="delete-account-dialog-title"
+        aria-describedby="delete-account-dialog-description"
+      >
+        <DialogTitle id="delete-account-dialog-title">{"Confirm Account Deletion"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-account-dialog-description">
+            Are you sure you want to delete your account? This action is permanent and cannot be undone.
+            All your data will be removed.
+          </DialogContentText>
+          {deleteAccountError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {deleteAccountError}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteAccountDialog} disabled={deleteAccountLoading}>
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDeleteAccount} color="error" autoFocus disabled={deleteAccountLoading}>
+            {deleteAccountLoading ? <CircularProgress size={24} color="inherit" /> : "Delete My Account"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 }

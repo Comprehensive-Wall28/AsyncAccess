@@ -72,6 +72,6 @@ router.get('/', authorizationMiddleware([ROLES.ADMIN]), userController.getAllUse
 router.get('/:id', authorizationMiddleware([ROLES.ADMIN]), userController.getUser)
 router.put("/:id", authorizationMiddleware([ROLES.ADMIN]), userController.updateUserById)
 
-router.delete('/:id', authorizationMiddleware([ROLES.ADMIN]), userController.deleteUser)
+router.delete('/:id', authorizationMiddleware([ROLES.ADMIN , ROLES.ORGANIZER , ROLES.USER]), userController.deleteUser)
 
 module.exports = router;

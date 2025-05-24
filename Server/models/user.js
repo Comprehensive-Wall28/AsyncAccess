@@ -29,6 +29,26 @@ const userSchema = new mongoose.Schema({
         enum: ['User', 'Organizer', 'Admin'],
         default: 'User',
     },
+    isEmailVerified: { // New field
+        type: Boolean,
+        default: false,
+    },
+    emailVerificationToken: { // New field
+        type: String,
+        select: false, // Typically, tokens should not be selected by default
+    },
+    emailVerificationTokenExpires: { // New field
+        type: Date,
+        select: false, // Typically, expiry dates for tokens should not be selected by default
+    },
+    mfaCode: {
+        type: String,
+        select: false,
+    },
+    mfaCodeExpires: {
+        type: Date,
+        select: false,
+    },
     resetPasswordToken: {
         type: String,
         select: false, 
@@ -46,6 +66,8 @@ userSchema.methods.comparePassword = async function(incomingPassword) {
 };
 
 userSchema.index({ email: 1, resetPasswordToken: 1, resetPasswordExpires: 1 });
+userSchema.index({ email: 1, emailVerificationToken: 1, emailVerificationTokenExpires: 1 }); // Optional: index for email verification fields
+userSchema.index({ email: 1, mfaCode: 1, mfaCodeExpires: 1 }); // Optional: index for MFA fields
 
 const User = mongoose.model('User', userSchema);
 module.exports = User;

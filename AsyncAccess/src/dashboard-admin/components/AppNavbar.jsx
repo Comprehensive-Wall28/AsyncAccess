@@ -28,7 +28,7 @@ const Toolbar = styled(MuiToolbar)({
   },
 });
 
-export default function AppNavbar({ currentUser }) {
+export default function AppNavbar({ currentUser, onMenuItemClick, selectedItem }) {
   const [open, setOpen] = React.useState(false);
 
   const toggleDrawer = (newOpen) => () => {
@@ -68,11 +68,12 @@ export default function AppNavbar({ currentUser }) {
               Dashboard
             </Typography>
           </Stack>
+          {/* Remove Users button here - it's now part of SideMenuMobile's MenuContent */}
           <ColorModeIconDropdown />
           <MenuButton aria-label="menu" onClick={toggleDrawer(true)}>
             <MenuRoundedIcon />
           </MenuButton>
-          <SideMenuMobile open={open} toggleDrawer={toggleDrawer} currentUser={currentUser} />
+          <SideMenuMobile open={open} toggleDrawer={toggleDrawer} currentUser={currentUser} onMenuItemClick={onMenuItemClick} selectedItem={selectedItem} />
         </Stack>
       </Toolbar>
     </AppBar>

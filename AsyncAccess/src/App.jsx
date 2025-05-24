@@ -18,6 +18,8 @@ import DashboardAdmin from './dashboard-admin/Dashboard.jsx'
 import OrganizerDashboard from './organizerPage/Dashboard.jsx';
 import EventsPage from './events/Events'; // Assuming 'Events.jsx' is the page wrapper
 import EventDetails from './events/components/EventDetails'; // Corrected import path
+import VerifyEmail from './verify-email/VerifyEmail.jsx'; // Import the VerifyEmail component
+import MfaVerify from './mfa-verify/MfaVerify.jsx'; // Import the MfaVerify component
 
 
 function App() {
@@ -36,6 +38,14 @@ function App() {
                     Route
                     path="/signup"
                     element={<SignUp />} />
+                <
+                    Route
+                    path="/verify-email" 
+                    element={<VerifyEmail />} />
+                <
+                    Route
+                    path="/mfa-verify" // Add route for MFA verification
+                    element={<MfaVerify />} />
                 <
                     Route
                     path="/marketing"

@@ -210,6 +210,7 @@ export default function UserEventsDisplay({ currentUser }) {
       } catch (err) {
         if (err && err.status === 404 && err.data && err.data.error === "No events found for this user") {
           setEvents([]);
+          setError("No events found"); // Set specific message for this case
         } else if (err && err.data && err.data.error) {
           setError(err.data.error);
           setEvents([]);

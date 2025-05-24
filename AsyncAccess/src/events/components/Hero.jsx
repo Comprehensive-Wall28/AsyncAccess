@@ -80,11 +80,11 @@ export default function Hero() {
             sx={{
               display: 'flex',
               flexDirection: { xs: 'column', sm: 'row' },
-              alignItems: 'center',
-              fontSize: 'clamp(2.2rem, 8vw, 3.5rem)',
+              alignItems: 'baseline', 
+              fontSize: 'clamp(2.2rem, 3vw, 2.8rem)', // Adjusted for smaller text
             }}
           >
-            Check out our {'‎ '}
+            Check out our {' '} 
 
             <Typography
               component="span"
@@ -92,6 +92,10 @@ export default function Hero() {
               sx={(theme) => ({
                 fontSize: 'inherit',
                 color: 'primary.main',
+                // Add marginLeft when flexDirection is 'row' (sm and up)
+                [theme.breakpoints.up('sm')]: {
+                  marginLeft: theme.spacing(1), 
+                },
                 ...theme.applyStyles('dark', {
                   color: 'primary.light',
                 }),

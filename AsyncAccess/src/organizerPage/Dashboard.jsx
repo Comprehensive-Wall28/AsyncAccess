@@ -35,23 +35,33 @@ export default function Dashboard(props) {
         const response = await apiClient.get('/users/profile');
         if(response.data?.role !== 'Organizer') {
           navigate('/unauthorized', { replace: true }); // Redirect if not Organizer
+          return; // Ensure no further state updates after redirect
         }
         setCurrentUser(response.data);
 
       } catch (err) {
         console.error("Failed to fetch user profile:", err);
+
+        const errorMessage = err.response?.data?.message || err.message || 'An unexpected error occurred.';
         if (err.response) {
-          if (err.response.status === 401 || err.response.status === 403) {
-            navigate('/unauthenticated', { replace: true });
-            localStorage.removeItem('currentUser');
-          } else {
-            setError(err.response.data?.message || `Server error: ${err.response.status}`);
-          }
-        } else if (err.request) {
-          setError('Network error. Please check your connection.');
-        } else {
-          setError(err.message || 'An unexpected error occurred.');
+            if (err.response.status === 401) {
+                console.warn(`Received 401 from API. Redirecting to /unauthenticated`);
+                navigate('/unauthenticated', { replace: true });
+                return;
+            }
+            if (err.response.status === 403) {
+                console.warn(`Received 403 from API. Redirecting to /unauthorized`);
+                navigate('/unauthorized', { replace: true });
+                return;
+            }
+            if (errorMessage.includes("User not found") || (err.response.status === 404 && errorMessage.includes("profile"))) {
+                console.warn(`Received error "${errorMessage}". Redirecting to /notfound`);
+                navigate('/notfound', { replace: true });
+                return;
+            }
         }
+        
+        setError(errorMessage);
         setCurrentUser(null);
       } finally {
         setIsLoading(false);
@@ -59,7 +69,7 @@ export default function Dashboard(props) {
     };
 
     fetchUserProfile();
-  }, [navigate]);
+  }, [navigate]); // Removed handleAuthError from dependency array
 
   let mainContent;
   if (isLoading && !currentUser && currentView !== 'user-profile' && currentView !== 'analytics') { // Show loading for home view if user not yet loaded

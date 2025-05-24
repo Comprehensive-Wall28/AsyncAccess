@@ -1,4 +1,5 @@
-import { apiClient } from './authService'; // Assuming apiClient is exported from authService.js
+import { apiClient, logout } from './authService'; // Assuming apiClient is exported from authService.js
+export { logout as logoutUser } from './authService'; // Import and re-export logout as logoutUser
 
 /**
  * Fetches the current logged-in user's profile information.
@@ -43,3 +44,20 @@ export const updateUserProfile = async (profileData) => {
   const response = await apiClient.put('/users/profile', formData); // Content-Type will be set to multipart/form-data by browser with FormData
   return response.data;
 };
+
+export const getAllUsers = () => apiClient.get('/users');
+
+/**
+ * Deletes a user by ID.
+ * @param {string} userId - The ID of the user to delete.
+ * @returns {Promise<Object>} The server's response.
+ */
+export const deleteUserById = (userId) => apiClient.delete(`/users/${userId}`);
+
+/**
+ * Updates a user's role by ID.
+ * @param {string} userId - The ID of the user whose role is to be updated.
+ * @param {string} role - The new role for the user.
+ * @returns {Promise<Object>} The server's response.
+ */
+export const updateUserRoleById = (userId, role) => apiClient.put(`/users/${userId}`, { role });
