@@ -28,7 +28,7 @@ import AppAppBar from '../../home-page/components/AppAppBar';
 import Footer from '../../home-page/components/Footer';
 
 // Import the backdrop image
-import eventBackdrop from '../../assets/event_backdrop.webp'; // Assuming assets folder is at src/assets
+import eventBackdrop from '../../assets/b.webp'; // Assuming assets folder is at src/assets
 
 const BACKEND_STATIC_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
