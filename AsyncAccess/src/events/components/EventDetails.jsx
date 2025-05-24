@@ -9,15 +9,16 @@ import {
     CircularProgress,
     Alert,
     Stack,
-    Grid,
     Paper,
     Divider,
     Chip,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableRow,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import EventIcon from '@mui/icons-material/Event';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import CategoryIcon from '@mui/icons-material/Category';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 
 // Imports for the overall page structure
@@ -25,6 +26,9 @@ import CssBaseline from '@mui/material/CssBaseline';
 import AppTheme from '../../shared-theme/AppTheme';
 import AppAppBar from '../../home-page/components/AppAppBar';
 import Footer from '../../home-page/components/Footer';
+
+// Import the backdrop image
+import eventBackdrop from '../../assets/event_backdrop.webp'; // Assuming assets folder is at src/assets
 
 const BACKEND_STATIC_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -45,6 +49,8 @@ const EventDetails = (props) => {
             setLoading(false);
             return;
         }
+        // Scroll to top when id changes or component mounts
+        window.scrollTo(0, 0);
 
         const fetchEvent = async () => {
             setLoading(true);
@@ -80,14 +86,14 @@ const EventDetails = (props) => {
         if (event) {
             const currentAvailableTickets = (typeof event.totalTickets === 'number' && typeof event.bookedTickets === 'number')
                 ? event.totalTickets - event.bookedTickets
-                : Infinity; // Default to Infinity if data is missing, though UI should prevent this
+                : Infinity; 
 
             navigate('/bookings', {
                 state: {
                     eventId: event._id,
                     eventTitle: event.title,
                     ticketPrice: event.ticketPrice,
-                    availableTickets: currentAvailableTickets, // Pass available tickets
+                    availableTickets: currentAvailableTickets,
                 }
             });
         } else {
@@ -120,6 +126,9 @@ const EventDetails = (props) => {
         }
 
         if (!event) {
+            // This case should ideally be handled by the useEffect redirecting to /notfound
+            // or show a specific "Event not found" message if preferred over redirect.
+            // For now, keeping a loader as a fallback before redirect logic kicks in.
             return (
                 <Container sx={{ py: 8, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
                     <CircularProgress size={60} />
@@ -130,209 +139,136 @@ const EventDetails = (props) => {
         const availableTickets = typeof event.totalTickets === 'number' && typeof event.bookedTickets === 'number'
             ? event.totalTickets - event.bookedTickets
             : 'N/A';
+        
+        const eventDate = new Date(event.date);
+
+        const isButtonDisabled = availableTickets === 'N/A' || availableTickets <= 0;
+        const buttonText = (availableTickets === 'N/A' || availableTickets > 0) ? 'Book Now' : 'Sold Out';
+
+        const buttonSx = {
+            py: 1.5, 
+            px: 4, 
+            fontSize: '1.1rem', 
+            fontWeight: 'bold',
+        };
 
         return (
-            <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 5 }, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <Paper
-                    sx={{
-                        borderRadius: 4,
-                        overflow: 'hidden',
-                        width: '60%',
-                        maxWidth: '900px',
-                        boxShadow: '0px 0px 20px 10px rgb(72, 111, 220)',
-                        mt: 10,
-                        backgroundColor: 'background.paper',
-                        zIndex: 1,
-                    }}
-                >
-                    <Box sx={{
-                        p: { xs: 2, sm: 3, md: 4 },
-                        textAlign: 'center'
-                    }}>
-                        <Typography
-                            variant="h1"
-                            component="h1"
-                            gutterBottom
-                            sx={{
-                                fontWeight: 'bold',
-                                color: 'primary.main',
-                                mb: 1,
-                            }}
-                        >
+            <Container maxWidth="md" sx={{ py: { xs: 3, sm: 5 } }}>
+                {/* Image with Title Overlay */}
+                <Box sx={{ position: 'relative', borderRadius: 3, overflow: 'hidden', mb: 4, boxShadow: 3 }}>
+                    <Box
+                        component="img"
+                        src={eventBackdrop}
+                        alt={event.title || "Event image"}
+                        loading="eager" // Explicitly set loading strategy
+                        sx={{
+                            width: '100%',
+                            height: { xs: 200, sm: 280, md: 350 }, // Reduced height
+                            objectFit: 'cover',
+                            display: 'block',
+                        }}
+                    />
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            bottom: 0,
+                            left: 0,
+                            width: '100%',
+                            p: {xs: 2, sm: 3},
+                            background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%)',
+                        }}
+                    >
+                        <Typography variant="h3" component="h1" sx={{ color: 'white', fontWeight: 'bold' }}>
                             {event.title}
                         </Typography>
-
-                        <Typography
-                            variant="body1"
-                            color="text.secondary"
-                            paragraph
-                            sx={{
-                                mb: 3,
-                                fontSize: '1.1rem',
-                                whiteSpace: 'pre-wrap',
-                            }}
-                        >
-                            {event.description || "No detailed description available for this event."}
-                        </Typography>
-
-                        <Divider sx={{ my: 3 }} />
-
-                        <Grid container spacing={3} justifyContent="center">
-                            <Grid item xs={12} md={7} sx={{ display: 'flex', flexDirection: 'column' }}>
-                                <Stack spacing={2} sx={{ flexGrow: 1 }}>
-                                    <Paper
-                                        elevation={2}
-                                        sx={{
-                                            p: 2,
-                                            borderRadius: 2,
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            justifyContent: 'center',
-                                            flexGrow: 1,
-                                        }}
-                                    >
-                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                            <EventIcon color="action" sx={{ mr: 1.5 }} />
-                                            <Box sx={{ textAlign: 'left' }}>
-                                                <Typography variant="overline" color="text.secondary" display="block">
-                                                    DATE & TIME
-                                                </Typography>
-                                                <Typography variant="h6" component="p">
-                                                    {new Date(event.date).toLocaleDateString(undefined, {
-                                                        year: 'numeric',
-                                                        month: 'long',
-                                                        day: 'numeric',
-                                                        hour: '2-digit',
-                                                        minute: '2-digit'
-                                                    })}
-                                                </Typography>
-                                            </Box>
-                                        </Box>
-                                    </Paper>
-
-                                    <Paper
-                                        elevation={2}
-                                        sx={{
-                                            p: 2,
-                                            borderRadius: 2,
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            justifyContent: 'center',
-                                            flexGrow: 1,
-                                        }}
-                                    >
-                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                            <LocationOnIcon color="action" sx={{ mr: 1.5 }} />
-                                            <Box sx={{ textAlign: 'left' }}>
-                                                <Typography variant="overline" color="text.secondary" display="block">
-                                                    Location
-                                                </Typography>
-                                                <Typography variant="h6" component="p">
-                                                    {event.location}
-                                                </Typography>
-                                            </Box>
-                                        </Box>
-                                    </Paper>
-
-                                    {event.category && event.category.length > 0 && (
-                                        <Paper
-                                            elevation={2}
-                                            sx={{
-                                                p: 2,
-                                                borderRadius: 2,
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                justifyContent: 'center',
-                                                flexGrow: 1,
-                                            }}
-                                        >
-                                            <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                                                <CategoryIcon color="action" sx={{ mr: 1.5, mt: 0.5 }} />
-                                                <Box sx={{ textAlign: 'left' }}>
-                                                    <Typography variant="overline" color="text.secondary" display="block">
-                                                        CATEGORIES
-                                                    </Typography>
-                                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'flex-start' }}>
-                                                        {event.category.map((cat, index) => (
-                                                            <Chip key={index} label={cat} size="small" variant="outlined" />
-                                                        ))}
-                                                    </Box>
-                                                </Box>
-                                            </Box>
-                                        </Paper>
-                                    )}
-                                </Stack>
-                            </Grid>
-
-                            <Grid item xs={12} md={5} sx={{ display: 'flex', flexDirection: 'column' }}>
-                                <Stack spacing={2} sx={{ flexGrow: 1 }}>
-                                    <Paper
-                                        elevation={2}
-                                        sx={{
-                                            p: 2,
-                                            borderRadius: 2,
-                                            textAlign: 'center',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            justifyContent: 'center',
-                                            flexGrow: 1,
-                                        }}
-                                    >
-                                        <Box>
-                                            <Typography variant="overline" color="text.secondary">
-                                                TICKET PRICE
-                                            </Typography>
-                                            <Typography variant="h3" color="primary">
-                                                ${event.ticketPrice.toFixed(2)}
-                                            </Typography>
-                                        </Box>
-                                    </Paper>
-
-                                    <Paper
-                                        elevation={2}
-                                        sx={{
-                                            p: 2,
-                                            borderRadius: 2,
-                                            textAlign: 'center',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            justifyContent: 'center',
-                                            flexGrow: 1,
-                                        }}
-                                    >
-                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <ConfirmationNumberIcon color="action" sx={{ mr: 1 }} />
-                                            <Box>
-                                                <Typography variant="overline" color="text.secondary">
-                                                    AVAILABLE: {availableTickets}
-                                                </Typography>
-                                            </Box>
-                                        </Box>
-                                    </Paper>
-
-                                    <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            size="large"
-                                            startIcon={<ConfirmationNumberIcon />}
-                                            sx={{
-                                                py: 1.5,
-                                                px: 4,
-                                                fontSize: '1.1rem',
-                                                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                                            }}
-                                            onClick={handleBookNowClick}
-                                            disabled={availableTickets === 'N/A' || availableTickets <= 0}
-                                        >
-                                            {availableTickets === 'N/A' || availableTickets > 0 ? 'Book Now' : 'Sold Out'}
-                                        </Button>
-                                    </Box>
-                                </Stack>
-                            </Grid>
-                        </Grid>
                     </Box>
+                </Box>
+
+                {/* Description */}
+                <Typography 
+                    variant="body1" 
+                    paragraph 
+                    sx={{ 
+                        mb: 4, 
+                        fontSize: '1.1rem', 
+                        lineHeight: 1.7,
+                        whiteSpace: 'pre-wrap', 
+                        color: 'text.secondary' 
+                    }}
+                >
+                    {event.description || "No detailed description available for this event."}
+                </Typography>
+
+                {/* Event Details Table */}
+                <Typography variant="h4" component="h2" gutterBottom sx={{ mb: 2, fontWeight: 'medium' }}>
+                    Event Details
+                </Typography>
+                <Paper elevation={2} sx={{ mb: 4, borderRadius: 2, overflow: 'hidden' }}>
+                    <TableContainer>
+                        <Table aria-label="event details table">
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell component="th" scope="row" sx={{ fontWeight: 'bold', width: { xs: '35%', sm: '25%' }, py: 1.5, borderBottom: 'none' }}>Date</TableCell>
+                                    <TableCell sx={{ py: 1.5, borderBottom: 'none' }}>{eventDate.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell component="th" scope="row" sx={{ fontWeight: 'bold', py: 1.5, borderBottom: 'none' }}>Time</TableCell>
+                                    <TableCell sx={{ py: 1.5, borderBottom: 'none' }}>{eventDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: true })}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell component="th" scope="row" sx={{ fontWeight: 'bold', py: 1.5, borderBottom: 'none' }}>Location</TableCell>
+                                    <TableCell sx={{ py: 1.5, borderBottom: 'none' }}>{event.location}</TableCell>
+                                </TableRow>
+                                {event.category && event.category.length > 0 && (
+                                    <TableRow>
+                                        <TableCell component="th" scope="row" sx={{ fontWeight: 'bold', verticalAlign: 'top', py: 1.5, borderBottom: 'none' }}>Categories</TableCell>
+                                        <TableCell sx={{ py: 1.5, borderBottom: 'none' }}>
+                                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                                {event.category.map((cat, index) => (
+                                                    <Chip key={index} label={cat} size="small" variant="outlined" />
+                                                ))}
+                                            </Box>
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
                 </Paper>
+
+                {/* Booking Section */}
+                <Paper elevation={3} sx={{ p: {xs: 2, sm: 3}, borderRadius: 2, textAlign: 'center', backgroundColor: 'primary.lightest', mb: 4 }}>
+                    <Typography variant="h5" gutterBottom sx={{ fontWeight: 'medium', color: 'primary.dark' }}>
+                        Tickets
+                    </Typography>
+                    <Typography variant="h4" color="primary.main" sx={{ fontWeight: 'bold', mb: 1 }}>
+                        ${event.ticketPrice.toFixed(2)}
+                    </Typography>
+                    <Typography variant="body1" sx={{ mb: 2, color: 'text.secondary' }}>
+                        Available: {availableTickets === 'N/A' ? 'N/A' : (availableTickets > 0 ? availableTickets : 'None')}
+                    </Typography>
+                    <Button
+                        variant="outlined" // Always outlined
+                        color={isButtonDisabled ? "inherit" : "primary"} // Adjust color based on disabled state
+                        size="large"
+                        startIcon={<ConfirmationNumberIcon />}
+                        onClick={handleBookNowClick}
+                        disabled={isButtonDisabled}
+                        sx={buttonSx} // Use the simplified sx
+                    >
+                        {buttonText}
+                    </Button>
+                </Paper>
+                
+                <Box sx={{ mt: 4, textAlign: 'center' }}>
+                    <Button
+                        variant="outlined"
+                        startIcon={<ArrowBackIcon />}
+                        onClick={() => navigate('/events')}
+                    >
+                        Back to All Events
+                    </Button>
+                </Box>
             </Container>
         );
     };
@@ -348,12 +284,13 @@ const EventDetails = (props) => {
                     width: '100%',
                     backgroundRepeat: 'no-repeat',
                     backgroundImage:
-                        'radial-gradient(ellipse 80% 50% at 50% -20%, hsl(210, 100%, 90%), transparent)',
+                        'radial-gradient(ellipse 80% 50% at 50% -20%, hsl(210, 100%, 90%), transparent)', // Light mode
                     ...theme.applyStyles('dark', {
                         backgroundImage:
-                            'radial-gradient(ellipse 80% 50% at 50% -20%, hsl(210, 100%, 16%), transparent)',
+                            'radial-gradient(ellipse 80% 50% at 50% -20%, hsl(210, 100%, 16%), transparent)', // Dark mode
                     }),
-                    minHeight: '100vh',
+                    minHeight: 'calc(100vh - 64px)', // Adjust if AppAppBar height changes
+                    pt: '64px', // Offset for AppAppBar
                 })}
             >
                 {renderPageContent()}
