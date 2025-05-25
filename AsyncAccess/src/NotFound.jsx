@@ -29,7 +29,7 @@ function NotFound() {
             404 - Not Found
           </Typography>
           <Typography variant="body1" paragraph color="text.secondary">
-            The page you are looking for does not exist or has been moved. Or , You have a cookie for a user no longer existing.
+            The page you are looking for does not exist or has been moved or you have are accessing a non-existant user.
           </Typography>
           <Box sx={{ mt: 3 }}>
             <Button
