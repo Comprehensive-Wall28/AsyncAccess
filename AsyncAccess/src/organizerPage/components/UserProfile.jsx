@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Box, Paper, Typography, List, ListItem, ListItemText, Avatar,
+  Box, Card, Typography, List, ListItem, ListItemText, Avatar, // Changed Paper to Card
   IconButton, Button, CircularProgress, Alert, Divider, Stack, Input,
-  OutlinedInput, InputAdornment, FormControl, // Added OutlinedInput, InputAdornment, FormControl
+  OutlinedInput, InputAdornment, FormControl,
   Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle // Added Dialog components
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
@@ -273,7 +273,7 @@ export default function UserProfile() {
       : null;
 
   return (
-    <Paper elevation={3} sx={{ p: 3, width: '100%', mt: 4 }}> {/* Removed maxWidth and margin: 'auto', added width: '100%' */}
+    <Card sx={{ p: 2, width: '100%', mt: 2 }}> {/* Changed Paper to Card, updated sx, removed elevation */}
       <Typography variant="h5" gutterBottom component="div" sx={{ mb: 2 }}>
         User Information
       </Typography>
@@ -368,6 +368,6 @@ export default function UserProfile() {
           </Button>
         </DialogActions>
       </Dialog>
-    </Paper>
+    </Card>
   );
 }
