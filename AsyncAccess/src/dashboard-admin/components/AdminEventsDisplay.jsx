@@ -111,7 +111,7 @@ export default function AdminEventsDisplay() {
   const handleOpenEditDialog = (eventData) => {
     setEventToEdit(eventData);
     setEditFormData({
-      status: eventData.status || 'pending',
+      status: '', // Initialize to empty to force selection
     });
     setOpenEditDialog(true);
     setEditError('');
@@ -132,6 +132,13 @@ export default function AdminEventsDisplay() {
 
   const handleConfirmEdit = async () => {
     if (!eventToEdit) return;
+
+    if (!editFormData.status) {
+      setEditError("Please select a new status (Approved or Rejected).");
+      setEditInProgress(false); // Ensure spinner stops if it was somehow started
+      return;
+    }
+
     setEditInProgress(true);
     setEditError('');
 
@@ -140,7 +147,7 @@ export default function AdminEventsDisplay() {
     };
     
     if (dataToUpdate.status === eventToEdit.status) {
-        setEditError("No changes were made to the status.");
+        setEditError("The selected status is the same as the event's current status. Please choose a different status to make a change.");
         setEditInProgress(false);
         return;
     }
@@ -322,19 +329,22 @@ export default function AdminEventsDisplay() {
             </DialogContentText>
             {editError && <Alert severity="error" sx={{ mb: 2 }}>{editError}</Alert>}
             <FormControl fullWidth margin="dense" variant="outlined" disabled={editInProgress}>
-              <InputLabel htmlFor="status-select">Status</InputLabel>
+              <InputLabel htmlFor="status-select"></InputLabel>
               <Select
-                native
                 value={editFormData.status}
                 onChange={handleEditFormChange}
-                label="Status"
+                label="Status" // This connects to the InputLabel
                 inputProps={{
                   name: 'status',
                   id: 'status-select',
                 }}
+                displayEmpty // Important to show the placeholder when value is ""
               >
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
+                <MenuItem value="" disabled>
+                  <em>Select new status</em>
+                </MenuItem>
+                <MenuItem value="approved">Approved</MenuItem>
+                <MenuItem value="rejected">Rejected</MenuItem>
                 {/* Removed cancelled from here as it's usually a separate action, but admin can still set it if backend allows */}
               </Select>
             </FormControl>
