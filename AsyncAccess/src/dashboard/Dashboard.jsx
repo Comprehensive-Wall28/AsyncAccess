@@ -84,9 +84,6 @@ export default function Dashboard(props) {
       case 'user-profile':
         mainContent = <UserProfile />; // Render UserProfile component
         break;
-      case 'about':
-        mainContent = <Typography variant="h4" sx={{mt: 2}}>About Page Placeholder</Typography>; // Placeholder for About
-        break;
       default:
         mainContent = <MainGrid currentUser={currentUser} isLoading={isLoading && !currentUser} setCurrentUser={setCurrentUser} />;
     }
