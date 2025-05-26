@@ -1,3 +1,11 @@
+# AsyncAccess 
+
+AsyncAccess is MERN application that allows users to book tickets. Organizers can create and manage events with analytics.
+
+## Deployment
+
+The page is deployed on https://asyncaccess.pages.dev/ (Please wait for 50 seconds for the backend to start-up)
+
 # AsyncAccess API Documentation
 
 This document provides a basic overview of the AsyncAccess backend API endpoints, models, and core functionalities.
